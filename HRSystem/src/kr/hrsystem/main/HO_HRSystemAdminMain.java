@@ -6,11 +6,11 @@ import java.io.InputStreamReader;
 
 import kr.hrsystem.dao.MemberDAO;
 
-public class HO_HRSystemAdminMain2 {
+public class HO_HRSystemAdminMain {
 	private BufferedReader br;
 	private MemberDAO dao;
 	
-	public HO_HRSystemAdminMain2() {
+	public HO_HRSystemAdminMain() {
 		try {
 			br = new BufferedReader(
 					new InputStreamReader(
@@ -53,7 +53,7 @@ public class HO_HRSystemAdminMain2 {
 	}
 	
 	public static void main(String[] args) {
-		new HO_HRSystemAdminMain2();
+		new HO_HRSystemAdminMain();
 	}
 }
 

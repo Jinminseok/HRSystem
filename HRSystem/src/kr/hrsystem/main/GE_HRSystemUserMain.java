@@ -6,13 +6,13 @@ import java.io.InputStreamReader;
 
 import kr.hrsystem.dao.MemberDAO;
 
-public class GE_HRSystemUserMain2 {
+public class GE_HRSystemUserMain {
 	private BufferedReader br;
 	private MemberDAO dao;
 	private String cust_id;//로그인한 회원 아이디
 	private boolean login;//로그인 여부(로그인:true,로그아웃:false)
 	
-	public GE_HRSystemUserMain2() {
+	public GE_HRSystemUserMain() {
 		try {
 			br = new BufferedReader(
 					new InputStreamReader(
@@ -76,6 +76,6 @@ public class GE_HRSystemUserMain2 {
 	}
 	
 	public static void main(String[] args) {
-		new GE_HRSystemUserMain2();
+		new GE_HRSystemUserMain();
 	}
 }
