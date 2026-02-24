@@ -4,8 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import kr.admin.DepartmentManageAdminMenu;
+import kr.admin.PositionManageAdminMenu;
+import kr.attendance.AdminAttendanceMenu;
 import kr.employee.UserManageAdminMenu;
 import kr.hrsystem.dao.LogDAO;
+import kr.log.LogAdminMenu;
+import kr.notice.NoticeAdmin;
 
 
 public class AdminScreen {
@@ -59,12 +64,12 @@ public class AdminScreen {
 
                     case 2:
                         // ✅ 부서관리 메뉴 클래스 연결 (아직 없으면 아래 안내처럼 먼저 생성)
-                    	//new DepartmentManageAdminMenu(br, userId, loginLogId);
+                    	new DepartmentManageAdminMenu(br, userId, loginLogId);
                         break;
 
                     case 3:
                         // ✅ 직급관리 메뉴는 여기
-                    	//new PositionManageAdminMenu(br, userId, loginLogId);
+                    	new PositionManageAdminMenu(br, userId, loginLogId);
                         break;
 
                     case 4:
@@ -76,11 +81,11 @@ public class AdminScreen {
                         break;
 
                     case 6:
-                       // new AdminAttendanceMenu(br, userId, loginLogId);
+                       new AdminAttendanceMenu(br, userId, loginLogId);
                         break;
 
                     case 7:
-                       // new NoticeAdmin(br, userId, loginLogId);
+                        new NoticeAdmin(br, userId, loginLogId);
                         break;
 
                     case 8:
@@ -92,7 +97,7 @@ public class AdminScreen {
                         break;
 
                     case 10:
-                       // new LogAdminMenu(br, userId, loginLogId);
+                        new LogAdminMenu(br, userId, loginLogId);
                         break;
 
                     case 0:

@@ -3,7 +3,9 @@ package kr.hrsystem.main;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import kr.attendance.UserAttendanceMenu;
 import kr.hrsystem.dao.LogDAO;
+import kr.notice.NoticeEmployee;
 
 
 public class EmployeeScreen {
@@ -51,7 +53,7 @@ public class EmployeeScreen {
                         break;
 
                     case 2:
-                        //new UserAttendanceMenu(br, userId, loginLogId);
+                        new UserAttendanceMenu(br, userId, loginLogId);
                         break;
 
                     case 3:
@@ -59,7 +61,7 @@ public class EmployeeScreen {
                         break;
 
                     case 4:
-                       // new NoticeEmployee(br, userId, loginLogId);
+                        new NoticeEmployee(br, userId, loginLogId);
                         break;
 
                     case 0:

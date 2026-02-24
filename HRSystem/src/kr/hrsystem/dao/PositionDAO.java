@@ -1,5 +1,253 @@
 package kr.hrsystem.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import kr.util.DBUtil;
+
 public class PositionDAO {
 
+    // 1) 직급 전체 조회
+    public void selectPosition() {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnection();
+
+            String sql = "SELECT POSITION_NUM, POSITION_NAME, POSITION_SAL "
+                       + "FROM POSITION "
+                       + "ORDER BY POSITION_NUM";
+
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+
+            System.out.println("=".repeat(50));
+            System.out.println("직급번호\t직급명\t기본급");
+            System.out.println("=".repeat(50));
+
+            boolean hasData = false;
+            while (rs.next()) {
+                hasData = true;
+                System.out.print(rs.getInt("POSITION_NUM") + "\t");
+                System.out.print(rs.getString("POSITION_NAME") + "\t");
+                System.out.print(rs.getInt("POSITION_SAL") + "\n");
+            }
+
+            if (!hasData) {
+                System.out.println("직급이 존재하지 않습니다.");
+            }
+
+            System.out.println("=".repeat(50));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.executeClose(rs, pstmt, conn);
+        }
+    }
+
+    // 2) 직급 등록 (번호는 시퀀스로 자동)
+    public int insertPosition(String positionName, int positionSal) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            conn = DBUtil.getConnection();
+
+            String sql = "INSERT INTO POSITION (POSITION_NUM, POSITION_NAME, POSITION_SAL) "
+                       + "VALUES (SEQ_POSITION.NEXTVAL, ?, ?)";
+
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, positionName);
+            pstmt.setInt(2, positionSal);
+
+            int count = pstmt.executeUpdate();
+
+            if (count > 0) {
+                System.out.println("✅ 직급 등록이 완료되었습니다.");
+            }
+
+            return count;
+
+        } catch (Exception e) {
+            // UNIQUE 제약 등
+            e.printStackTrace();
+            System.out.println("❌ 직급 등록 실패 (중복 직급명 여부 확인)");
+            return 0;
+        } finally {
+            DBUtil.executeClose(null, pstmt, conn);
+        }
+    }
+
+    // 3) 직급 수정 (직급번호 기준)
+    public int updatePosition(int positionNum, String newPositionName, int positionSal) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            conn = DBUtil.getConnection();
+
+            String sql = "UPDATE POSITION "
+                       + "SET POSITION_NAME = ?, POSITION_SAL = ? "
+                       + "WHERE POSITION_NUM = ?";
+
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, newPositionName);
+            pstmt.setInt(2, positionSal);
+            pstmt.setInt(3, positionNum);
+
+            int count = pstmt.executeUpdate();
+
+            if (count > 0) {
+                System.out.println("✅ " + count + "개 직급 수정 완료");
+            } else {
+                System.out.println("❌ 해당 직급번호가 존재하지 않습니다.");
+            }
+
+            return count;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("❌ 직급 수정 실패");
+            return 0;
+        } finally {
+            DBUtil.executeClose(null, pstmt, conn);
+        }
+    }
+
+    // 4) 직급 사용중 인원 수 체크
+    // USERTEST 기준 (USER_C 쓰면 USER_C로 바꾸기)
+    public int positionCount(int positionNum) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        int count = 0;
+
+        try {
+            conn = DBUtil.getConnection();
+
+            String sql = "SELECT COUNT(*) "
+                       + "FROM USERTEST "
+                       + "WHERE POSITION_NUM = ?";
+
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, positionNum);
+
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.executeClose(rs, pstmt, conn);
+        }
+
+        return count;
+    }
+
+    // 5) 직급 삭제 (번호 기준, 사용 중이면 삭제 불가)
+    public int deletePosition(int positionNum) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            int empCount = positionCount(positionNum);
+
+            if (empCount > 0) {
+                System.out.println("❌ 해당 직급 사용 인원이 " + empCount + "명 있어 삭제할 수 없습니다.");
+                return 0;
+            }
+
+            conn = DBUtil.getConnection();
+
+            String sql = "DELETE FROM POSITION WHERE POSITION_NUM = ?";
+
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, positionNum);
+
+            int count = pstmt.executeUpdate();
+
+            if (count == 1) {
+                System.out.println("✅ 직급 삭제가 완료되었습니다.");
+            } else {
+                System.out.println("❌ 해당 직급번호가 존재하지 않습니다.");
+            }
+
+            return count;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        } finally {
+            DBUtil.executeClose(null, pstmt, conn);
+        }
+    }
+
+    // 6) 직급별 기본급 수정 (번호 기준)
+    public int updateSalary(int positionNum, int newSalary) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            conn = DBUtil.getConnection();
+
+            String sql = "UPDATE POSITION "
+                       + "SET POSITION_SAL = ? "
+                       + "WHERE POSITION_NUM = ?";
+
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, newSalary);
+            pstmt.setInt(2, positionNum);
+
+            int count = pstmt.executeUpdate();
+
+            if (count == 1) {
+                System.out.println("✅ 기본급 수정 완료");
+            } else {
+                System.out.println("❌ 해당 직급번호가 존재하지 않습니다.");
+            }
+
+            return count;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("❌ 기본급 수정 실패");
+            return 0;
+        } finally {
+            DBUtil.executeClose(null, pstmt, conn);
+        }
+    }
+
+    // 7) 로그용/검증용: 직급명 조회
+    public String getPositionNameByNum(int positionNum) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnection();
+
+            String sql = "SELECT POSITION_NAME FROM POSITION WHERE POSITION_NUM = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, positionNum);
+
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("POSITION_NAME");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.executeClose(rs, pstmt, conn);
+        }
+
+        return null;
+    }
 }
