@@ -47,7 +47,7 @@ public class JIN_HRSystemAdminMain {
 					System.out.println("잘못 입력했습니다.");
 				}
 			}catch(NumberFormatException e) {
-				System.out.println("[숫자만 입력 가능ffqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+				System.out.println("[숫자만 입력 가능mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm");
 			}
 		}
 	}
