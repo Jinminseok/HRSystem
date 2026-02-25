@@ -2,7 +2,10 @@ package kr.employee;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Objects;
 
+import kr.appointment.HrAppointmentHistoryDAO;
 import kr.hrsystem.dao.LogDAO;
 import kr.hrsystem.dao.LoginDAO;
 
@@ -13,9 +16,9 @@ public class UserManageAdminMenu {
     private BufferedReader br;
     private int adminUserId;
     private int loginLogId;
-
     private LoginDAO userDao;
     private LogDAO logDao;
+    private HrAppointmentHistoryDAO historyDao;
 
     public UserManageAdminMenu(BufferedReader br, int adminUserId, int loginLogId) {
         this.br = br;
@@ -23,6 +26,7 @@ public class UserManageAdminMenu {
         this.loginLogId = loginLogId;
         this.userDao = new LoginDAO();
         this.logDao = new LogDAO();
+        this.historyDao = new HrAppointmentHistoryDAO();
 
         try {
             menu();
@@ -142,6 +146,13 @@ public class UserManageAdminMenu {
                         System.out.print("변경할 USER_ID : ");
                         int targetUserId = Integer.parseInt(br.readLine());
 
+                        // ✅ 변경 전 현재값 조회 (이력 저장용)
+                        Map<String, Object> beforeUser = userDao.getUserInfoMapById(targetUserId);
+                        if (beforeUser == null) {
+                            System.out.println("❌ 해당 USER_ID가 존재하지 않습니다.");
+                            break;
+                        }
+
                         System.out.print("새 부서번호(DEPT_NUM) : ");
                         int newDeptNum = Integer.parseInt(br.readLine());
 
@@ -167,11 +178,29 @@ public class UserManageAdminMenu {
                             break;
                         }
 
+                        Integer beforeDeptNum = (Integer) beforeUser.get("DEPT_NUM");
+                        Integer beforePositionNum = (Integer) beforeUser.get("POSITION_NUM");
+                        String beforeEmpStatus = (String) beforeUser.get("EMP_STATUS");
+
+                        // ✅ 변경 없음 체크
+                        boolean deptSame = Objects.equals(beforeDeptNum, newDeptNum);
+                        boolean posSame = Objects.equals(beforePositionNum, newPositionNum);
+                        boolean statusSame = (beforeEmpStatus != null && beforeEmpStatus.equalsIgnoreCase(empStatus));
+
+                        if (deptSame && posSame && statusSame) {
+                            System.out.println("⚠ 변경된 항목이 없습니다.");
+                            break;
+                        }
+
                         int updateCnt = userDao.updateUserInfoByAdmin(targetUserId, newDeptNum, newPositionNum, empStatus);
 
                         if (updateCnt > 0) {
                             System.out.println("✅ 사원 정보 변경 완료!");
 
+                            // ✅ 변경된 항목만 인사발령 이력 저장
+                            saveAppointmentHistoryOnUserUpdate(beforeUser, targetUserId, newDeptNum, newPositionNum, empStatus);
+
+                            // 기존 액션 로그
                             logDao.insertActionLog(
                                 adminUserId,
                                 "사원관리",
@@ -237,6 +266,80 @@ public class UserManageAdminMenu {
                 return "대기";
             default:
                 return code;
+        }
+    }
+    
+    private void saveAppointmentHistoryOnUserUpdate(
+            Map<String, Object> beforeUser,
+            int targetUserId,
+            int newDeptNum,
+            int newPositionNum,
+            String newEmpStatus) {
+
+        Integer loginLogIdValue = (loginLogId > 0 ? loginLogId : null);
+
+        Integer beforeDeptNum = (Integer) beforeUser.get("DEPT_NUM");
+        Integer beforePositionNum = (Integer) beforeUser.get("POSITION_NUM");
+        String beforeEmpStatus = (String) beforeUser.get("EMP_STATUS");
+
+        // 1) 부서 변경
+        if (!Objects.equals(beforeDeptNum, newDeptNum)) {
+            String beforeValue = (beforeDeptNum == null) ? null : String.valueOf(beforeDeptNum);
+            String afterValue = String.valueOf(newDeptNum);
+
+            String beforeLabel = userDao.getDeptNameByNum(beforeDeptNum);
+            String afterLabel = userDao.getDeptNameByNum(newDeptNum);
+
+            historyDao.insertHistory(
+                targetUserId,
+                "DEPT",
+                beforeValue,
+                afterValue,
+                beforeLabel,
+                afterLabel,
+                "관리자 사원정보 변경",
+                adminUserId,
+                "USER_MANAGE",
+                loginLogIdValue
+            );
+        }
+
+        // 2) 직급 변경
+        if (!Objects.equals(beforePositionNum, newPositionNum)) {
+            String beforeValue = (beforePositionNum == null) ? null : String.valueOf(beforePositionNum);
+            String afterValue = String.valueOf(newPositionNum);
+
+            String beforeLabel = userDao.getPositionNameByNum(beforePositionNum);
+            String afterLabel = userDao.getPositionNameByNum(newPositionNum);
+
+            historyDao.insertHistory(
+                targetUserId,
+                "POSITION",
+                beforeValue,
+                afterValue,
+                beforeLabel,
+                afterLabel,
+                "관리자 사원정보 변경",
+                adminUserId,
+                "USER_MANAGE",
+                loginLogIdValue
+            );
+        }
+
+        // 3) 재직상태 변경
+        if (beforeEmpStatus == null || !beforeEmpStatus.equalsIgnoreCase(newEmpStatus)) {
+            historyDao.insertHistory(
+                targetUserId,
+                "EMP_STATUS",
+                beforeEmpStatus,
+                newEmpStatus,
+                empStatusToKor(beforeEmpStatus),
+                empStatusToKor(newEmpStatus),
+                "관리자 사원정보 변경",
+                adminUserId,
+                "USER_MANAGE",
+                loginLogIdValue
+            );
         }
     }
 }

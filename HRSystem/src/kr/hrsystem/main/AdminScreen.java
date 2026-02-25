@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+
 import kr.admin.DepartmentManageAdminMenu;
 import kr.admin.PositionManageAdminMenu;
+import kr.appointment.HrAppointmentHistoryAdminMenu;
 import kr.attendance.AdminAttendanceMenu;
 import kr.employee.UserManageAdminMenu;
 import kr.hrsystem.dao.LogDAO;
@@ -77,7 +79,7 @@ public class AdminScreen {
                         break;
 
                     case 5:
-                        System.out.println("▶ 인사발령관리 화면으로 이동");
+                    	new HrAppointmentHistoryAdminMenu(br, userId, loginLogId);
                         break;
 
                     case 6:

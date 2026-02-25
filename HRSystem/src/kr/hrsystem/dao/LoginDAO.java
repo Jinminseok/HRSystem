@@ -3,6 +3,8 @@ package kr.hrsystem.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 
 import kr.hrsystem.user.LoginUser;
 import kr.util.DBUtil;
@@ -384,6 +386,92 @@ import kr.util.DBUtil;
 	            case "USER":  return "사원";
 	            default:      return userRole;
 	        }
+	    }
+	    //사용자 현재값 조회 (수정 전 값)
+	    public Map<String, Object> getUserInfoMapById(int userId) {
+	        String sql =
+	            "SELECT USER_ID, USER_NAME, DEPT_NUM, POSITION_NUM, EMP_STATUS " +
+	            "  FROM USERTEST " +
+	            " WHERE USER_ID = ?";
+
+	        try (Connection conn = DBUtil.getConnection();
+	             PreparedStatement pstat = conn.prepareStatement(sql)) {
+
+	            pstat.setInt(1, userId);
+
+	            try (ResultSet rs = pstat.executeQuery()) {
+	                if (rs.next()) {
+	                    Map<String, Object> map = new HashMap<>();
+
+	                    map.put("USER_ID", rs.getInt("USER_ID"));
+	                    map.put("USER_NAME", rs.getString("USER_NAME"));
+
+	                    int deptNum = rs.getInt("DEPT_NUM");
+	                    map.put("DEPT_NUM", rs.wasNull() ? null : deptNum);
+
+	                    int posNum = rs.getInt("POSITION_NUM");
+	                    map.put("POSITION_NUM", rs.wasNull() ? null : posNum);
+
+	                    map.put("EMP_STATUS", rs.getString("EMP_STATUS"));
+
+	                    return map;
+	                }
+	            }
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	        return null;
+	    }
+	    //부서명 조회 (테이블명/컬럼명 확인 필요)
+	    public String getDeptNameByNum(Integer deptNum) {
+	        if (deptNum == null) return null;
+
+	        // 실제 테이블명/컬럼명 기준으로 맞추기
+	        String sql = "SELECT DEPT_NAME FROM DEPT WHERE DEPT_NUM = ?";
+
+	        try (Connection conn = DBUtil.getConnection();
+	             PreparedStatement pstat = conn.prepareStatement(sql)) {
+
+	            pstat.setInt(1, deptNum);
+
+	            try (ResultSet rs = pstat.executeQuery()) {
+	                if (rs.next()) {
+	                    return rs.getString(1);
+	                }
+	            }
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	        return "부서#" + deptNum;
+	    }
+	    
+	    //직급명 조회 (테이블명/컬럼명 확인 필요)
+	    public String getPositionNameByNum(Integer positionNum) {
+	        if (positionNum == null) return null;
+
+	        // ✅ 네 실제 테이블명/컬럼명으로 수정
+	        String sql = "SELECT POSITION_NAME FROM POSITION WHERE POSITION_NUM = ?";
+
+	        try (Connection conn = DBUtil.getConnection();
+	             PreparedStatement pstat = conn.prepareStatement(sql)) {
+
+	            pstat.setInt(1, positionNum);
+
+	            try (ResultSet rs = pstat.executeQuery()) {
+	                if (rs.next()) {
+	                    return rs.getString(1);
+	                }
+	            }
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	        return "직급#" + positionNum;
 	    }
 	}
 
