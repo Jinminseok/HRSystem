@@ -138,7 +138,7 @@ public class payment_MAIN {
                     input = br.readLine();
                     if (input.equals("99")) break topLoop;
                     dNum = Integer.parseInt(input);
-                    if (dNum == 0) continue;
+                    if (dNum == 0) continue; 
                 }
 
                 while (true) {
