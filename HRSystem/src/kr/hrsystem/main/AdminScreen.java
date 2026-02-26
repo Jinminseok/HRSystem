@@ -13,6 +13,7 @@ import kr.employee.UserManageAdminMenu;
 import kr.hrsystem.dao.LogDAO;
 import kr.log.LogAdminMenu;
 import kr.notice.NoticeAdmin;
+import kr.hrsystem.main.salary_MAIN;
 
 
 public class AdminScreen {
@@ -75,7 +76,7 @@ public class AdminScreen {
                         break;
 
                     case 4:
-                        System.out.println("▶ 급여관리 화면으로 이동");
+                    	new salary_MAIN(br, userId, loginLogId);
                         break;
 
                     case 5:
