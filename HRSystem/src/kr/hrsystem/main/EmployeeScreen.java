@@ -46,7 +46,7 @@ public class EmployeeScreen {
         	System.out.println("|  3. 근태 관리                            |");
         	System.out.println("|  4. 조직도 조회                          |");
         	System.out.println("|  5. 게시판                               |");
-        	System.out.println("|  0. 로그아웃                              |");
+        	System.out.println("|  0. 로그아웃                             |");
         	System.out.println("+------------------------------------------+");
         	System.out.print("선택 > ");
 
@@ -89,4 +89,5 @@ public class EmployeeScreen {
             }
         }
     }
+    
 }
