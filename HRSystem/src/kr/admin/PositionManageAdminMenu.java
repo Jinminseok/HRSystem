@@ -58,6 +58,7 @@ public class PositionManageAdminMenu {
                         break;
 
                     case 2:
+                    	 dao.selectPosition();
                         System.out.print("등록할 직급명: ");
                         String positionName = br.readLine().trim();
 
@@ -109,7 +110,13 @@ public class PositionManageAdminMenu {
 
                         System.out.print("삭제할 직급번호: ");
                         int deletePositionNum = Integer.parseInt(br.readLine());
+                        System.out.print("정말 삭제하시겠습니까? (Y/N): ");
+                        String yn = br.readLine().trim().toUpperCase();
 
+                        if (!"Y".equals(yn)) {
+                            System.out.println("삭제를 취소했습니다.");
+                            break;
+                        }
                         String deleteName = dao.getPositionNameByNum(deletePositionNum);
 
                         int deleteCnt = dao.deletePosition(deletePositionNum);

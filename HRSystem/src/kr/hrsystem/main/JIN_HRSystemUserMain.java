@@ -70,7 +70,7 @@ public class JIN_HRSystemUserMain {
 							"잘못 입력했습니다.");
 				}
 			}catch(NumberFormatException e) {
-				System.out.println("[숫자만 입력 가능dddddddddddddddddddddddddddddddddddddddddd]");
+				System.out.println("[숫자만 입력 가능]");
 			}
 		}//end of while
 	}

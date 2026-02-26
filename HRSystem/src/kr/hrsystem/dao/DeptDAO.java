@@ -76,8 +76,7 @@ public class DeptDAO {
 
             int count = pstmt.executeUpdate();
 
-            DBUtil.executeClose(null, pstmt, null);
-
+            // 방금 생성된 dept_num 가져오기
             Integer deptNum = null;
             pstmtSeq = conn.prepareStatement("SELECT seq_dept.CURRVAL AS dept_num FROM dual");
             rs = pstmtSeq.executeQuery();
@@ -86,7 +85,7 @@ public class DeptDAO {
             }
 
             if (count > 0) {
-                System.out.println("✅ 부서 등록 완료! (dept_num=" + deptNum + ")");
+                System.out.println("✅ 부서 등록 완료! (부서번호=" + deptNum + ")");
 
                 logDao.insertActionLog(
                     adminUserId,
@@ -99,16 +98,30 @@ public class DeptDAO {
                 );
             }
 
+        } catch (java.sql.SQLIntegrityConstraintViolationException e) {
+            // 무결성 제약 위반(중복 포함)
+            if (e.getErrorCode() == 1) { // ORA-00001
+                System.out.println("❌ 부서명이 중복되었습니다!");
+            } else {
+                System.out.println("❌ 무결성 제약조건 위배로 부서 등록에 실패했습니다.");
+            }
+
+        } catch (java.sql.SQLException e) {
+            // 드라이버/상황에 따라 여기로 들어올 수도 있어서 한 번 더 처리
+            if (e.getErrorCode() == 1) {
+                System.out.println("❌ 부서명이 중복되었습니다!");
+            } else {
+                System.out.println("❌ DB 오류로 부서 등록에 실패했습니다.");
+            }
+
         } catch (Exception e) {
-            // ORA-00001 (중복) 같은 것도 여기로 옴
-            System.out.println("❌ 부서 등록 실패 (중복 부서명인지 확인)");
-            e.printStackTrace();
+            System.out.println("❌ 시스템 오류로 부서 등록에 실패했습니다.");
+
         } finally {
             DBUtil.executeClose(rs, pstmtSeq, null);
             DBUtil.executeClose(null, pstmt, conn);
         }
     }
-
     // ==========================
     // 3. 부서 수정 (로그 포함)
     // ==========================

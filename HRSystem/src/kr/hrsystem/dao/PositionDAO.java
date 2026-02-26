@@ -69,14 +69,31 @@ public class PositionDAO {
             if (count > 0) {
                 System.out.println("✅ 직급 등록이 완료되었습니다.");
             }
-
             return count;
 
-        } catch (Exception e) {
-            // UNIQUE 제약 등
-            e.printStackTrace();
-            System.out.println("❌ 직급 등록 실패 (중복 직급명 여부 확인)");
+        } catch (java.sql.SQLIntegrityConstraintViolationException e) {
+           
+            // 오라클 ORA-00001은 errorCode = 1
+            if (e.getErrorCode() == 1) {
+                System.out.println("❌ 직급명이 중복되었습니다!");
+            } else {
+                System.out.println("❌ 무결성 제약조건 위배로 등록 실패했습니다.");
+            }
             return 0;
+
+        } catch (java.sql.SQLException e) {
+            // 
+            if (e.getErrorCode() == 1) {
+                System.out.println("❌ 직급명이 중복되었습니다!");
+                return 0;
+            }
+            System.out.println("❌ DB 오류로 직급 등록에 실패했습니다.");
+            return 0;
+
+        } catch (Exception e) {
+            System.out.println("❌ 시스템 오류로 직급 등록에 실패했습니다.");
+            return 0;
+
         } finally {
             DBUtil.executeClose(null, pstmt, conn);
         }
@@ -109,10 +126,27 @@ public class PositionDAO {
 
             return count;
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("❌ 직급 수정 실패");
+        } catch (java.sql.SQLIntegrityConstraintViolationException e) {
+            // UNIQUE 제약조건 위반 (중복)
+            if (e.getErrorCode() == 1) { // ORA-00001
+                System.out.println("❌ 직급명이 중복되었습니다!");
+            } else {
+                System.out.println("❌ 무결성 제약조건 위배로 수정 실패");
+            }
             return 0;
+
+        } catch (java.sql.SQLException e) {
+            if (e.getErrorCode() == 1) {
+                System.out.println("❌ 직급명이 중복되었습니다!");
+            } else {
+                System.out.println("❌ DB 오류로 직급 수정 실패");
+            }
+            return 0;
+
+        } catch (Exception e) {
+            System.out.println("❌ 시스템 오류로 직급 수정 실패");
+            return 0;
+
         } finally {
             DBUtil.executeClose(null, pstmt, conn);
         }

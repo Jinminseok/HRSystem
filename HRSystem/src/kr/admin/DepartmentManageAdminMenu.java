@@ -49,6 +49,7 @@ public class DepartmentManageAdminMenu {
 
                     case 2:
                         System.out.println("\n[ 부서 등록 ]");
+                        dao.selectDepartment();
                         System.out.print("등록할 부서명: ");
                         String deptName = br.readLine().trim();
 

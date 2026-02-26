@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-
+import kr.admin.SearchAdminMenu;
 import kr.admin.DepartmentManageAdminMenu;
 import kr.admin.PositionManageAdminMenu;
 import kr.appointment.HrAppointmentHistoryAdminMenu;
@@ -92,7 +92,8 @@ public class AdminScreen {
                         break;
 
                     case 8:
-                        System.out.println("▶ 검색 화면으로 이동");
+                    	System.out.println("▶ 검색 화면으로 이동");
+                        new SearchAdminMenu(br, userId, loginLogId);
                         break;
 
                     case 9:
