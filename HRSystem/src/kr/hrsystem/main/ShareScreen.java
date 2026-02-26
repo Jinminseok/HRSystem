@@ -36,7 +36,7 @@ public class ShareScreen {
             System.out.println("=".repeat(35));
             System.out.println("🏢 인사관리 시스템");
             System.out.println("=".repeat(35));
-            System.out.println("1. 로그인vbvvvvvvvvvvvvvvvvvvvvvvv");
+            System.out.println("1. 로그인");
             System.out.println("2. 회원가입");
             System.out.println("3. 종료");
             System.out.println("=".repeat(35));
