@@ -36,7 +36,7 @@ public class ShareScreen {
             System.out.println("=".repeat(35));
             System.out.println("🏢 인사관리 시스템");
             System.out.println("=".repeat(35));
-            System.out.println("1. 로그인");
+            System.out.println("1. 로그인vbvvvvvvvvvvvvvvvvvvvvvvv");
             System.out.println("2. 회원가입");
             System.out.println("3. 종료");
             System.out.println("=".repeat(35));
@@ -102,28 +102,42 @@ public class ShareScreen {
         }
     }
 
-    // 회원가입
+ // 회원가입
     private void signScreen() throws IOException {
 
         System.out.print("아이디 : ");
-        String id = br.readLine();
+        String id = br.readLine().trim();
+
+        // ✅ 빈값 체크
+        if (id.isEmpty()) {
+            System.out.println("❌ 아이디를 입력하세요.");
+            return;
+        }
+
+        // ✅ 미리 중복 확인 (사용자 경험 향상)
+        if (dao.existsLoginId(id)) {
+            System.out.println("❌ 이미 사용 중인 아이디입니다. 다른 아이디를 입력하세요.");
+            return;
+        }
 
         System.out.print("비밀번호 : ");
-        String pw = br.readLine();
+        String pw = br.readLine().trim();
 
         System.out.print("이름 : ");
-        String name = br.readLine();
+        String name = br.readLine().trim();
 
         System.out.print("이메일 : ");
-        String email = br.readLine();
+        String email = br.readLine().trim();
 
         System.out.print("전화번호 : ");
-        String phone = br.readLine();
+        String phone = br.readLine().trim();
 
         int result = dao.insertUser(id, pw, name, email, phone);
 
         if (result > 0) {
             System.out.println("✅ 회원가입 완료! (관리자 승인 후 로그인 가능)");
+        } else if (result == -1) {
+            System.out.println("❌ 이미 사용 중인 아이디입니다. 다른 아이디를 입력하세요.");
         } else {
             System.out.println("❌ 회원가입 실패");
         }

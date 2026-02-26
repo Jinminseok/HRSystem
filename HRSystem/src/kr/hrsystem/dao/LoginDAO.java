@@ -3,6 +3,7 @@ package kr.hrsystem.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,38 +12,79 @@ import kr.util.DBUtil;
 
 	public class LoginDAO {
 
-	    // 회원가입
-	    // 가입 시: APPROVAL_STATUS=PENDING, USER_ROLE=USER, EMP_STATUS=WAIT
-	    public int insertUser(String id, String pw, String name, String email, String phone) {
+		// 회원가입
+		// 가입 시: APPROVAL_STATUS=PENDING, USER_ROLE=USER, EMP_STATUS=WAIT
+		// 반환값: 1 이상 = 성공, -1 = 아이디중복, 0 = 기타실패
+		public int insertUser(String id, String pw, String name, String email, String phone) {
+		    Connection conn = null;
+		    PreparedStatement pstmt = null;
+
+		    try {
+		        conn = DBUtil.getConnection();
+
+		
+		        if (existsLoginId(id)) {
+		            return -1;
+		        }
+
+		        String sql = "INSERT INTO USERTEST ("
+		                   + "    USER_ID, LOGIN_ID, PASSWORD, USER_NAME, EMAIL, PHONE, "
+		                   + "    APPROVAL_STATUS, EMP_STATUS, USER_ROLE, JOIN_DATE, USER_MODIFIED_DATE"
+		                   + ") VALUES ("
+		                   + "    USER_ACCOUNT_SEQ.NEXTVAL, ?, ?, ?, ?, ?, "
+		                   + "    'PENDING', 'WAIT', 'USER', SYSDATE, SYSDATE"
+		                   + ")";
+
+		        pstmt = conn.prepareStatement(sql);
+		        pstmt.setString(1, id);
+		        pstmt.setString(2, pw);
+		        pstmt.setString(3, name);
+		        pstmt.setString(4, email);
+		        pstmt.setString(5, phone);
+
+		        return pstmt.executeUpdate();
+
+		    } catch (SQLException e) {
+		      
+		        if (e.getErrorCode() == 1) {
+		            return -1;
+		        }
+		        e.printStackTrace();
+		        return 0;
+
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		        return 0;
+
+		    } finally {
+		        DBUtil.executeClose(null, pstmt, conn);
+		    }
+		}
+	 //로그인 아이디 중복 체크
+	    public boolean existsLoginId(String loginId) {
 	        Connection conn = null;
 	        PreparedStatement pstmt = null;
+	        ResultSet rs = null;
 
 	        try {
 	            conn = DBUtil.getConnection();
 
-	            String sql = "INSERT INTO USERTEST ("
-	                       + "    USER_ID, LOGIN_ID, PASSWORD, USER_NAME, EMAIL, PHONE, "
-	                       + "    APPROVAL_STATUS, EMP_STATUS, USER_ROLE, JOIN_DATE, USER_MODIFIED_DATE"
-	                       + ") VALUES ("
-	                       + "    USER_ACCOUNT_SEQ.NEXTVAL, ?, ?, ?, ?, ?, "
-	                       + "    'PENDING', 'WAIT', 'USER', SYSDATE, SYSDATE"
-	                       + ")";
-
+	            String sql = "SELECT COUNT(*) FROM USERTEST WHERE LOGIN_ID = ?";
 	            pstmt = conn.prepareStatement(sql);
-	            pstmt.setString(1, id);
-	            pstmt.setString(2, pw);
-	            pstmt.setString(3, name);
-	            pstmt.setString(4, email);
-	            pstmt.setString(5, phone);
+	            pstmt.setString(1, loginId);
 
-	            return pstmt.executeUpdate();
+	            rs = pstmt.executeQuery();
+	            if (rs.next()) {
+	                return rs.getInt(1) > 0;
+	            }
 
 	        } catch (Exception e) {
 	            e.printStackTrace();
-	            return 0;
 	        } finally {
-	            DBUtil.executeClose(null, pstmt, conn);
+	            DBUtil.executeClose(rs, pstmt, conn);
 	        }
+
+	        return false;
 	    }
 
 	    // 로그인용: 계정 정보 조회 (승인상태/권한 포함)
