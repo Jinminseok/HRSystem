@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import kr.hrsystem.dao.DeptDAO;
 
-
 public class DepartmentManageAdminMenu {
 
     private BufferedReader br;

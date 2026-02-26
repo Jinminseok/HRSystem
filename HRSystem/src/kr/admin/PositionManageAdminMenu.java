@@ -6,7 +6,6 @@ import java.io.IOException;
 import kr.hrsystem.dao.LogDAO;
 import kr.hrsystem.dao.PositionDAO;
 
-
 public class PositionManageAdminMenu {
 
     private BufferedReader br;

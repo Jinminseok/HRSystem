@@ -11,7 +11,6 @@ import kr.hrsystem.dao.LoginDAO;
 import kr.hrsystem.dao.DeptDAO;
 import kr.hrsystem.dao.PositionDAO;
 
-
 public class UserManageAdminMenu {
 
     private BufferedReader br;
