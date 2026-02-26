@@ -37,18 +37,18 @@ public class EmployeeScreen {
 
         while (true) {
 
-            System.out.println();
-            System.out.println("┌────────────────────────────────────");
-            System.out.println("│        👨‍💼 사원 전용 화면");
-            System.out.println("├────────────────────────────────────");
-            System.out.println("│  1. 내 정보 조회");
-            System.out.println("│  2. 내 정보 수정");
-            System.out.println("│  3. 근태 관리");
-            System.out.println("│  4. 조직도 조회");
-            System.out.println("│  5. 게시판");
-            System.out.println("│  0. 로그아웃");
-            System.out.println("└────────────────────────────────────");
-            System.out.print("선택 >> ");
+        	System.out.println();
+        	System.out.println("+------------------------------------------+");
+        	System.out.println("|              사원 전용 화면              |");
+        	System.out.println("+------------------------------------------+");
+        	System.out.println("|  1. 내 정보 조회                         |");
+        	System.out.println("|  2. 내 정보 수정                         |");
+        	System.out.println("|  3. 근태 관리                            |");
+        	System.out.println("|  4. 조직도 조회                          |");
+        	System.out.println("|  5. 게시판                               |");
+        	System.out.println("|  0. 로그아웃                              |");
+        	System.out.println("+------------------------------------------+");
+        	System.out.print("선택 > ");
 
             try {
                 int no = Integer.parseInt(br.readLine());
