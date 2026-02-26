@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import kr.hrsystem.user.LoginUser;
 import kr.util.DBUtil;
 
 	public class LoginDAO {
@@ -89,7 +88,8 @@ import kr.util.DBUtil;
 	    }
 
 	    // 로그인용: 계정 정보 조회 (승인상태/권한 포함)
-	    public LoginUser login(String loginId, String password) {
+
+	    public Map<String, Object> loginAsMap(String loginId, String password) {
 	        Connection conn = null;
 	        PreparedStatement pstmt = null;
 	        ResultSet rs = null;
@@ -108,19 +108,19 @@ import kr.util.DBUtil;
 	            rs = pstmt.executeQuery();
 
 	            if (rs.next()) {
-	                return new LoginUser(
-	                    rs.getInt("USER_ID"),
-	                    rs.getString("LOGIN_ID"),
-	                    rs.getString("USER_NAME"),
-	                    rs.getString("APPROVAL_STATUS"),
-	                    rs.getString("USER_ROLE")
-	                );
+	                Map<String, Object> m = new HashMap<>();
+	                m.put("USER_ID", rs.getInt("USER_ID"));
+	                m.put("LOGIN_ID", rs.getString("LOGIN_ID"));
+	                m.put("USER_NAME", rs.getString("USER_NAME"));
+	                m.put("APPROVAL_STATUS", rs.getString("APPROVAL_STATUS"));
+	                m.put("USER_ROLE", rs.getString("USER_ROLE"));
+	                return m;
 	            }
 
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        } finally {
-	            DBUtil.executeClose(rs, pstmt, conn);
+	            DBUtil.executeClose(rs, pstmt, conn); // 너 프로젝트 close 메서드명에 맞춰 사용
 	        }
 
 	        return null;
