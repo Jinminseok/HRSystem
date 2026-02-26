@@ -8,7 +8,8 @@ import java.util.Objects;
 import kr.appointment.HrAppointmentHistoryDAO;
 import kr.hrsystem.dao.LogDAO;
 import kr.hrsystem.dao.LoginDAO;
-
+import kr.hrsystem.dao.DeptDAO;
+import kr.hrsystem.dao.PositionDAO;
 
 
 public class UserManageAdminMenu {
@@ -19,6 +20,8 @@ public class UserManageAdminMenu {
     private LoginDAO userDao;
     private LogDAO logDao;
     private HrAppointmentHistoryDAO historyDao;
+    private DeptDAO deptDao;
+    private PositionDAO positionDao;
 
     public UserManageAdminMenu(BufferedReader br, int adminUserId, int loginLogId) {
         this.br = br;
@@ -27,6 +30,8 @@ public class UserManageAdminMenu {
         this.userDao = new LoginDAO();
         this.logDao = new LogDAO();
         this.historyDao = new HrAppointmentHistoryDAO();
+        this.deptDao = new DeptDAO();
+        this.positionDao = new PositionDAO();
 
         try {
             menu();
@@ -45,7 +50,7 @@ public class UserManageAdminMenu {
             System.out.println("│  1. 승인대기 사원 목록 조회                 ");
             System.out.println("│  2. 사원 승인 처리                          ");
             System.out.println("│  3. 사원 승인 거절                          ");
-            System.out.println("│  4. 전체 사원 목록 조회                     ");
+            System.out.println("│  4. 사원 목록 조회                     ");
             System.out.println("│  5. 사원 정보 변경(부서/직급/재직상태)      ");
             System.out.println("│  0. 뒤로가기                               ");
             System.out.println("└─────────────────────────────────────────────");
@@ -135,8 +140,8 @@ public class UserManageAdminMenu {
                         break;
 
                     case 4:
-                        // 전체 사원 조회
-                        userDao.selectAllUsers();
+                        // 사원 목록 조회
+                        employeeListMenu();
                         break;
 
                     case 5:
@@ -216,6 +221,79 @@ public class UserManageAdminMenu {
                         } else {
                             System.out.println("❌ 변경 실패 (USER_ID 확인)");
                         }
+                        break;
+
+                    case 0:
+                        return;
+
+                    default:
+                        System.out.println("잘못 입력했습니다.");
+                }
+
+            } catch (NumberFormatException e) {
+                System.out.println("숫자만 입력하세요.");
+            }
+        }
+    }
+    private void employeeListMenu() throws IOException {
+        while (true) {
+            System.out.println();
+            System.out.println("┌─────────────────────────────────────────────");
+            System.out.println("│            📋 사원 목록 조회 (관리자)        ");
+            System.out.println("├─────────────────────────────────────────────");
+            System.out.println("│  1. 부서별 사원 목록 조회                    ");
+            System.out.println("│  2. 직급별 사원 목록 조회                    ");
+            System.out.println("│  3. 전체 사원 목록 조회                      ");
+            System.out.println("│  0. 뒤로가기                                ");
+            System.out.println("└─────────────────────────────────────────────");
+            System.out.print("선택 >> ");
+
+            try {
+                int no = Integer.parseInt(br.readLine());
+
+                switch (no) {
+                    case 1: {
+                        // ✅ 부서 번호표 먼저 보여주기
+                        System.out.println("\n[부서 목록]");
+                        deptDao.selectDepartment();
+
+                        System.out.print("조회할 부서번호(DEPT_NUM) (0:취소) : ");
+                        int deptNum = Integer.parseInt(br.readLine());
+
+                        if (deptNum == 0) break;
+
+                        // ✅ 존재 체크 (잘못 입력 방지)
+                        if (!userDao.existsDeptNum(deptNum)) {
+                            System.out.println("❌ 해당 부서번호는 존재하지 않습니다.");
+                            break;
+                        }
+
+                        userDao.selectUsersByDept(deptNum);
+                        break;
+                    }
+
+                    case 2: {
+                        // ✅ 직급 번호표 먼저 보여주기
+                        System.out.println("\n[직급 목록]");
+                        positionDao.selectPosition();
+
+                        System.out.print("조회할 직급번호(POSITION_NUM) (0:취소) : ");
+                        int posNum = Integer.parseInt(br.readLine());
+
+                        if (posNum == 0) break;
+
+                        // ✅ 존재 체크
+                        if (!userDao.existsPositionNum(posNum)) {
+                            System.out.println("❌ 해당 직급번호는 존재하지 않습니다.");
+                            break;
+                        }
+
+                        userDao.selectUsersByPosition(posNum);
+                        break;
+                    }
+
+                    case 3:
+                        userDao.selectAllUsers();
                         break;
 
                     case 0:

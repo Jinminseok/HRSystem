@@ -206,6 +206,127 @@ import kr.util.DBUtil;
 	            DBUtil.executeClose(rs, pstmt, conn);
 	        }
 	    }
+	 // ==============================
+	 // 부서별 사원 목록 조회
+	 // ==============================
+	 public void selectUsersByDept(int deptNum) {
+	     Connection conn = null;
+	     PreparedStatement pstmt = null;
+	     ResultSet rs = null;
+
+	     try {
+	         conn = DBUtil.getConnection();
+
+	         String sql =
+	             "SELECT USER_ID, LOGIN_ID, USER_NAME, DEPT_NUM, POSITION_NUM, " +
+	             "       APPROVAL_STATUS, EMP_STATUS, USER_ROLE " +
+	             "FROM USERTEST " +
+	             "WHERE DEPT_NUM = ? " +
+	             "ORDER BY USER_ID ASC";
+
+	         pstmt = conn.prepareStatement(sql);
+	         pstmt.setInt(1, deptNum);
+
+	         rs = pstmt.executeQuery();
+
+	         System.out.println("=".repeat(120));
+	         System.out.println("부서별 사원 목록 (DEPT_NUM = " + deptNum + ")");
+	         System.out.println("=".repeat(120));
+	         System.out.println("ID\tLOGIN_ID\t이름\t부서\t직급\t승인상태\t재직상태\t권한");
+	         System.out.println("=".repeat(120));
+
+	         boolean hasData = false;
+	         while (rs.next()) {
+	             hasData = true;
+
+	             System.out.print(rs.getInt("USER_ID") + "\t");
+	             System.out.print(rs.getString("LOGIN_ID") + "\t");
+	             System.out.print(rs.getString("USER_NAME") + "\t");
+	             System.out.print((rs.getObject("DEPT_NUM") == null ? "-" : rs.getInt("DEPT_NUM")) + "\t");
+	             System.out.print((rs.getObject("POSITION_NUM") == null ? "-" : rs.getInt("POSITION_NUM")) + "\t");
+
+	             String approvalStatus = rs.getString("APPROVAL_STATUS");
+	             String empStatus = rs.getString("EMP_STATUS");
+	             String userRole = rs.getString("USER_ROLE");
+
+	             System.out.print(approvalStatusToKor(approvalStatus) + "\t");
+	             System.out.print(empStatusToKor(empStatus) + "\t");
+	             System.out.print(userRoleToKor(userRole) + "\n");
+	         }
+
+	         if (!hasData) {
+	             System.out.println("해당 부서에 사원이 없습니다.");
+	         }
+
+	         System.out.println("=".repeat(120));
+
+	     } catch (Exception e) {
+	         e.printStackTrace();
+	     } finally {
+	         DBUtil.executeClose(rs, pstmt, conn);
+	     }
+	 }
+
+	 // ==============================
+	 // 직급별 사원 목록 조회
+	 // ==============================
+	 public void selectUsersByPosition(int positionNum) {
+	     Connection conn = null;
+	     PreparedStatement pstmt = null;
+	     ResultSet rs = null;
+
+	     try {
+	         conn = DBUtil.getConnection();
+
+	         String sql =
+	             "SELECT USER_ID, LOGIN_ID, USER_NAME, DEPT_NUM, POSITION_NUM, " +
+	             "       APPROVAL_STATUS, EMP_STATUS, USER_ROLE " +
+	             "FROM USERTEST " +
+	             "WHERE POSITION_NUM = ? " +
+	             "ORDER BY USER_ID ASC";
+
+	         pstmt = conn.prepareStatement(sql);
+	         pstmt.setInt(1, positionNum);
+
+	         rs = pstmt.executeQuery();
+
+	         System.out.println("=".repeat(120));
+	         System.out.println("직급별 사원 목록 (POSITION_NUM = " + positionNum + ")");
+	         System.out.println("=".repeat(120));
+	         System.out.println("ID\tLOGIN_ID\t이름\t부서\t직급\t승인상태\t재직상태\t권한");
+	         System.out.println("=".repeat(120));
+
+	         boolean hasData = false;
+	         while (rs.next()) {
+	             hasData = true;
+
+	             System.out.print(rs.getInt("USER_ID") + "\t");
+	             System.out.print(rs.getString("LOGIN_ID") + "\t");
+	             System.out.print(rs.getString("USER_NAME") + "\t");
+	             System.out.print((rs.getObject("DEPT_NUM") == null ? "-" : rs.getInt("DEPT_NUM")) + "\t");
+	             System.out.print((rs.getObject("POSITION_NUM") == null ? "-" : rs.getInt("POSITION_NUM")) + "\t");
+
+	             String approvalStatus = rs.getString("APPROVAL_STATUS");
+	             String empStatus = rs.getString("EMP_STATUS");
+	             String userRole = rs.getString("USER_ROLE");
+
+	             System.out.print(approvalStatusToKor(approvalStatus) + "\t");
+	             System.out.print(empStatusToKor(empStatus) + "\t");
+	             System.out.print(userRoleToKor(userRole) + "\n");
+	         }
+
+	         if (!hasData) {
+	             System.out.println("해당 직급에 사원이 없습니다.");
+	         }
+
+	         System.out.println("=".repeat(120));
+
+	     } catch (Exception e) {
+	         e.printStackTrace();
+	     } finally {
+	         DBUtil.executeClose(rs, pstmt, conn);
+	     }
+	 }
 
 	    // 사원 승인 처리 (부서/직급/권한 지정)
 	    public int approveUser(int userId, int deptNum, int positionNum, String userRole) {
