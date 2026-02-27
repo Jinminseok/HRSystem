@@ -117,11 +117,28 @@ public class SearchAdminMenu {
                 }
 
                 case 5:
+
                     System.out.println("날짜 형식: YYYY-MM-DD");
-                    System.out.print("시작일: ");
-                    Date start = Date.valueOf(br.readLine().trim());
-                    System.out.print("종료일: ");
-                    Date end = Date.valueOf(br.readLine().trim());
+
+                    Date start = null;
+                    Date end = null;
+
+                    try {
+                        System.out.print("시작일: ");
+                        String startStr = br.readLine().trim();
+                        start = Date.valueOf(startStr);
+
+                        System.out.print("종료일: ");
+                        String endStr = br.readLine().trim();
+                        end = Date.valueOf(endStr);
+
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("❌ 잘못된 날짜 형식입니다. (예: 2026-02-26)");
+                        break;  // case 종료
+                    }
+
+                    
+
                     dao.searchUserByJoinDateRange(start, end);
                     break;
 

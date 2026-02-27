@@ -120,7 +120,7 @@ public class ShareScreen {
         }
 
         if (dao.existsLoginId(id)) {
-            System.out.println("❌ 이미 사용 중인 아이디입니다. 다른 아이디를 입력하세요.");
+            System.out.println("❌ 이미 사용 s중인 아이디입니다. 다른 아이디를 입력하세요.");
             return;
         }
 

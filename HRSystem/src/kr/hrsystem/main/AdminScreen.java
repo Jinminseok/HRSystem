@@ -92,7 +92,6 @@ public class AdminScreen {
                         break;
 
                     case 8:
-                    	System.out.println("▶ 검색 화면으로 이동");
                         new SearchAdminMenu(br, userId, loginLogId);
                         break;
 
