@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import kr.admin.SearchAdminMenu;
+import kr.admin.UserManageAdminMenu;
 import kr.admin.DepartmentManageAdminMenu;
 import kr.admin.PositionManageAdminMenu;
 import kr.appointment.HrAppointmentHistoryAdminMenu;
 import kr.attendance.AdminAttendanceMenu;
-import kr.employee.UserManageAdminMenu;
 import kr.hrsystem.dao.LogDAO;
 import kr.log.LogAdminMenu;
 import kr.notice.NoticeAdmin;

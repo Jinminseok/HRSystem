@@ -1,4 +1,4 @@
-package kr.employee;
+package kr.admin;
 
 import java.io.BufferedReader;
 import java.io.IOException;

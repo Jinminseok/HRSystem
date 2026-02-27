@@ -10,7 +10,9 @@ import java.util.List;
 import kr.util.DBUtil;
 
 public class MyInfoDAO {
-
+	
+	private static final String LINE = "───────────────────────────────────────────";
+	
     // 1) 로그인한 사용자 내 정보 조회 (오늘 출근/퇴근시간 포함)
     public void selectMyInfo(int userId) {
         Connection conn = null;
@@ -43,18 +45,18 @@ public class MyInfoDAO {
 
             if (rs.next()) {
                 System.out.println();
-                System.out.println("┌─────────────────────────────────────────────");
-                System.out.println("│              🙋 내 정보 조회                ");
-                System.out.println("├─────────────────────────────────────────────");
-                System.out.println("아이디        : " + rs.getString("LOGIN_ID"));
-                System.out.println("이름          : " + rs.getString("USER_NAME"));
-                System.out.println("부서          : " + rs.getString("DEPT_NAME"));
-                System.out.println("직급          : " + rs.getString("POSITION_NAME"));
-                System.out.println("이메일        : " + rs.getString("EMAIL"));
-                System.out.println("전화번호      : " + rs.getString("PHONE"));
-                System.out.println("오늘 출근시간 : " + nvlTime(rs.getString("CHECK_IN")));
-                System.out.println("오늘 퇴근시간 : " + nvlTime(rs.getString("CHECK_OUT")));
-                System.out.println("└─────────────────────────────────────────────");
+                System.out.println("+───────────────────────────────────────────────+");
+                System.out.println("│              🙋 내 정보 조회                  │");
+                System.out.println("+───────────────────────────────────────────────+");
+                System.out.println("│  아이디        :  " + rs.getString("LOGIN_ID") +"\t\t\t│");
+                System.out.println("│  이름          :  " + rs.getString("USER_NAME")+"\t\t\t│");
+                System.out.println("│  부서          :  " + rs.getString("DEPT_NAME")+"\t\t\t│");
+                System.out.println("│  직급          :  " + rs.getString("POSITION_NAME")+"\t\t\t│");
+                System.out.println("│  이메일        :  " + rs.getString("EMAIL")+"\t\t\t│");
+                System.out.println("│  전화번호      :  " + rs.getString("PHONE")+"\t\t│");
+                System.out.println("│  오늘 출근시간 :  " + nvlTime(rs.getString("CHECK_IN"))+"\t\t│");
+                System.out.println("│  오늘 퇴근시간 :  " + nvlTime(rs.getString("CHECK_OUT"))+"\t\t│");
+                System.out.println("+───────────────────────────────────────────────+");
             } else {
                 System.out.println("❌ 사용자 정보를 찾을 수 없습니다.");
             }

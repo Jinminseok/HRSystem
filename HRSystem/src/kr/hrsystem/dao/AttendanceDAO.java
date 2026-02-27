@@ -10,6 +10,12 @@ import kr.util.DBUtil;
 public class AttendanceDAO {
 
     private LogDAO logDao = new LogDAO();
+    private String tsToMinuteStr(Timestamp ts) {
+        if (ts == null) return "-";
+        // 2026-02-20 08:50:00.0 -> 2026-02-20 08:50
+        String s = ts.toString();
+        return s.length() >= 16 ? s.substring(0, 16) : s;
+    }
 
     // ==========================
     // 1. 출근하기 (로그 포함)
@@ -20,14 +26,20 @@ public class AttendanceDAO {
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
+        
+        
 
         String checkSql =
             "SELECT COUNT(*) FROM attendance " +
             "WHERE USER_ID = ? AND ATT_DATE = TRUNC(SYSDATE)";
 
         String insertSql =
-        	    "INSERT INTO attendance (ATT_ID, USER_ID, CHECK_IN, IN_STATUS, OUT_STATUS) " +
-        	    "VALUES (ATT_SEQ.NEXTVAL, ?, SYSDATE, ?, 0)";
+            "INSERT INTO attendance (ATT_ID, USER_ID, CHECK_IN, IN_STATUS, OUT_STATUS) " +
+            "VALUES (ATT_SEQ.NEXTVAL, ?, SYSDATE, ?, 0)";
+
+        String selectTimeSql =
+            "SELECT CHECK_IN FROM attendance " +
+            "WHERE USER_ID = ? AND ATT_DATE = TRUNC(SYSDATE)";
 
         try {
             conn = DBUtil.getConnection();
@@ -38,13 +50,14 @@ public class AttendanceDAO {
 
             if (rs.next() && rs.getInt(1) > 0) {
                 System.out.println("👉 오늘 이미 출근했습니다.");
+                System.out.println();
                 return;
             }
 
             DBUtil.executeClose(rs, pstmt, null);
 
             Timestamp now = new Timestamp(System.currentTimeMillis());
-            int inStatus = calculateInStatus(now);
+            int inStatus = calculateInStatus(now); // 저장용(화면에는 안 보여줌)
 
             pstmt = conn.prepareStatement(insertSql);
             pstmt.setInt(1, userId);
@@ -52,18 +65,29 @@ public class AttendanceDAO {
 
             int count = pstmt.executeUpdate();
 
-            if (count > 0) {
-                System.out.println("✅ 출근 완료! (" + inStatusToString(inStatus) + ")");
+            DBUtil.executeClose(null, pstmt, null);
 
-                // ✅ 중요 로그 기록 (action_type 이름 통일!)
-                LogDAO logDao = new LogDAO();
+            if (count > 0) {
+                // ✅ 찍힌 시간 조회해서 출력
+                pstmt = conn.prepareStatement(selectTimeSql);
+                pstmt.setInt(1, userId);
+                rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    Timestamp inTs = rs.getTimestamp("CHECK_IN");
+                    System.out.println("✅ 출근 처리 완료! 출근시간: " + tsToMinuteStr(inTs));
+                } else {
+                    System.out.println("✅ 출근 처리 완료!");
+                }
+
+                // 로그 기록은 그대로
                 logDao.insertActionLog(
                     userId,
                     "근태관리",
                     "ATT_CHECKIN",
-                    "출근 처리 (" + inStatusToString(inStatus) + ")",
+                    "출근 처리 (출근시간 기록)",
                     "ATTENDANCE",
-                    null,          // target_id는 없어도 됨 (원하면 ATT_ID 조회해서 넣기)
+                    null,
                     loginLogId
                 );
             }
@@ -94,6 +118,10 @@ public class AttendanceDAO {
             "SET CHECK_OUT = SYSDATE, OUT_STATUS = ? " +
             "WHERE USER_ID = ? AND ATT_DATE = TRUNC(SYSDATE)";
 
+        String selectTimeSql =
+            "SELECT CHECK_IN, CHECK_OUT FROM attendance " +
+            "WHERE USER_ID = ? AND ATT_DATE = TRUNC(SYSDATE)";
+
         try {
             conn = DBUtil.getConnection();
 
@@ -103,6 +131,7 @@ public class AttendanceDAO {
 
             if (!rs.next()) {
                 System.out.println("👉 아직 출근하지 않았습니다.");
+                System.out.println();
                 return;
             }
 
@@ -111,11 +140,12 @@ public class AttendanceDAO {
 
             if (alreadyOut != null) {
                 System.out.println("👉 이미 퇴근 처리되었습니다.");
+                System.out.println();
                 return;
             }
 
             Timestamp now = new Timestamp(System.currentTimeMillis());
-            int outStatus = calculateOutStatus(now);
+            int outStatus = calculateOutStatus(now); // 저장용(화면에는 안 보여줌)
 
             DBUtil.executeClose(rs, pstmt, null);
 
@@ -125,16 +155,32 @@ public class AttendanceDAO {
 
             int count = pstmt.executeUpdate();
 
-            if (count > 0) {
-                System.out.println("✅ 퇴근 완료! 상태: " + finalStatusToString(inStatus, outStatus));
+            DBUtil.executeClose(null, pstmt, null);
 
-                // ✅ 중요 로그 기록
-                LogDAO logDao = new LogDAO();
+            if (count > 0) {
+                // ✅ 찍힌 시간 조회해서 출력
+                pstmt = conn.prepareStatement(selectTimeSql);
+                pstmt.setInt(1, userId);
+                rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    Timestamp inTs = rs.getTimestamp("CHECK_IN");
+                    Timestamp outTs = rs.getTimestamp("CHECK_OUT");
+
+                    System.out.println("✅ 퇴근 처리 완료!");
+                    System.out.println("   출근시간: " + tsToMinuteStr(inTs));
+                    System.out.println("   퇴근시간: " + tsToMinuteStr(outTs));
+                } else {
+                    System.out.println("✅ 퇴근 처리 완료!");
+                    System.out.println();
+                }
+
+                // 로그 기록은 그대로
                 logDao.insertActionLog(
                     userId,
                     "근태관리",
                     "ATT_CHECKOUT",
-                    "퇴근 처리 (" + finalStatusToString(inStatus, outStatus) + ")",
+                    "퇴근 처리 (퇴근시간 기록)",
                     "ATTENDANCE",
                     null,
                     loginLogId
@@ -243,8 +289,8 @@ public class AttendanceDAO {
             rs = pstmt.executeQuery();
 
             boolean hasData = false;
-            System.out.println("\n==== 전체 근태 조회 ====");
-
+            System.out.println("\n======================================= 전체 근태 조회 =======================================");
+            System.out.println();
             while (rs.next()) {
                 hasData = true;
 
@@ -262,11 +308,14 @@ public class AttendanceDAO {
                     + (checkOut == null ? "퇴근 전" : checkOut)
                     + " | 상태 : " + makeStatusLabel(inStatus, outStatus)
                     + " | 근무시간 : " + (checkOut == null ? "-" : hour + "시간")
+                    
                 );
+                System.out.println();
             }
 
             if (!hasData) {
                 System.out.println("👉 근태 기록이 없습니다.");
+                System.out.println();
             }
 
         } catch (Exception e) {
@@ -304,8 +353,8 @@ public class AttendanceDAO {
             rs = pstmt.executeQuery();
 
             boolean hasData = false;
-            System.out.println("\n==== " + yearMonth + " 월 근태 조회 ====");
-
+            System.out.println("\n======================== " + yearMonth + " 월 근태 조회 ========================");
+            System.out.println();
             while (rs.next()) {
                 hasData = true;
 
@@ -322,10 +371,12 @@ public class AttendanceDAO {
                     + (checkOut == null ? "퇴근 전" : checkOut)
                     + " | 상태 : " + makeStatusLabel(inStatus, outStatus)
                 );
+                System.out.println();
             }
 
             if (!hasData) {
                 System.out.println("👉 해당 월의 근태 기록이 없습니다.");
+                System.out.println();
             }
 
         } catch (Exception e) {
@@ -362,7 +413,9 @@ public class AttendanceDAO {
             if (rs.next()) {
                 double total = rs.getDouble("TOTAL_HOUR");
                 System.out.println("\n==== " + yearMonth + " 월 총 근무시간 ====");
+                System.out.println();
                 System.out.println("총 근무시간 : " + total + "시간");
+                System.out.println();
             }
 
         } catch (Exception e) {
@@ -400,7 +453,7 @@ public class AttendanceDAO {
             pstmt.setString(2, yearMonth);
             rs = pstmt.executeQuery();
 
-            System.out.println("\n==== " + yearMonth + " 월 상태별 횟수 ====");
+            System.out.println("\n======== " + yearMonth + "월 상태별 횟수 ========");
 
             if (rs.next()) {
                 System.out.println("정상출근 : " + rs.getInt("NORMAL_IN_CNT") + "회");
@@ -409,6 +462,7 @@ public class AttendanceDAO {
                 System.out.println("조퇴     : " + rs.getInt("EARLY_CNT") + "회");
                 System.out.println("연장     : " + rs.getInt("OVERTIME_CNT") + "회");
                 System.out.println("완전정상(정상출근+정상퇴근) : " + rs.getInt("PERFECT_CNT") + "회");
+                System.out.println();
             }
 
         } catch (Exception e) {
@@ -465,6 +519,7 @@ public class AttendanceDAO {
                 beforeOutStatus = rs.getInt("OUT_STATUS");
             } else {
                 System.out.println("👉 해당 날짜의 근태 기록이 없습니다.");
+                System.out.println();
                 return;
             }
 
@@ -494,6 +549,7 @@ public class AttendanceDAO {
             if (result > 0) {
                 String finalStatus = finalStatusToString(inStatus, outStatus);
                 System.out.println("✅ 근태 수정 완료! 상태: " + finalStatus);
+                System.out.println();
 
                 // ✅ 관리자 수정 로그 (before -> after)
                 String beforeText =
@@ -518,6 +574,7 @@ public class AttendanceDAO {
 
             } else {
                 System.out.println("👉 해당 날짜의 근태 기록이 없습니다.");
+                System.out.println();
             }
 
         } catch (Exception e) {

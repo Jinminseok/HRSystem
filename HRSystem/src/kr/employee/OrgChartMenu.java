@@ -24,14 +24,14 @@ public class OrgChartMenu {
     private void menu() throws IOException {
         while (true) {
             System.out.println();
-            System.out.println("┌─────────────────────────────────────────────");
-            System.out.println("│              🏢 조직도 조회                 ");
-            System.out.println("├─────────────────────────────────────────────");
-            System.out.println("│  1. 전체 조직도 조회                        ");
-            System.out.println("│  2. 부서별 조직도 조회                      ");
-            System.out.println("│  0. 뒤로가기                                ");
-            System.out.println("└─────────────────────────────────────────────");
-            System.out.print("선택 >> ");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│              🏢 조직도 조회              │");
+            System.out.println("├──────────────────────────────────────────+");
+            System.out.println("│  1. 전체 조직도 조회                     │");
+            System.out.println("│  2. 부서별 조직도 조회                   │");
+            System.out.println("│  0. 뒤로가기                             │");
+            System.out.println("└──────────────────────────────────────────+");
+            System.out.print("선택 : ");
 
             try {
                 int no = Integer.parseInt(br.readLine());
@@ -42,10 +42,21 @@ public class OrgChartMenu {
                         break;
 
                     case 2:
-                        System.out.print("조회할 부서명 입력 (예: 개발부) : ");
-                        String deptName = br.readLine();
-                        dao.selectOrgChartByDeptName(deptName);
-                        break;
+                    	 dao.printDeptGuide();
+
+                         System.out.print("부서명 입력(취소: 0) : ");
+                         String keyword = br.readLine().trim();
+
+                         if ("0".equals(keyword)) {
+                             System.out.println("↩ 부서별 조회를 취소했습니다.");
+                             break;
+                         }
+                         if (keyword.isEmpty()) {
+                             System.out.println("❌ 검색어를 입력하세요.");
+                             break;
+                         }
+                         dao.selectOrgChartByDeptName(keyword);
+                         break;
 
                     case 0:
                         return;

@@ -31,15 +31,18 @@ public class UserAttendanceMenu {
 
         while (true) {
             try {
-                System.out.println("\n==== 근태 관리 ====");
-                System.out.println("1. 출근하기");
-                System.out.println("2. 퇴근하기");
-                System.out.println("3. 전체 조회");
-                System.out.println("4. 월별 조회");
-                System.out.println("5. 월 총 근무시간");
-                System.out.println("6. 월 특정 횟수");
-                System.out.println("0. 뒤로가기");
-                System.out.print("선택 >> ");
+            	System.out.println("+──────────────────────────────────────────+"); 	
+            	System.out.println("│               근태 관리                  │");
+    			System.out.println("+──────────────────────────────────────────+");
+    			System.out.println("│  1. 출근하기                             │");
+    			System.out.println("│  2. 퇴근하기                             │");
+    			System.out.println("│  3. 전체조회                             │");
+    			System.out.println("│  4. 월별 조회                            │");
+    			System.out.println("│  5. 월 총 근무시간                       │");
+    			System.out.println("│  6. 월 근무 횟수                         │");
+    			System.out.println("│  0. 뒤로가기                             │");
+    			System.out.println("+──────────────────────────────────────────+");
+                System.out.print("선택 : ");
 
                 int no = Integer.parseInt(br.readLine());
 
@@ -55,15 +58,38 @@ public class UserAttendanceMenu {
                         break;
                     case 4:
                         System.out.print("조회 월 입력 (예: 2026-02) : ");
-                        dao.selectByMonth(userId, br.readLine());
+                        String ym4 = br.readLine().trim();
+
+                        if (!isValidYearMonth(ym4)) {
+                            System.out.println("👉 해당 월이 없습니다. (예: 2026-02)");
+                            System.out.println();
+                            break;
+                        }
+                        dao.selectByMonth(userId, ym4);
                         break;
+
                     case 5:
                         System.out.print("조회 월 입력 (예: 2026-02) : ");
-                        dao.selectMonthTotal(userId, br.readLine());
+                        String ym5 = br.readLine().trim();
+
+                        if (!isValidYearMonth(ym5)) {
+                            System.out.println("👉 해당 월이 없습니다. (예: 2026-02)");
+                            System.out.println();
+                            break;
+                        }
+                        dao.selectMonthTotal(userId, ym5);
                         break;
+
                     case 6:
                         System.out.print("조회 월 입력 (예: 2026-02) : ");
-                        dao.selectMonthStatusCount(userId, br.readLine());
+                        String ym6 = br.readLine().trim();
+
+                        if (!isValidYearMonth(ym6)) {
+                            System.out.println("👉 해당 월이 없습니다. (예: 2026-02)");
+                            System.out.println();
+                            break;
+                        }
+                        dao.selectMonthStatusCount(userId, ym6);
                         break;
                     case 0:
                         return;
@@ -75,5 +101,11 @@ public class UserAttendanceMenu {
                 System.out.println("숫자만 입력하세요.");
             }
         }
+    }
+    private boolean isValidYearMonth(String ym) {
+        if (ym == null) return false;
+        ym = ym.trim();
+        // YYYY-MM (01~12만 허용)
+        return ym.matches("^(\\d{4})-(0[1-9]|1[0-2])$");
     }
 }

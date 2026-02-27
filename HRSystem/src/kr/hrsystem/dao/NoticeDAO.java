@@ -32,13 +32,13 @@ public class NoticeDAO {
             pstmt = conn.prepareStatement(sql);
             rs = pstmt.executeQuery();
 
-            System.out.println("=".repeat(120));
-            System.out.println("번호\t제목\t작성자\t작성일\t조회수\t고정\t투표\t투표상태");
-            System.out.println("=".repeat(120));
+            System.out.println("=".repeat(90));
+            System.out.println("번호\t"+"     "+"제목\t\t작성자\t작성일\t"+"     "+"조회수"+"   "+"고정"+"    "+"투표"+"   "+"투표상태");
+            System.out.println("=".repeat(90));
 
             while (rs.next()) {
                 System.out.print(rs.getInt("notice_id") + "\t");
-                System.out.print(rs.getString("notice_title") + "\t");
+                System.out.print(rs.getString("notice_title") + "\t\t");
                 System.out.print(rs.getString("user_name") + "\t");
                 System.out.print(rs.getString("created_at_str") + "\t");
                 System.out.print(rs.getInt("view_count") + "\t");
@@ -47,7 +47,7 @@ public class NoticeDAO {
                 System.out.print(rs.getString("vote_status") + "\n");
             }
 
-            System.out.println("=".repeat(120));
+            System.out.println("=".repeat(90));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,16 +80,16 @@ public class NoticeDAO {
 
             rs = pstmt.executeQuery();
 
-            System.out.println("=".repeat(120));
-            System.out.println("[ USER_ID = " + targetUserId + " ] 게시글 목록");
-            System.out.println("번호\t제목\t작성자\t작성일\t조회수\t고정\t투표\t투표상태");
-            System.out.println("=".repeat(120));
+            System.out.println("=".repeat(90));
+            System.out.println("[ 사원번호 = " + targetUserId + " ] 님의 게시글 목록");
+            System.out.println("번호\t"+"     "+"제목\t\t작성자\t작성일\t"+"     "+"조회수"+"   "+"고정"+"    "+"투표"+"   "+"투표상태");
+            System.out.println("=".repeat(90));
 
             boolean hasData = false;
             while (rs.next()) {
                 hasData = true;
                 System.out.print(rs.getInt("notice_id") + "\t");
-                System.out.print(rs.getString("notice_title") + "\t");
+                System.out.print(rs.getString("notice_title") + "\t\t");
                 System.out.print(rs.getString("user_name") + "\t");
                 System.out.print(rs.getString("created_at_str") + "\t");
                 System.out.print(rs.getInt("view_count") + "\t");
@@ -102,7 +102,7 @@ public class NoticeDAO {
                 System.out.println("해당 사용자가 작성한 게시글이 없습니다.");
             }
 
-            System.out.println("=".repeat(120));
+            System.out.println("=".repeat(90));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -148,7 +148,7 @@ public class NoticeDAO {
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                System.out.println("=".repeat(70));
+                System.out.println("=".repeat(90));
                 System.out.println("번호    : " + rs.getInt("notice_id"));
                 System.out.println("제목    : " + rs.getString("notice_title"));
                 System.out.println("작성자  : " + rs.getString("user_name"));
@@ -160,7 +160,7 @@ public class NoticeDAO {
                 System.out.println("투표마감: " + (rs.getString("vote_deadline_str") == null ? "-" : rs.getString("vote_deadline_str")));
                 System.out.println("내용    : ");
                 System.out.println(rs.getString("notice_content"));
-                System.out.println("=".repeat(70));
+                System.out.println("=".repeat(90));
             }
 
             conn.commit();
@@ -229,7 +229,7 @@ public class NoticeDAO {
                 noticeId = rs.getInt("notice_id");
             }
 
-            System.out.println(count + "개의 공지가 등록되었습니다.");
+            System.out.println(count + "개의 게시글이 등록되었습니다.");
 
             logDao.insertActionLog(
                 writerUserId,
