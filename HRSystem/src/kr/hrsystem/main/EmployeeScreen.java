@@ -49,7 +49,7 @@ public class EmployeeScreen {
         	System.out.println("│  5. 게시판                               │");
         	System.out.println("│  0. 로그아웃                             │");
         	System.out.println("+──────────────────────────────────────────+");
-        	System.out.print("선택 > ");
+        	System.out.print("선택 >> ");
 
             try {
                 int no = Integer.parseInt(br.readLine());

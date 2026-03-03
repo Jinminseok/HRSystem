@@ -41,7 +41,7 @@ public class ShareScreen {
 			System.out.println("│  2. 회원가입                             │");
 			System.out.println("│  3. 종료                                 │");
 			System.out.println("+──────────────────────────────────────────+");
-			System.out.print("선택 : ");
+			System.out.print("선택 >> ");
 
 			try {
 				int no = Integer.parseInt(br.readLine());

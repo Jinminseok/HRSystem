@@ -22,6 +22,7 @@ public class AdminScreen {
     private int userId;
     private int loginLogId;
     private LogDAO logDao;
+    private static final String LINE = "───────────────────────────────────────────";
 
     public AdminScreen(BufferedReader br, int userId, Integer loginLogId) {
         this.br = br;
@@ -40,22 +41,22 @@ public class AdminScreen {
 
         while (true) {
             System.out.println();
-            System.out.println("┌───────────────────────────────────────────────────");
-            System.out.println("│                👑 관리자 전용 화면                ");
-            System.out.println("├───────────────────────────────────────────────────");
-            System.out.println("│  1. 사원관리                                      ");
-            System.out.println("│  2. 부서관리                                      ");
-            System.out.println("│  3. 직급관리                                      ");
-            System.out.println("│  4. 급여관리                                      ");
-            System.out.println("│  5. 인사발령관리                                  ");
-            System.out.println("│  6. 근태조회                                      ");
-            System.out.println("│  7. 게시판 관리                                   ");
-            System.out.println("│  8. 검색                                          ");
-            System.out.println("│  9. 통계                                          ");
-            System.out.println("│ 10. 로그 기록 조회                                ");
-            System.out.println("│  0. 로그아웃                                      ");
-            System.out.println("└───────────────────────────────────────────────────");
-            System.out.print("선택 >> ");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│                👑 관리자 전용 화면       │");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│  1. 사원관리                             │");
+            System.out.println("│  2. 부서관리                             │");
+            System.out.println("│  3. 직급관리                             │");
+            System.out.println("│  4. 급여관리                             │");
+            System.out.println("│  5. 인사발령관리                         │");
+            System.out.println("│  6. 근태조회                             │");
+            System.out.println("│  7. 게시판 관리                          │");
+            System.out.println("│  8. 검색                                 │");
+            System.out.println("│  9. 통계                                 │");
+            System.out.println("│ 10. 로그 기록 조회                       │");
+            System.out.println("│  0. 로그아웃                             │");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.print("선택 > ");
 
             try {
                 int no = Integer.parseInt(br.readLine());
