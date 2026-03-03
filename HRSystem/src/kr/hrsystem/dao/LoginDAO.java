@@ -165,9 +165,10 @@ import kr.util.DBUtil;
 	            conn = DBUtil.getConnection();
 
 	            String sql = "SELECT USER_ID, LOGIN_ID, USER_NAME, EMAIL, PHONE, "
+	            		   + "       APPROVAL_STATUS AS APPROVAL_STATUS, "
 	                       + "       TO_CHAR(JOIN_DATE, 'YYYY-MM-DD HH24:MI') AS JOIN_DATE "
 	                       + "FROM USERTEST "
-	                       + "WHERE APPROVAL_STATUS = 'PENDING' "
+	                       + "WHERE APPROVAL_STATUS IN ('PENDING','REJECTED') "
 	                       + "ORDER BY USER_ID ASC";
 
 	            pstmt = conn.prepareStatement(sql);
@@ -176,7 +177,7 @@ import kr.util.DBUtil;
 	            System.out.println("=".repeat(100));
 	            System.out.println("승인대기 사원 목록");
 	            System.out.println("=".repeat(100));
-	            System.out.println("USER_ID\tLOGIN_ID\t이름\t이메일\t전화번호\t가입일");
+	            System.out.println("USER_ID\tLOGIN_ID\t이름\t승인상태\t이메일\t전화번호\t가입일");
 	            System.out.println("=".repeat(100));
 
 	            boolean hasData = false;
@@ -185,6 +186,8 @@ import kr.util.DBUtil;
 	                System.out.print(rs.getInt("USER_ID") + "\t");
 	                System.out.print(rs.getString("LOGIN_ID") + "\t");
 	                System.out.print(rs.getString("USER_NAME") + "\t");
+	                String status = rs.getString("APPROVAL_STATUS");
+	                System.out.print(approvalStatusToKor(status) + "\t");
 	                System.out.print((rs.getString("EMAIL") == null ? "-" : rs.getString("EMAIL")) + "\t");
 	                System.out.print((rs.getString("PHONE") == null ? "-" : rs.getString("PHONE")) + "\t");
 	                System.out.print(rs.getString("JOIN_DATE") + "\n");
@@ -215,6 +218,7 @@ import kr.util.DBUtil;
 	            String sql = "SELECT USER_ID, LOGIN_ID, USER_NAME, DEPT_NUM, POSITION_NUM, "
 	                       + "       APPROVAL_STATUS, EMP_STATUS, USER_ROLE "
 	                       + "FROM USERTEST "
+	                       + "WHERE APPROVAL_STATUS <> 'REJECTED' "
 	                       + "ORDER BY USER_ID ASC";
 
 	            pstmt = conn.prepareStatement(sql);
@@ -265,6 +269,7 @@ import kr.util.DBUtil;
 	             "       APPROVAL_STATUS, EMP_STATUS, USER_ROLE " +
 	             "FROM USERTEST " +
 	             "WHERE DEPT_NUM = ? " +
+	             "  AND APPROVAL_STATUS <> 'REJECTED' " +
 	             "ORDER BY USER_ID ASC";
 
 	         pstmt = conn.prepareStatement(sql);
@@ -326,6 +331,7 @@ import kr.util.DBUtil;
 	             "       APPROVAL_STATUS, EMP_STATUS, USER_ROLE " +
 	             "FROM USERTEST " +
 	             "WHERE POSITION_NUM = ? " +
+	             "  AND APPROVAL_STATUS <> 'REJECTED' " +
 	             "ORDER BY USER_ID ASC";
 
 	         pstmt = conn.prepareStatement(sql);
@@ -387,7 +393,7 @@ import kr.util.DBUtil;
 	                       + "    USER_ROLE = ?, "
 	                       + "    USER_MODIFIED_DATE = SYSDATE "
 	                       + "WHERE USER_ID = ? "
-	                       + "AND APPROVAL_STATUS = 'PENDING'";
+	                       + "AND APPROVAL_STATUS IN ('PENDING', 'REJECTED')";
 
 	            pstmt = conn.prepareStatement(sql);
 	            pstmt.setInt(1, deptNum);
