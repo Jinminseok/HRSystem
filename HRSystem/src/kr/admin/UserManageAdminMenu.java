@@ -10,6 +10,8 @@ import kr.hrsystem.dao.LogDAO;
 import kr.hrsystem.dao.LoginDAO;
 import kr.hrsystem.dao.DeptDAO;
 import kr.hrsystem.dao.PositionDAO;
+import kr.hrsystem.dao.SearchDAO;
+import kr.hrsystem.dao.OrgChartDAO;
 
 public class UserManageAdminMenu {
 
@@ -64,28 +66,36 @@ public class UserManageAdminMenu {
                         userDao.selectPendingUsers();
                         break;
 
-                    case 2:
+                    case 2: {
                         // 사원 승인 처리
                         userDao.selectPendingUsers();
 
                         System.out.print("승인할 USER_ID : ");
                         int approveUserId = Integer.parseInt(br.readLine());
 
-                        System.out.print("부서번호(DEPT_NUM) : ");
-                        int deptNum = Integer.parseInt(br.readLine());
+                        // ✅ 부서 목록(예쁜 UI) 출력
+                        OrgChartDAO orgDao = new OrgChartDAO();
+                        orgDao.printDeptGuide();
 
-                        // 부서번호 존재 체크
-                        if (!userDao.existsDeptNum(deptNum)) {
-                            System.out.println("❌ 입력한 부서번호(" + deptNum + ")는 등록된 부서 정보가 없습니다.");
+                        System.out.print("부서명(DEPT_NAME) 입력 : ");
+                        String deptName = br.readLine().trim();
+
+                        Integer deptNum = userDao.getDeptNumByName(deptName);
+                        if (deptNum == null) {
+                            System.out.println("❌ 입력한 부서명(" + deptName + ")은 존재하지 않습니다.");
                             break;
                         }
 
-                        System.out.print("직급번호(POSITION_NUM) : ");
-                        int positionNum = Integer.parseInt(br.readLine());
+                        // ✅ 직급 목록(예쁜 UI) 출력
+                        PositionDAO posDao = new PositionDAO();
+                        posDao.printPositionGuide();
 
-                        // 직급번호 존재 체크
-                        if (!userDao.existsPositionNum(positionNum)) {
-                            System.out.println("❌ 입력한 직급번호(" + positionNum + ")는 등록된 직급 정보가 없습니다.");
+                        System.out.print("직급명(POSITION_NAME) 입력 : ");
+                        String positionName = br.readLine().trim();
+
+                        Integer positionNum = userDao.getPositionNumByName(positionName);
+                        if (positionNum == null) {
+                            System.out.println("❌ 입력한 직급명(" + positionName + ")은 존재하지 않습니다.");
                             break;
                         }
 
@@ -102,7 +112,10 @@ public class UserManageAdminMenu {
                                 adminUserId,
                                 "사원관리",
                                 "USER_APPROVE",
-                                "userId=" + approveUserId + ", dept=" + deptNum + ", pos=" + positionNum + ", role=" + role,
+                                "userId=" + approveUserId
+                                    + ", dept_num=" + deptNum + "(" + deptName + ")"
+                                    + ", pos_num=" + positionNum + "(" + positionName + ")"
+                                    + ", role=" + role,
                                 "USERTEST",
                                 approveUserId,
                                 (loginLogId > 0 ? loginLogId : null)
@@ -111,6 +124,7 @@ public class UserManageAdminMenu {
                             System.out.println("❌ 승인 실패 (대상 확인 필요 / 이미 처리됨)");
                         }
                         break;
+                    }
 
                     case 3:
                         // 승인 거절

@@ -495,6 +495,40 @@ import kr.util.DBUtil;
 
 	        return false;
 	    }
+	    //부서명 이름으로 입력받기
+	    public Integer getDeptNumByName(String deptName) {
+	        String sql = "SELECT DEPT_NUM FROM DEPT WHERE DEPT_NAME = ?";
+	        try (Connection conn = DBUtil.getConnection();
+	             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+	            pstmt.setString(1, deptName);
+
+	            try (ResultSet rs = pstmt.executeQuery()) {
+	                if (rs.next()) return rs.getInt(1);
+	            }
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	        return null;
+	    }
+	    //직급명 이름으로 입력받기
+	    public Integer getPositionNumByName(String positionName) {
+	        String sql = "SELECT POSITION_NUM FROM POSITION WHERE POSITION_NAME = ?";
+	        try (Connection conn = DBUtil.getConnection();
+	             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+	            pstmt.setString(1, positionName);
+
+	            try (ResultSet rs = pstmt.executeQuery()) {
+	                if (rs.next()) return rs.getInt(1);
+	            }
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	        return null;
+	    }
 
 	    // ✅ 관리자용 사원 정보 변경 (부서/직급/재직상태)
 	    public int updateUserInfoByAdmin(int userId, int deptNum, int positionNum, String empStatus) {
