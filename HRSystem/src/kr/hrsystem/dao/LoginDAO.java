@@ -215,11 +215,15 @@ import kr.util.DBUtil;
 	        try {
 	            conn = DBUtil.getConnection();
 
-	            String sql = "SELECT USER_ID, LOGIN_ID, USER_NAME, DEPT_NUM, POSITION_NUM, "
-	                       + "       APPROVAL_STATUS, EMP_STATUS, USER_ROLE "
-	                       + "FROM USERTEST "
-	                       + "WHERE APPROVAL_STATUS <> 'REJECTED' "
-	                       + "ORDER BY USER_ID ASC";
+	            String sql =
+	            	    "SELECT u.USER_ID, u.LOGIN_ID, u.USER_NAME, " +
+	            	    "       NVL(d.DEPT_NAME, '-') AS DEPT_NAME, " +
+	            	    "       NVL(p.POSITION_NAME, '-') AS POSITION_NAME, " +
+	            	    "       u.APPROVAL_STATUS, u.EMP_STATUS, u.USER_ROLE " +
+	            	    "FROM USERTEST u " +
+	            	    "LEFT JOIN DEPT d ON u.DEPT_NUM = d.DEPT_NUM " +
+	            	    "LEFT JOIN POSITION p ON u.POSITION_NUM = p.POSITION_NUM " +
+	            	    "ORDER BY u.USER_ID ASC";
 
 	            pstmt = conn.prepareStatement(sql);
 	            rs = pstmt.executeQuery();
@@ -234,8 +238,8 @@ import kr.util.DBUtil;
 	                System.out.print(rs.getInt("USER_ID") + "\t");
 	                System.out.print(rs.getString("LOGIN_ID") + "\t");
 	                System.out.print(rs.getString("USER_NAME") + "\t");
-	                System.out.print((rs.getObject("DEPT_NUM") == null ? "-" : rs.getInt("DEPT_NUM")) + "\t");
-	                System.out.print((rs.getObject("POSITION_NUM") == null ? "-" : rs.getInt("POSITION_NUM")) + "\t");
+	                System.out.print(rs.getString("DEPT_NAME") + "\t");
+	                System.out.print(rs.getString("POSITION_NAME") + "\t");
 	                String approvalStatus = rs.getString("APPROVAL_STATUS");
 	                String empStatus = rs.getString("EMP_STATUS");
 	                String userRole = rs.getString("USER_ROLE");
