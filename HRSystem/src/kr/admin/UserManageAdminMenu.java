@@ -161,8 +161,21 @@ public class UserManageAdminMenu {
                         // 사원 정보 변경 (부서/직급/재직상태)
                         userDao.selectAllUsers();
 
-                        System.out.print("변경할 USER_ID : ");
-                        int targetUserId = Integer.parseInt(br.readLine());
+                        System.out.print("변경할 USER_ID(취소: 0) : ");
+                        String inputUserId = br.readLine();
+
+                        int targetUserId;
+                        try {
+                            targetUserId = Integer.parseInt(inputUserId.trim());
+                        } catch (NumberFormatException e) {
+                            System.out.println("❌ 숫자만 입력하세요.");
+                            break; // 또는 continue; (원하면 다시 입력 받게)
+                        }
+
+                        if (targetUserId == 0) {
+                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            break;
+                        }
 
                         // ✅ 변경 전 현재값 조회 (이력 저장용)
                         Map<String, Object> beforeUser = userDao.getUserInfoMapById(targetUserId);
@@ -171,22 +184,39 @@ public class UserManageAdminMenu {
                             break;
                         }
 
-                        System.out.print("새 부서번호(DEPT_NUM) : ");
-                        int newDeptNum = Integer.parseInt(br.readLine());
+                        // ✅ 부서/직급 DAO 준비 (리스트 출력 + 이름→번호)
+                        DeptDAO deptDao = new DeptDAO();
+                        PositionDAO positionDao = new PositionDAO();
 
-                        if (!userDao.existsDeptNum(newDeptNum)) {
-                            System.out.println("❌ 해당 부서번호는 존재하지 않습니다.");
+                        // =========================
+                        // ✅ 새 부서명 입력
+                        // =========================
+                        deptDao.printDeptListUI();
+                        System.out.print("새 부서명 입력 : ");
+                        String newDeptName = br.readLine().trim();
+
+                        int newDeptNum = deptDao.getDeptNumByName(newDeptName);
+                        if (newDeptNum == -1) {
+                            System.out.println("❌ 존재하지 않는 부서명입니다: " + newDeptName);
                             break;
                         }
 
-                        System.out.print("새 직급번호(POSITION_NUM) : ");
-                        int newPositionNum = Integer.parseInt(br.readLine());
+                        // =========================
+                        // ✅ 새 직급명 입력
+                        // =========================
+                        positionDao.printPositionListUI();
+                        System.out.print("새 직급명 입력 : ");
+                        String newPositionName = br.readLine().trim();
 
-                        if (!userDao.existsPositionNum(newPositionNum)) {
-                            System.out.println("❌ 해당 직급번호는 존재하지 않습니다.");
+                        int newPositionNum = positionDao.getPositionNumByName(newPositionName);
+                        if (newPositionNum == -1) {
+                            System.out.println("❌ 존재하지 않는 직급명입니다: " + newPositionName);
                             break;
                         }
 
+                        // =========================
+                        // ✅ 재직상태 입력
+                        // =========================
                         System.out.print("재직상태(재직/휴직/퇴직 또는 WORK/LEAVE/RESIGNED) : ");
                         String empStatusInput = br.readLine();
                         String empStatus = empStatusToCode(empStatusInput);
@@ -224,8 +254,8 @@ public class UserManageAdminMenu {
                                 "사원관리",
                                 "USER_UPDATE",
                                 "userId=" + targetUserId
-                                    + ", dept=" + newDeptNum
-                                    + ", pos=" + newPositionNum
+                                    + ", dept=" + newDeptName  // ✅ 로그도 이름으로 남기고 싶으면 이렇게
+                                    + ", pos=" + newPositionName
                                     + ", empStatus=" + empStatusToKor(empStatus),
                                 "USERTEST",
                                 targetUserId,
@@ -235,7 +265,6 @@ public class UserManageAdminMenu {
                             System.out.println("❌ 변경 실패 (USER_ID 확인)");
                         }
                         break;
-
                     case 0:
                         return;
 

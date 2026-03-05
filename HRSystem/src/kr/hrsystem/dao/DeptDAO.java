@@ -241,4 +241,64 @@ public class DeptDAO {
             DBUtil.executeClose(null, pstmt, conn);
         }
     }
+ // ✅ 부서 목록 UI 출력 (조직도 스타일)
+    public void printDeptListUI() {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnection();
+
+            String sql = "SELECT DEPT_NUM, DEPT_NAME FROM DEPT ORDER BY DEPT_NUM";
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+
+            System.out.println("=".repeat(60));
+            System.out.println("📌 현재 등록된 부서 목록");
+            System.out.println("=".repeat(60));
+            System.out.println("부서번호\t부서명");
+            System.out.println("-".repeat(60));
+
+            boolean hasData = false;
+            while (rs.next()) {
+                hasData = true;
+                System.out.println(rs.getInt("DEPT_NUM") + "\t\t" + rs.getString("DEPT_NAME"));
+            }
+
+            if (!hasData) System.out.println("등록된 부서가 없습니다.");
+
+            System.out.println("=".repeat(60));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.excuteClose(rs, pstmt, conn); // 너 프로젝트에서 DeptDAO는 excuteClose 쓰는 쪽이 많았지
+        }
+    }
+
+    // ✅ 부서명으로 부서번호 찾기 (없으면 -1)
+    public int getDeptNumByName(String deptName) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnection();
+
+            String sql = "SELECT DEPT_NUM FROM DEPT WHERE DEPT_NAME = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, deptName);
+
+            rs = pstmt.executeQuery();
+            if (rs.next()) return rs.getInt("DEPT_NUM");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.excuteClose(rs, pstmt, conn);
+        }
+
+        return -1;
+    }
 }

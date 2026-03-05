@@ -495,7 +495,7 @@ import kr.util.DBUtil;
 
 	        return false;
 	    }
-	    //부서명 이름으로 입력받기
+	    //부서명 이름으로 입력받기(이름 ->번호 변환 메서드)
 	    public Integer getDeptNumByName(String deptName) {
 	        String sql = "SELECT DEPT_NUM FROM DEPT WHERE DEPT_NAME = ?";
 	        try (Connection conn = DBUtil.getConnection();
@@ -512,7 +512,7 @@ import kr.util.DBUtil;
 	        }
 	        return null;
 	    }
-	    //직급명 이름으로 입력받기
+	    //직급명 이름으로 입력받기(이름 ->번호 변환 메서드)
 	    public Integer getPositionNumByName(String positionName) {
 	        String sql = "SELECT POSITION_NUM FROM POSITION WHERE POSITION_NAME = ?";
 	        try (Connection conn = DBUtil.getConnection();

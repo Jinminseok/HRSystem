@@ -98,6 +98,7 @@ public class PositionDAO {
             DBUtil.executeClose(null, pstmt, conn);
         }
     }
+    //직급목록 출력 (ui 예쁘게)
     public void printPositionGuide() {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -138,6 +139,66 @@ public class PositionDAO {
         } finally {
             DBUtil.excuteClose(rs, pstmt, conn);
         }
+    }
+ // ✅ 직급 목록 UI 출력 (조직도 스타일)
+    public void printPositionListUI() {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnection();
+
+            String sql = "SELECT POSITION_NUM, POSITION_NAME FROM POSITION ORDER BY POSITION_NUM";
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+
+            System.out.println("=".repeat(60));
+            System.out.println("📌 현재 등록된 직급 목록");
+            System.out.println("=".repeat(60));
+            System.out.println("직급번호\t직급명");
+            System.out.println("-".repeat(60));
+
+            boolean hasData = false;
+            while (rs.next()) {
+                hasData = true;
+                System.out.println(rs.getInt("POSITION_NUM") + "\t\t" + rs.getString("POSITION_NAME"));
+            }
+
+            if (!hasData) System.out.println("등록된 직급이 없습니다.");
+
+            System.out.println("=".repeat(60));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.executeClose(rs, pstmt, conn);
+        }
+    }
+
+    // ✅ 직급명으로 직급번호 찾기 (없으면 -1)
+    public int getPositionNumByName(String positionName) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnection();
+
+            String sql = "SELECT POSITION_NUM FROM POSITION WHERE POSITION_NAME = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, positionName);
+
+            rs = pstmt.executeQuery();
+            if (rs.next()) return rs.getInt("POSITION_NUM");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.executeClose(rs, pstmt, conn);
+        }
+
+        return -1;
     }
 
     // 3) 직급 수정 (직급번호 기준)
