@@ -55,16 +55,28 @@ public class HrAppointmentHistoryAdminMenu {
                         writeViewLog("HR_APPT_HISTORY_ALL", "전체 발령 이력 조회");
                         break;
 
-                    case 2:
-                        System.out.print("조회할 USER_ID : ");
+                    case 2: {
+                        System.out.print("조회할 USER_ID (취소: 0) : ");
                         int userId = Integer.parseInt(br.readLine());
+
+                        if (userId == 0) {
+                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            break;
+                        }
+
                         printHistoryList(historyDao.selectHistoryByUserId(userId));
                         writeViewLog("HR_APPT_HISTORY_BY_USER", "targetUserId=" + userId);
                         break;
+                    }
 
-                    case 3:
-                        System.out.print("유형 입력 (1:부서, 2:직급, 3:재직상태) : ");
+                    case 3: {
+                        System.out.print("유형 입력 (1:부서, 2:직급, 3:재직상태, 취소:0) : ");
                         int typeNo = Integer.parseInt(br.readLine());
+
+                        if (typeNo == 0) {
+                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            break;
+                        }
 
                         String changeType = null;
                         if (typeNo == 1) changeType = "DEPT";
@@ -79,17 +91,29 @@ public class HrAppointmentHistoryAdminMenu {
                         printHistoryList(historyDao.selectHistoryByType(changeType));
                         writeViewLog("HR_APPT_HISTORY_BY_TYPE", "changeType=" + changeType);
                         break;
+                    }
 
-                    case 4:
-                        System.out.print("시작일 (YYYY-MM-DD) : ");
+                    case 4: {
+                        System.out.print("시작일 (YYYY-MM-DD / 취소: 0) : ");
                         String fromDate = br.readLine().trim();
 
-                        System.out.print("종료일 (YYYY-MM-DD) : ");
+                        if ("0".equals(fromDate)) {
+                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            break;
+                        }
+
+                        System.out.print("종료일 (YYYY-MM-DD / 취소: 0) : ");
                         String toDate = br.readLine().trim();
+
+                        if ("0".equals(toDate)) {
+                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            break;
+                        }
 
                         printHistoryList(historyDao.selectHistoryByDateRange(fromDate, toDate));
                         writeViewLog("HR_APPT_HISTORY_BY_DATE", fromDate + "~" + toDate);
                         break;
+                    }
 
                     case 0:
                         return;
