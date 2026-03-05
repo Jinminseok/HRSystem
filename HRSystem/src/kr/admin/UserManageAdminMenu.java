@@ -70,8 +70,21 @@ public class UserManageAdminMenu {
                         // 사원 승인 처리
                         userDao.selectPendingUsers();
 
-                        System.out.print("승인할 USER_ID : ");
-                        int approveUserId = Integer.parseInt(br.readLine());
+                        System.out.print("승인할 USER_ID(취소: 0) : ");
+                        String approveInput = br.readLine();
+
+                        int approveUserId;
+                        try {
+                            approveUserId = Integer.parseInt(approveInput.trim());
+                        } catch (NumberFormatException e) {
+                            System.out.println("❌ 숫자만 입력하세요.");
+                            break;
+                        }
+
+                        if (approveUserId == 0) {
+                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            break; // case 2 종료 → 사원관리 메뉴로 복귀
+                        }
 
                         // ✅ 부서 목록(예쁜 UI) 출력
                         OrgChartDAO orgDao = new OrgChartDAO();
@@ -130,8 +143,21 @@ public class UserManageAdminMenu {
                         // 승인 거절
                         userDao.selectPendingUsers();
 
-                        System.out.print("거절할 USER_ID : ");
-                        int rejectUserId = Integer.parseInt(br.readLine());
+                        System.out.print("거절할 USER_ID(취소: 0) : ");
+                        String rejectInput = br.readLine();
+
+                        int rejectUserId;
+                        try {
+                            rejectUserId = Integer.parseInt(rejectInput.trim());
+                        } catch (NumberFormatException e) {
+                            System.out.println("❌ 숫자만 입력하세요.");
+                            break;
+                        }
+
+                        if (rejectUserId == 0) {
+                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            break; // case 3 종료 → 사원관리 메뉴로 복귀
+                        }
 
                         int rejectCnt = userDao.rejectUser(rejectUserId);
 
@@ -162,18 +188,18 @@ public class UserManageAdminMenu {
                         userDao.selectAllUsers();
 
                         System.out.print("변경할 USER_ID(취소: 0) : ");
-                        String inputUserId = br.readLine();
+                        String inputUserId = br.readLine().trim();
+
+                        if ("0".equals(inputUserId)) {
+                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            break;
+                        }
 
                         int targetUserId;
                         try {
-                            targetUserId = Integer.parseInt(inputUserId.trim());
+                            targetUserId = Integer.parseInt(inputUserId);
                         } catch (NumberFormatException e) {
                             System.out.println("❌ 숫자만 입력하세요.");
-                            break; // 또는 continue; (원하면 다시 입력 받게)
-                        }
-
-                        if (targetUserId == 0) {
-                            System.out.println("이전 메뉴로 돌아갑니다.");
                             break;
                         }
 
@@ -184,16 +210,20 @@ public class UserManageAdminMenu {
                             break;
                         }
 
-                        // ✅ 부서/직급 DAO 준비 (리스트 출력 + 이름→번호)
                         DeptDAO deptDao = new DeptDAO();
                         PositionDAO positionDao = new PositionDAO();
 
                         // =========================
-                        // ✅ 새 부서명 입력
+                        // ✅ 새 부서명 입력 (취소: 0)
                         // =========================
                         deptDao.printDeptListUI();
-                        System.out.print("새 부서명 입력 : ");
+                        System.out.print("새 부서명 입력(취소: 0) : ");
                         String newDeptName = br.readLine().trim();
+
+                        if ("0".equals(newDeptName)) {
+                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            break;
+                        }
 
                         int newDeptNum = deptDao.getDeptNumByName(newDeptName);
                         if (newDeptNum == -1) {
@@ -202,11 +232,16 @@ public class UserManageAdminMenu {
                         }
 
                         // =========================
-                        // ✅ 새 직급명 입력
+                        // ✅ 새 직급명 입력 (취소: 0)
                         // =========================
                         positionDao.printPositionListUI();
-                        System.out.print("새 직급명 입력 : ");
+                        System.out.print("새 직급명 입력(취소: 0) : ");
                         String newPositionName = br.readLine().trim();
+
+                        if ("0".equals(newPositionName)) {
+                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            break;
+                        }
 
                         int newPositionNum = positionDao.getPositionNumByName(newPositionName);
                         if (newPositionNum == -1) {
@@ -215,12 +250,17 @@ public class UserManageAdminMenu {
                         }
 
                         // =========================
-                        // ✅ 재직상태 입력
+                        // ✅ 재직상태 입력 (취소: 0)
                         // =========================
-                        System.out.print("재직상태(재직/휴직/퇴직 또는 WORK/LEAVE/RESIGNED) : ");
-                        String empStatusInput = br.readLine();
-                        String empStatus = empStatusToCode(empStatusInput);
+                        System.out.print("재직상태(재직/휴직/퇴직 또는 WORK/LEAVE/RESIGNED) (취소: 0) : ");
+                        String empStatusInput = br.readLine().trim();
 
+                        if ("0".equals(empStatusInput)) {
+                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            break;
+                        }
+
+                        String empStatus = empStatusToCode(empStatusInput);
                         if (empStatus == null) {
                             System.out.println("❌ 재직상태는 재직 / 휴직 / 퇴직 (또는 WORK / LEAVE / RESIGNED)만 가능합니다.");
                             break;
@@ -230,7 +270,6 @@ public class UserManageAdminMenu {
                         Integer beforePositionNum = (Integer) beforeUser.get("POSITION_NUM");
                         String beforeEmpStatus = (String) beforeUser.get("EMP_STATUS");
 
-                        // ✅ 변경 없음 체크
                         boolean deptSame = Objects.equals(beforeDeptNum, newDeptNum);
                         boolean posSame = Objects.equals(beforePositionNum, newPositionNum);
                         boolean statusSame = (beforeEmpStatus != null && beforeEmpStatus.equalsIgnoreCase(empStatus));
@@ -245,16 +284,14 @@ public class UserManageAdminMenu {
                         if (updateCnt > 0) {
                             System.out.println("✅ 사원 정보 변경 완료!");
 
-                            // ✅ 변경된 항목만 인사발령 이력 저장
                             saveAppointmentHistoryOnUserUpdate(beforeUser, targetUserId, newDeptNum, newPositionNum, empStatus);
 
-                            // 기존 액션 로그
                             logDao.insertActionLog(
                                 adminUserId,
                                 "사원관리",
                                 "USER_UPDATE",
                                 "userId=" + targetUserId
-                                    + ", dept=" + newDeptName  // ✅ 로그도 이름으로 남기고 싶으면 이렇게
+                                    + ", dept=" + newDeptName
                                     + ", pos=" + newPositionName
                                     + ", empStatus=" + empStatusToKor(empStatus),
                                 "USERTEST",
