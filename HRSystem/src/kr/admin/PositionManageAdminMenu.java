@@ -58,14 +58,28 @@ public class PositionManageAdminMenu {
                         break;
 
                     case 2:
-                    	 dao.selectPosition();
-                        System.out.print("등록할 직급명: ");
-                        String positionName = br.readLine().trim();
+                    	dao.selectPosition();
 
-                        System.out.print("기본급: ");
-                        int positionSal = Integer.parseInt(br.readLine());
+                    	System.out.print("등록할 직급명(취소: 0): ");
+                    	String positionName = br.readLine().trim();
+                    	if ("0".equals(positionName)) {
+                    	    System.out.println("직급 등록을 취소했습니다.");
+                    	    break;
+                    	}
+                    	if (positionName.length() == 0) {
+                    	    System.out.println("직급명은 비울 수 없습니다.");
+                    	    break;
+                    	}
 
-                        int insertCnt = dao.insertPosition(positionName, positionSal);
+                    	System.out.print("기본급(취소: 0): ");
+                    	String salInput = br.readLine().trim();
+                    	if ("0".equals(salInput)) {
+                    	    System.out.println("직급 등록을 취소했습니다.");
+                    	    break;
+                    	}
+                    	int positionSal = Integer.parseInt(salInput);
+
+                    	int insertCnt = dao.insertPosition(positionName, positionSal);
 
                         if (insertCnt > 0) {
                             writeLog(
@@ -79,20 +93,42 @@ public class PositionManageAdminMenu {
                         break;
 
                     case 3:
-                        dao.selectPosition();
+                    	dao.selectPosition();
 
-                        System.out.print("수정할 직급번호: ");
-                        int updatePositionNum = Integer.parseInt(br.readLine());
+                    	System.out.print("수정할 직급번호(취소: 0): ");
+                    	String numInput = br.readLine().trim();
+                    	if ("0".equals(numInput)) {
+                    	    System.out.println("직급 수정을 취소했습니다.");
+                    	    break;
+                    	}
+                    	int updatePositionNum = Integer.parseInt(numInput);
 
-                        String oldName = dao.getPositionNameByNum(updatePositionNum);
+                    	String oldName = dao.getPositionNameByNum(updatePositionNum);
+                    	if (oldName == null) {
+                    	    System.out.println("❌ 해당 직급번호가 존재하지 않습니다.");
+                    	    break;
+                    	}
 
-                        System.out.print("새 직급명: ");
-                        String newPositionName = br.readLine().trim();
+                    	System.out.print("새 직급명(취소: 0): ");
+                    	String newPositionName = br.readLine().trim();
+                    	if ("0".equals(newPositionName)) {
+                    	    System.out.println("직급 수정을 취소했습니다.");
+                    	    break;
+                    	}
+                    	if (newPositionName.length() == 0) {
+                    	    System.out.println("직급명은 비울 수 없습니다.");
+                    	    break;
+                    	}
 
-                        System.out.print("새 기본급: ");
-                        int newPositionSal = Integer.parseInt(br.readLine());
+                    	System.out.print("새 기본급(취소: 0): ");
+                    	String newSalInput = br.readLine().trim();
+                    	if ("0".equals(newSalInput)) {
+                    	    System.out.println("직급 수정을 취소했습니다.");
+                    	    break;
+                    	}
+                    	int newPositionSal = Integer.parseInt(newSalInput);
 
-                        int updateCnt = dao.updatePosition(updatePositionNum, newPositionName, newPositionSal);
+                    	int updateCnt = dao.updatePosition(updatePositionNum, newPositionName, newPositionSal);
 
                         if (updateCnt > 0) {
                             writeLog(
@@ -106,20 +142,34 @@ public class PositionManageAdminMenu {
                         break;
 
                     case 4:
-                        dao.selectPosition();
+                    	dao.selectPosition();
 
-                        System.out.print("삭제할 직급번호: ");
-                        int deletePositionNum = Integer.parseInt(br.readLine());
-                        System.out.print("정말 삭제하시겠습니까? (Y/N): ");
-                        String yn = br.readLine().trim().toUpperCase();
+                    	System.out.print("삭제할 직급번호(취소: 0): ");
+                    	String delNumInput = br.readLine().trim();
+                    	if ("0".equals(delNumInput)) {
+                    	    System.out.println("직급 삭제를 취소했습니다.");
+                    	    break;
+                    	}
+                    	int deletePositionNum = Integer.parseInt(delNumInput);
 
-                        if (!"Y".equals(yn)) {
-                            System.out.println("삭제를 취소했습니다.");
-                            break;
-                        }
-                        String deleteName = dao.getPositionNameByNum(deletePositionNum);
+                    	String deleteName = dao.getPositionNameByNum(deletePositionNum);
+                    	if (deleteName == null) {
+                    	    System.out.println("❌ 해당 직급번호가 존재하지 않습니다.");
+                    	    break;
+                    	}
 
-                        int deleteCnt = dao.deletePosition(deletePositionNum);
+                    	System.out.print("정말 삭제하시겠습니까? (Y/N, 취소: 0): ");
+                    	String yn = br.readLine().trim().toUpperCase();
+                    	if ("0".equals(yn)) {
+                    	    System.out.println("직급 삭제를 취소했습니다.");
+                    	    break;
+                    	}
+                    	if (!"Y".equals(yn)) {
+                    	    System.out.println("삭제를 취소했습니다.");
+                    	    break;
+                    	}
+
+                    	int deleteCnt = dao.deletePosition(deletePositionNum);
 
                         if (deleteCnt > 0) {
                             writeLog(
@@ -133,17 +183,31 @@ public class PositionManageAdminMenu {
                         break;
 
                     case 5:
-                        dao.selectPosition();
+                    	dao.selectPosition();
 
-                        System.out.print("기본급 변경할 직급번호: ");
-                        int salaryPositionNum = Integer.parseInt(br.readLine());
+                    	System.out.print("기본급 변경할 직급번호(취소: 0): ");
+                    	String salaryNumInput = br.readLine().trim();
+                    	if ("0".equals(salaryNumInput)) {
+                    	    System.out.println("기본급 변경을 취소했습니다.");
+                    	    break;
+                    	}
+                    	int salaryPositionNum = Integer.parseInt(salaryNumInput);
 
-                        String salaryName = dao.getPositionNameByNum(salaryPositionNum);
+                    	String salaryName = dao.getPositionNameByNum(salaryPositionNum);
+                    	if (salaryName == null) {
+                    	    System.out.println("❌ 해당 직급번호가 존재하지 않습니다.");
+                    	    break;
+                    	}
 
-                        System.out.print("새 기본급: ");
-                        int newSalary = Integer.parseInt(br.readLine());
+                    	System.out.print("새 기본급(취소: 0): ");
+                    	String newSalaryInput = br.readLine().trim();
+                    	if ("0".equals(newSalaryInput)) {
+                    	    System.out.println("기본급 변경을 취소했습니다.");
+                    	    break;
+                    	}
+                    	int newSalary = Integer.parseInt(newSalaryInput);
 
-                        int salCnt = dao.updateSalary(salaryPositionNum, newSalary);
+                    	int salCnt = dao.updateSalary(salaryPositionNum, newSalary);
 
                         if (salCnt > 0) {
                             writeLog(
