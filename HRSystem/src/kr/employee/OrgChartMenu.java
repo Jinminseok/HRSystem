@@ -27,9 +27,9 @@ public class OrgChartMenu {
             System.out.println("+──────────────────────────────────────────+");
             System.out.println("│              🏢 조직도 조회              │");
             System.out.println("├──────────────────────────────────────────+");
-            System.out.println("│  1. 전체 조직도 조회                     │");
-            System.out.println("│  2. 부서별 조직도 조회                   │");
-            System.out.println("│  0. 뒤로가기                             │");
+            System.out.println("│  [1] 전체 조직도 조회                    │");
+            System.out.println("│  [2] 부서별 조직도 조회                  │");
+            System.out.println("│  [0] 뒤로가기                            │");
             System.out.println("└──────────────────────────────────────────+");
             System.out.print("선택 : ");
 
@@ -44,7 +44,7 @@ public class OrgChartMenu {
                     case 2:
                     	 dao.printDeptGuide();
 
-                         System.out.print("부서명 입력(취소: 0) : ");
+                         System.out.print("부서명 입력(뒤로가기: 0) : ");
                          String keyword = br.readLine().trim();
 
                          if ("0".equals(keyword)) {

@@ -25,14 +25,14 @@ public class PositionDAO {
             rs = pstmt.executeQuery();
 
             System.out.println("=".repeat(50));
-            System.out.println("직급번호\t직급명\t기본급");
+            System.out.println("직급번호    직급명\t기본급");
             System.out.println("=".repeat(50));
 
             boolean hasData = false;
             while (rs.next()) {
                 hasData = true;
-                System.out.print(rs.getInt("POSITION_NUM") + "\t");
-                System.out.print(rs.getString("POSITION_NAME") + "\t");
+                System.out.print("  " + rs.getInt("POSITION_NUM") + "\t  ");
+                System.out.print("   " + rs.getString("POSITION_NAME") + " \t ");
                 System.out.print(rs.getInt("POSITION_SAL") + "\n");
             }
 

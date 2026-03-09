@@ -31,11 +31,11 @@ public class MyInfoUpdateMenu {
 			System.out.println("+──────────────────────────────────────────+");
 			System.out.println("│              ✏ 내 정보 수정              │");
 			System.out.println("├──────────────────────────────────────────│");
-			System.out.println("│  1. 비밀번호 수정                        │");
-			System.out.println("│  2. 이메일 수정                          │ ");
-			System.out.println("│  3. 전화번호 수정                        │ ");
-			System.out.println("│  4. 한 번에 수정                         │");
-			System.out.println("│  0. 뒤로가기                             │");
+			System.out.println("│  [1] 비밀번호 수정                       │");
+			System.out.println("│  [2] 이메일 수정                         │ ");
+			System.out.println("│  [3] 전화번호 수정                       │ ");
+			System.out.println("│  [4] 한 번에 수정                        │");
+			System.out.println("│  [0] 뒤로가기                            │");
 			System.out.println("└──────────────────────────────────────────│");
 			System.out.print("선택 : ");
 
@@ -144,7 +144,7 @@ public class MyInfoUpdateMenu {
 	}
 	//0누를시 취소
 	private String readRequiredOrCancel(String label) throws IOException {
-		System.out.print(label + " (취소하기 : 0) : ");
+		System.out.print(label + " (뒤로가기 : 0) : ");
 		String input = br.readLine();
 		if (input == null) return null;
 
@@ -155,7 +155,7 @@ public class MyInfoUpdateMenu {
 
 	
 	private String readOptionalOrCancel(String label) throws IOException {
-		System.out.print(label + " (취소: 0) : ");
+		System.out.print(label + " (뒤로가기: 0) : ");
 		String input = br.readLine();
 		if (input == null) return null;
 

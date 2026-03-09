@@ -45,18 +45,17 @@ public class UserManageAdminMenu {
 
         while (true) {
             System.out.println();
-            System.out.println("┌─────────────────────────────────────────────");
-            System.out.println("│              👥 사원 관리 (관리자)          ");
-            System.out.println("├─────────────────────────────────────────────");
-            System.out.println("│  1. 승인대기 사원 목록 조회                 ");
-            System.out.println("│  2. 사원 승인 처리                          ");
-            System.out.println("│  3. 사원 승인 거절                          ");
-            System.out.println("│  4. 사원 목록 조회                     ");
-            System.out.println("│  5. 사원 정보 변경(부서/직급/재직상태)      ");
-            System.out.println("│  0. 뒤로가기                               ");
-            System.out.println("└─────────────────────────────────────────────");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│             👥 사원 관리 (관리자)        │");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│  [1] 승인대기 사원 목록 조회             │");
+            System.out.println("│  [2] 사원 승인 처리                      │");
+            System.out.println("│  [3] 사원 승인 거절                      │");
+            System.out.println("│  [4] 사원 목록 조회                      │");
+            System.out.println("│  [5] 사원 정보 변경(부서/직급/재직상태)  │");
+            System.out.println("│  [0] 뒤로가기                            │");
+            System.out.println("+──────────────────────────────────────────+");
             System.out.print("선택 >> ");
-
             try {
                 int no = Integer.parseInt(br.readLine());
 
@@ -70,7 +69,7 @@ public class UserManageAdminMenu {
                         // 사원 승인 처리
                         userDao.selectPendingUsers();
 
-                        System.out.print("승인할 USER_ID(취소: 0) : ");
+                        System.out.print("승인할 USER_ID(돌아가기: 0) : ");
                         String approveInput = br.readLine();
 
                         int approveUserId;
@@ -143,7 +142,7 @@ public class UserManageAdminMenu {
                         // 승인 거절
                         userDao.selectPendingUsers();
 
-                        System.out.print("거절할 USER_ID(취소: 0) : ");
+                        System.out.print("거절할 USER_ID(뒤로가기: 0) : ");
                         String rejectInput = br.readLine();
 
                         int rejectUserId;
@@ -187,7 +186,7 @@ public class UserManageAdminMenu {
                         // 사원 정보 변경 (부서/직급/재직상태)
                         userDao.selectAllUsers();
 
-                        System.out.print("변경할 USER_ID(취소: 0) : ");
+                        System.out.print("변경할 USER_ID(뒤로가기: 0) : ");
                         String inputUserId = br.readLine().trim();
 
                         if ("0".equals(inputUserId)) {
@@ -214,10 +213,10 @@ public class UserManageAdminMenu {
                         PositionDAO positionDao = new PositionDAO();
 
                         // =========================
-                        // ✅ 새 부서명 입력 (취소: 0)
+                        // ✅ 새 부서명 입력 (뒤로가기: 0)
                         // =========================
                         deptDao.printDeptListUI();
-                        System.out.print("새 부서명 입력(취소: 0) : ");
+                        System.out.print("새 부서명 입력(뒤로가기: 0) : ");
                         String newDeptName = br.readLine().trim();
 
                         if ("0".equals(newDeptName)) {
@@ -232,10 +231,10 @@ public class UserManageAdminMenu {
                         }
 
                         // =========================
-                        // ✅ 새 직급명 입력 (취소: 0)
+                        // ✅ 새 직급명 입력 (뒤로가기: 0)
                         // =========================
                         positionDao.printPositionListUI();
-                        System.out.print("새 직급명 입력(취소: 0) : ");
+                        System.out.print("새 직급명 입력(뒤로가기: 0) : ");
                         String newPositionName = br.readLine().trim();
 
                         if ("0".equals(newPositionName)) {
@@ -250,9 +249,9 @@ public class UserManageAdminMenu {
                         }
 
                         // =========================
-                        // ✅ 재직상태 입력 (취소: 0)
+                        // ✅ 재직상태 입력 (뒤로가기: 0)
                         // =========================
-                        System.out.print("재직상태(재직/휴직/퇴직 또는 WORK/LEAVE/RESIGNED) (취소: 0) : ");
+                        System.out.print("재직상태(재직/휴직/퇴직 또는 WORK/LEAVE/RESIGNED) (뒤로가기: 0) : ");
                         String empStatusInput = br.readLine().trim();
 
                         if ("0".equals(empStatusInput)) {
@@ -317,14 +316,14 @@ public class UserManageAdminMenu {
     private void employeeListMenu() throws IOException {
         while (true) {
             System.out.println();
-            System.out.println("┌─────────────────────────────────────────────");
-            System.out.println("│            📋 사원 목록 조회 (관리자)        ");
-            System.out.println("├─────────────────────────────────────────────");
-            System.out.println("│  1. 부서별 사원 목록 조회                    ");
-            System.out.println("│  2. 직급별 사원 목록 조회                    ");
-            System.out.println("│  3. 전체 사원 목록 조회                      ");
-            System.out.println("│  0. 뒤로가기                                ");
-            System.out.println("└─────────────────────────────────────────────");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│            📋 사원 목록 조회 (관리자)    │");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│  [1] 부서별 사원 목록 조회               │");
+            System.out.println("│  [2] 직급별 사원 목록 조회               │");
+            System.out.println("│  [3] 전체 사원 목록 조회                 │");
+            System.out.println("│  [0] 뒤로가기                            │");
+            System.out.println("+──────────────────────────────────────────+");
             System.out.print("선택 >> ");
 
             try {
@@ -336,7 +335,7 @@ public class UserManageAdminMenu {
                         System.out.println("\n[부서 목록]");
                         deptDao.selectDepartment();
 
-                        System.out.print("조회할 부서번호(DEPT_NUM) (0:취소) : ");
+                        System.out.print("조회할 부서번호(DEPT_NUM) (0:뒤로가기) : ");
                         int deptNum = Integer.parseInt(br.readLine());
 
                         if (deptNum == 0) break;
@@ -356,7 +355,7 @@ public class UserManageAdminMenu {
                         System.out.println("\n[직급 목록]");
                         positionDao.selectPosition();
 
-                        System.out.print("조회할 직급번호(POSITION_NUM) (0:취소) : ");
+                        System.out.print("조회할 직급번호(POSITION_NUM) (0:뒤로가기) : ");
                         int posNum = Integer.parseInt(br.readLine());
 
                         if (posNum == 0) break;

@@ -34,13 +34,13 @@ public class UserAttendanceMenu {
             	System.out.println("+──────────────────────────────────────────+"); 	
             	System.out.println("│               근태 관리                  │");
     			System.out.println("+──────────────────────────────────────────+");
-    			System.out.println("│  1. 출근하기                             │");
-    			System.out.println("│  2. 퇴근하기                             │");
-    			System.out.println("│  3. 전체조회                             │");
-    			System.out.println("│  4. 월별 조회                            │");
-    			System.out.println("│  5. 월 총 근무시간                       │");
-    			System.out.println("│  6. 월 근무 횟수                         │");
-    			System.out.println("│  0. 뒤로가기                             │");
+    			System.out.println("│  [1] 출근하기                            │");
+    			System.out.println("│  [2] 퇴근하기                            │");
+    			System.out.println("│  [3] 전체조회                            │");
+    			System.out.println("│  [4] 월별 조회                           │");
+    			System.out.println("│  [5] 월 총 근무시간                      │");
+    			System.out.println("│  [6] 월 근무 횟수                        │");
+    			System.out.println("│  [0] 뒤로가기                            │");
     			System.out.println("+──────────────────────────────────────────+");
                 System.out.print("선택 : ");
 

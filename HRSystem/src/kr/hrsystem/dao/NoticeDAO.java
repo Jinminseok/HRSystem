@@ -30,7 +30,7 @@ public class NoticeDAO {
                        + "ORDER BY n.fixed DESC, n.notice_id DESC";
 
             pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery(); 
 
             System.out.println("=".repeat(90));
             System.out.println("번호\t"+"     "+"제목\t\t작성자\t작성일\t"+"     "+"조회수"+"   "+"고정"+"    "+"투표"+"   "+"투표상태");
@@ -61,12 +61,28 @@ public class NoticeDAO {
     // ==========================
     public void selectUserNoticeList(int targetUserId) {
         Connection conn = null;
+        PreparedStatement pstmtName = null;
         PreparedStatement pstmt = null;
+        ResultSet rsName = null;
         ResultSet rs = null;
 
         try {
             conn = DBUtil.getConnection();
 
+            // ✅ 1) 사용자 이름 먼저 조회
+            String userName = null;
+            String nameSql = "SELECT user_name FROM usertest WHERE user_id = ?";
+            pstmtName = conn.prepareStatement(nameSql);
+            pstmtName.setInt(1, targetUserId);
+            rsName = pstmtName.executeQuery();
+            if (rsName.next()) {
+                userName = rsName.getString("user_name");
+            } else {
+                System.out.println("❌ 해당 USER_ID(" + targetUserId + ") 사용자가 존재하지 않습니다.");
+                return;
+            }
+
+            // ✅ 2) 게시글 목록 조회
             String sql = "SELECT n.notice_id, n.notice_title, u.user_name, "
                        + "       TO_CHAR(n.created_at, 'YYYY-MM-DD') AS created_at_str, "
                        + "       n.view_count, n.fixed, n.has_vote, n.vote_status "
@@ -77,12 +93,12 @@ public class NoticeDAO {
 
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, targetUserId);
-
             rs = pstmt.executeQuery();
 
             System.out.println("=".repeat(90));
-            System.out.println("[ 사원번호 = " + targetUserId + " ] 님의 게시글 목록");
-            System.out.println("번호\t"+"     "+"제목\t\t작성자\t작성일\t"+"     "+"조회수"+"   "+"고정"+"    "+"투표"+"   "+"투표상태");
+            // ✅ 헤더를 '이름'으로 출력
+            System.out.println("[ " + userName + " ] 님의 게시글 목록");
+            System.out.println("번호\t     제목\t\t작성자\t작성일\t     조회수   고정    투표   투표상태");
             System.out.println("=".repeat(90));
 
             boolean hasData = false;
@@ -107,6 +123,7 @@ public class NoticeDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            DBUtil.executeClose(rsName, pstmtName, null);
             DBUtil.executeClose(rs, pstmt, conn);
         }
     }

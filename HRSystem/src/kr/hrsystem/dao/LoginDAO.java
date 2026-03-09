@@ -174,17 +174,18 @@ import kr.util.DBUtil;
 	            pstmt = conn.prepareStatement(sql);
 	            rs = pstmt.executeQuery();
 
-	            System.out.println("=".repeat(100));
+	            System.out.println("=".repeat(120));
 	            System.out.println("승인대기 사원 목록");
-	            System.out.println("=".repeat(100));
-	            System.out.println("USER_ID\tLOGIN_ID\t이름\t승인상태\t이메일\t전화번호\t가입일");
-	            System.out.println("=".repeat(100));
+	            System.out.println("=".repeat(120));
+	            System.out.println("USER_ID\t      LOGIN_ID        이름\t승인상태\t   이메일\t\t  전화번호\t가입일");
+	            System.out.println("=".repeat(120));
 
 	            boolean hasData = false;
 	            while (rs.next()) {
 	                hasData = true;
-	                System.out.print(rs.getInt("USER_ID") + "\t");
-	                System.out.print(rs.getString("LOGIN_ID") + "\t");
+	                System.out.print("   ");
+	                System.out.print(rs.getInt("USER_ID") + "\t      ");
+	                System.out.print(rs.getString("LOGIN_ID") + "      ");
 	                System.out.print(rs.getString("USER_NAME") + "\t");
 	                String status = rs.getString("APPROVAL_STATUS");
 	                System.out.print(approvalStatusToKor(status) + "\t");
@@ -197,7 +198,7 @@ import kr.util.DBUtil;
 	                System.out.println("승인대기 사용자가 없습니다.");
 	            }
 
-	            System.out.println("=".repeat(100));
+	            System.out.println("=".repeat(120));
 
 	        } catch (Exception e) {
 	            e.printStackTrace();
@@ -231,22 +232,22 @@ import kr.util.DBUtil;
 	            System.out.println("=".repeat(120));
 	            System.out.println("전체 사원 목록");
 	            System.out.println("=".repeat(120));
-	            System.out.println("ID\tLOGIN_ID\t이름\t부서\t직급\t승인상태\t재직상태\t권한");
+	            System.out.println(" ID\tLOGIN_ID\t이름     부서\t  직급\t승인상태\t재직상태\t권한");
 	            System.out.println("=".repeat(120));
 
 	            while (rs.next()) {
-	                System.out.print(rs.getInt("USER_ID") + "\t");
+	                System.out.print("  " + rs.getInt("USER_ID") + "\t  ");
 	                System.out.print(rs.getString("LOGIN_ID") + "\t");
 	                System.out.print(rs.getString("USER_NAME") + "\t");
-	                System.out.print(rs.getString("DEPT_NAME") + "\t");
+	                System.out.print(rs.getString("DEPT_NAME") + "\t  ");
 	                System.out.print(rs.getString("POSITION_NAME") + "\t");
 	                String approvalStatus = rs.getString("APPROVAL_STATUS");
 	                String empStatus = rs.getString("EMP_STATUS");
 	                String userRole = rs.getString("USER_ROLE");
 
 	                System.out.print(approvalStatusToKor(approvalStatus) + "\t");
-	                System.out.print(empStatusToKor(empStatus) + "\t");
-	                System.out.print(userRoleToKor(userRole) + "\n");
+	                System.out.print(empStatusToKor(empStatus) + "\t     ");
+	                System.out.print(userRoleToKor(userRole) + "  \n");
 	            }
 
 	            System.out.println("=".repeat(120));
@@ -290,9 +291,8 @@ import kr.util.DBUtil;
 	         boolean hasData = false;
 	         while (rs.next()) {
 	             hasData = true;
-
-	             System.out.print(rs.getInt("USER_ID") + "\t");
-	             System.out.print(rs.getString("LOGIN_ID") + "\t");
+	             System.out.print(rs.getInt("USER_ID") + "  \t");
+	             System.out.print(rs.getString("LOGIN_ID") + "  \t");
 	             System.out.print(rs.getString("USER_NAME") + "\t");
 	             System.out.print((rs.getObject("DEPT_NUM") == null ? "-" : rs.getInt("DEPT_NUM")) + "\t");
 	             System.out.print((rs.getObject("POSITION_NUM") == null ? "-" : rs.getInt("POSITION_NUM")) + "\t");

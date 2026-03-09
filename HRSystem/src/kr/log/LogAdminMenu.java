@@ -32,10 +32,10 @@ public class LogAdminMenu {
             System.out.println("┌──────────────────────────────");
             System.out.println("│        로그 기록 조회         ");
             System.out.println("├──────────────────────────────");
-            System.out.println("│ 1. 중요 로그 요약            ");
-            System.out.println("│ 2. 로그인 로그 조회          ");
-            System.out.println("│ 3. 행동 로그 조회            ");
-            System.out.println("│ 0. 뒤로가기                 ");
+            System.out.println("│ [1] 중요 로그 요약            ");
+            System.out.println("│ [2] 로그인 로그 조회          ");
+            System.out.println("│ [3] 행동 로그 조회            ");
+            System.out.println("│ [0] 뒤로가기                 ");
             System.out.println("└──────────────────────────────");
             System.out.print("선택 >> ");
 

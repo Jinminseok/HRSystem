@@ -32,16 +32,16 @@ public class NoticeAdmin {
             System.out.println("┌─────────────────────────────────────────────");
             System.out.println("│              📢 공지사항 관리 (관리자)      ");
             System.out.println("├─────────────────────────────────────────────");
-            System.out.println("│  1. 공지사항 등록                           ");
-            System.out.println("│  2. 공지사항 수정 (전체)                    ");
-            System.out.println("│  3. 공지사항 삭제 (전체)                    ");
-            System.out.println("│  4. 공지사항 목록 조회                      ");
-            System.out.println("│  5. 공지사항 상세 조회                      ");
-            System.out.println("│  6. 투표 결과 조회                          ");
-            System.out.println("│  7. 특정 사용자 게시글 목록 조회            ");
-            System.out.println("│  8. 특정 사용자 게시글 수정                 ");
-            System.out.println("│  9. 특정 사용자 게시글 삭제                 ");
-            System.out.println("│  0. 뒤로가기                               ");
+            System.out.println("│  [1] 공지사항 등록                           ");
+            System.out.println("│  [2] 공지사항 수정 (전체)                    ");
+            System.out.println("│  [3] 공지사항 삭제 (전체)                    ");
+            System.out.println("│  [4] 공지사항 목록 조회                      ");
+            System.out.println("│  [5] 공지사항 상세 조회                      ");
+            System.out.println("│  [6] 투표 결과 조회                          ");
+            System.out.println("│  [7] 특정 사용자 게시글 목록 조회            ");
+            System.out.println("│  [8] 특정 사용자 게시글 수정                 ");
+            System.out.println("│  [9] 특정 사용자 게시글 삭제                 ");
+            System.out.println("│  [0] 뒤로가기                               ");
             System.out.println("└─────────────────────────────────────────────");
             System.out.print("선택 >> ");
 

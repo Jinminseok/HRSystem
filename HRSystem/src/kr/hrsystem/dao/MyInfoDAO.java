@@ -52,7 +52,7 @@ public class MyInfoDAO {
                 System.out.println("│  이름          :  " + rs.getString("USER_NAME")+"\t\t\t│");
                 System.out.println("│  부서          :  " + rs.getString("DEPT_NAME")+"\t\t\t│");
                 System.out.println("│  직급          :  " + rs.getString("POSITION_NAME")+"\t\t\t│");
-                System.out.println("│  이메일        :  " + rs.getString("EMAIL")+"\t\t\t│");
+                System.out.println("│  이메일        :  " + rs.getString("EMAIL")+"\t│");
                 System.out.println("│  전화번호      :  " + rs.getString("PHONE")+"\t\t│");
                 System.out.println("│  오늘 출근시간 :  " + nvlTime(rs.getString("CHECK_IN"))+"\t\t│");
                 System.out.println("│  오늘 퇴근시간 :  " + nvlTime(rs.getString("CHECK_OUT"))+"\t\t│");

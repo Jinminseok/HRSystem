@@ -31,13 +31,13 @@ public class DeptDAO {
             rs = pstmt.executeQuery();
 
             System.out.println("=".repeat(90));
-            System.out.println("부서번호\t부서명\t등록일\t\t\t수정일");
+            System.out.println("부서번호    부서명\t   등록일\t\t  수정일");
             System.out.println("=".repeat(90));
 
             boolean hasData = false;
             while (rs.next()) {
                 hasData = true;
-                System.out.print(rs.getInt("dept_num") + "\t");
+                System.out.print("   " + rs.getInt("dept_num") + "\t    ");
                 System.out.print(rs.getString("dept_name") + "\t");
                 System.out.print(rs.getString("dept_day") + "\t");
                 System.out.print((rs.getString("dept_modified_date") == null ? "-" : rs.getString("dept_modified_date")) + "\n");

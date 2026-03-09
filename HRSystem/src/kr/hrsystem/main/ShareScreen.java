@@ -42,7 +42,7 @@ public class ShareScreen {
 			System.out.println("│  3. 종료                                 │");
 			System.out.println("+──────────────────────────────────────────+");
 			System.out.print("선택 >> ");
-
+			
 			try {
 				int no = Integer.parseInt(br.readLine());
 
@@ -98,6 +98,7 @@ public class ShareScreen {
 
 		// 3) 로그인 성공
 		int loginLogId = logDao.insertLoginHistory(userId, id, "S", null);
+		System.out.println();
 		System.out.println("✅ 로그인 성공!");
 		System.out.println(userName + "님 환영합니다.");
 		System.out.println(LINE);
