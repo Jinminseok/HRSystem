@@ -25,7 +25,7 @@ public class PositionDAO {
             rs = pstmt.executeQuery();
 
             System.out.println("=".repeat(50));
-            System.out.println("직급번호    직급명\t기본급");
+            System.out.println("직급번호    직급명\t  기본급");
             System.out.println("=".repeat(50));
 
             boolean hasData = false;
@@ -52,39 +52,54 @@ public class PositionDAO {
     // 2) 직급 등록 (번호는 시퀀스로 자동)
     public int insertPosition(String positionName, int positionSal) {
         Connection conn = null;
+        PreparedStatement pstmtMax = null;
         PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
         try {
             conn = DBUtil.getConnection();
 
+            // 1. 현재 POSITION 테이블 기준 다음 직급번호 구하기
+            String maxSql = "SELECT NVL(MAX(POSITION_NUM), 0) + 1 AS NEXT_POSITION_NUM FROM POSITION";
+            pstmtMax = conn.prepareStatement(maxSql);
+            rs = pstmtMax.executeQuery();
+
+            int nextPositionNum = 10;
+            if (rs.next()) {
+                nextPositionNum = rs.getInt("NEXT_POSITION_NUM");
+            }
+
+            DBUtil.executeClose(rs, pstmtMax, null);
+            rs = null;
+            pstmtMax = null;
+
+            // 2. insert
             String sql = "INSERT INTO POSITION (POSITION_NUM, POSITION_NAME, POSITION_SAL) "
-                       + "VALUES (SEQ_POSITION.NEXTVAL, ?, ?)";
+                       + "VALUES (?, ?, ?)";
 
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, positionName);
-            pstmt.setInt(2, positionSal);
+            pstmt.setInt(1, nextPositionNum);
+            pstmt.setString(2, positionName);
+            pstmt.setInt(3, positionSal);
 
             int count = pstmt.executeUpdate();
 
             if (count > 0) {
-                System.out.println("✅ 직급 등록이 완료되었습니다.");
+                System.out.println("✅ 직급 등록이 완료되었습니다. (직급번호=" + nextPositionNum + ")");
             }
             return count;
 
         } catch (java.sql.SQLIntegrityConstraintViolationException e) {
-           
-            // 오라클 ORA-00001은 errorCode = 1
             if (e.getErrorCode() == 1) {
-                System.out.println("❌ 직급명이 중복되었습니다!");
+                System.out.println("❌ 직급명이 중복되었거나 직급번호가 중복되었습니다!");
             } else {
                 System.out.println("❌ 무결성 제약조건 위배로 등록 실패했습니다.");
             }
             return 0;
 
         } catch (java.sql.SQLException e) {
-            // 
             if (e.getErrorCode() == 1) {
-                System.out.println("❌ 직급명이 중복되었습니다!");
+                System.out.println("❌ 직급명이 중복되었거나 직급번호가 중복되었습니다!");
                 return 0;
             }
             System.out.println("❌ DB 오류로 직급 등록에 실패했습니다.");
@@ -92,9 +107,11 @@ public class PositionDAO {
 
         } catch (Exception e) {
             System.out.println("❌ 시스템 오류로 직급 등록에 실패했습니다.");
+            e.printStackTrace();
             return 0;
 
         } finally {
+            DBUtil.executeClose(rs, pstmtMax, null);
             DBUtil.executeClose(null, pstmt, conn);
         }
     }

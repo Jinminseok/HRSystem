@@ -9,145 +9,187 @@ import kr.hrsystem.dao.SearchDAO;
 
 public class SearchAdminMenu {
 
-    private BufferedReader br;
-    private int userId;
-    private int loginLogId;
-    private SearchDAO dao;
+	private BufferedReader br;
+	private int userId;
+	private int loginLogId;
+	private SearchDAO dao;
 
-    public SearchAdminMenu(BufferedReader br, int userId, int loginLogId) {
-        this.br = br;
-        this.userId = userId;
-        this.loginLogId = loginLogId;
-        this.dao = new SearchDAO();
+	public SearchAdminMenu(BufferedReader br, int userId, int loginLogId) {
+		this.br = br;
+		this.userId = userId;
+		this.loginLogId = loginLogId;
+		this.dao = new SearchDAO();
 
-        try {
-            callMenu();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+		try {
+			callMenu();
+		} catch (Exception e) {
+			System.out.println("❌ 관리자 검색 메뉴 실행 중 오류가 발생했습니다.");
+		}
+	}
 
-    private void callMenu() throws IOException {
-        while (true) {
+	private void callMenu() throws IOException {
+		while (true) {
 
-            System.out.println();
-            System.out.println("┌──────────────────────────────────────────────");
-            System.out.println("│               🔎 관리자 검색                ");
-            System.out.println("├──────────────────────────────────────────────");
-            System.out.println("│  1. 사번으로 사원 검색              ");
-            System.out.println("│  2. 이름으로 사원 검색   ");
-            System.out.println("│  3. 부서명으로 사원 검색          ");
-            System.out.println("│  4. 직급명으로 사원 검색      ");
-            System.out.println("│  5. 가입일 기간 검색              ");
-            System.out.println("│  0. 뒤로가기                                 ");
-            System.out.println("└──────────────────────────────────────────────");
-            System.out.print("선택 >> ");
+			System.out.println();
+			System.out.println("+──────────────────────────────────────────+");
+			System.out.println("│              🔎 관리자 검색              │");
+			System.out.println("+──────────────────────────────────────────+");
+			System.out.println("│  [1]. 사번으로 사원 검색                 │");
+			System.out.println("│  [2]. 이름으로 사원 검색                 │");
+			System.out.println("│  [3]. 부서명으로 사원 검색               │");
+			System.out.println("│  [4]. 직급명으로 사원 검색               │");
+			System.out.println("│  [5]. 가입일 기간 검색                   │");
+			System.out.println("│  [0]. 뒤로가기                           │");
+			System.out.println("+──────────────────────────────────────────+");
+			System.out.print("선택 >> ");
 
-            int no;
-            try {
-                no = Integer.parseInt(br.readLine());
-            } catch (NumberFormatException e) {
-                System.out.println("숫자만 입력하세요.");
-                continue;
-            }
+			int no;
+			try {
+				no = Integer.parseInt(br.readLine());
+			} catch (NumberFormatException e) {
+				System.out.println("숫자만 입력하세요.");
+				continue;
+			}
 
-            switch (no) {
-                case 1:
-                    System.out.print("사번(USER_ID) 입력: ");
-                    int uid = Integer.parseInt(br.readLine());
-                    dao.searchUserByUserId(uid);
-                    break;
+			switch (no) {
+			case 1: {
+				Integer uid = readIntWithBack("사번(USER_ID) 입력 (뒤로가기: 0): ");
+				if (uid == null) break;
 
-                case 2:
-                    System.out.print("이름 입력(부분검색): ");
-                    String name = br.readLine();
-                    dao.searchUserByName(name);
-                    break;
+				dao.searchUserByUserId(uid);
+				break;
+			}
 
-                case 3: {
-                    SearchDAO deptDao = new SearchDAO();
+			case 2: {
+				String name = readLineWithBack("이름 입력(부분검색, 뒤로가기: 0): ");
+				if (name == null) break;
 
-                    // 1) 부서명 목록 출력
-                    List<String> deptNames = deptDao.getDeptNameList();
-                    if (deptNames.isEmpty()) {
-                        System.out.println("등록된 부서가 없습니다.");
-                        break;
-                    }
+				dao.searchUserByName(name);
+				break;
+			}
 
-                    System.out.println();
-                    System.out.println("[현재 등록된 부서 목록]");
-                    for (int i = 0; i < deptNames.size(); i++) {
-                        System.out.printf("%d. %s%n", i + 1, deptNames.get(i));
-                    }
-                    System.out.println();
+			case 3: {
+				List<String> deptNames = dao.getDeptNameList();
+				if (deptNames.isEmpty()) {
+					System.out.println("등록된 부서가 없습니다.");
+					break;
+				}
 
-                    // 2) 입력 받기
-                    System.out.print("부서명 입력: ");
-                    String deptName = br.readLine().trim();
+				System.out.println();
+				System.out.println("[현재 등록된 부서 목록]");
+				for (int i = 0; i < deptNames.size(); i++) {
+					System.out.printf("%d. %s%n", i + 1, deptNames.get(i));
+				}
+				System.out.println();
 
-                    // 3) 기존 부서명 검색 기능 호출
-                    dao.searchUserByDeptName(deptName);  // 
-                    break;}
-                
+				String deptName = readLineWithBack("부서명 입력 (뒤로가기: 0): ");
+				if (deptName == null) break;
 
-                case 4: {
-                    SearchDAO dao = new SearchDAO(); // 
+				dao.searchUserByDeptName(deptName.trim());
+				break;
+			}
 
-                    // 1) 직급명 목록 출력
-                    List<String> posNames = dao.getPositionNameList();
-                    if (posNames.isEmpty()) {
-                        System.out.println("등록된 직급이 없습니다.");
-                        break;
-                    }
+			case 4: {
+				List<String> posNames = dao.getPositionNameList();
+				if (posNames.isEmpty()) {
+					System.out.println("등록된 직급이 없습니다.");
+					break;
+				}
 
-                    System.out.println();
-                    System.out.println("[현재 등록된 직급 목록]");
-                    for (int i = 0; i < posNames.size(); i++) {
-                        System.out.printf("%d. %s%n", i + 1, posNames.get(i));
-                    }
-                    System.out.println();
+				System.out.println();
+				System.out.println("[현재 등록된 직급 목록]");
+				for (int i = 0; i < posNames.size(); i++) {
+					System.out.printf("%d. %s%n", i + 1, posNames.get(i));
+				}
+				System.out.println();
 
-                    // 2) 입력 받기
-                    System.out.print("직급명 입력: ");
-                    String positionName = br.readLine().trim();
+				String positionName = readLineWithBack("직급명 입력 (뒤로가기: 0): ");
+				if (positionName == null) break;
 
-                    // 3) 기존 직급명 검색 호출
-                    dao.searchUserByPositionName(positionName); //
-                    break;
-                }
+				dao.searchUserByPositionName(positionName.trim());
+				break;
+			}
 
-                case 5:
+			case 5: {
+				System.out.println("날짜 형식: YYYY-MM-DD");
 
-                    System.out.println("날짜 형식: YYYY-MM-DD");
+				Date start = readDateWithBack("시작일 (뒤로가기: 0): ");
+				if (start == null) break;
 
-                    Date start = null;
-                    Date end = null;
+				Date end = readDateWithBack("종료일 (뒤로가기: 0): ");
+				if (end == null) break;
 
-                    try {
-                        System.out.print("시작일: ");
-                        String startStr = br.readLine().trim();
-                        start = Date.valueOf(startStr);
+				if (start.after(end)) {
+					System.out.println("❌ 시작일이 종료일보다 늦을 수 없습니다.");
+					break;
+				}
 
-                        System.out.print("종료일: ");
-                        String endStr = br.readLine().trim();
-                        end = Date.valueOf(endStr);
+				dao.searchUserByJoinDateRange(start, end);
+				break;
+			}
 
-                    } catch (IllegalArgumentException e) {
-                        System.out.println("❌ 잘못된 날짜 형식입니다. (예: 2026-02-26)");
-                        break;  // case 종료
-                    }
+			case 0:
+				return;
 
-                    
+			default:
+				System.out.println("잘못 입력했습니다.");
+			}
+		}
+	}
 
-                    dao.searchUserByJoinDateRange(start, end);
-                    break;
+	private String readLineWithBack(String message) throws IOException {
+		System.out.print(message);
+		String input = br.readLine();
 
-                case 0:
-                    return;
+		if (input == null) return null;
 
-                default:
-                    System.out.println("잘못 입력했습니다.");
-            }
-        }
-    }
+		if ("0".equals(input.trim())) {
+
+			return null;
+		}
+
+		return input;
+	}
+
+	private Integer readIntWithBack(String message) throws IOException {
+		System.out.print(message);
+		String input = br.readLine();
+
+		if (input == null) return null;
+
+		input = input.trim();
+
+		if ("0".equals(input)) {
+
+			return null;
+		}
+
+		try {
+			return Integer.parseInt(input);
+		} catch (NumberFormatException e) {
+			System.out.println("숫자만 입력하세요.");
+			return null;
+		}
+	}
+
+	private Date readDateWithBack(String message) throws IOException {
+		System.out.print(message);
+		String input = br.readLine();
+
+		if (input == null) return null;
+
+		input = input.trim();
+
+		if ("0".equals(input)) {
+			
+			return null;
+		}
+
+		try {
+			return Date.valueOf(input);
+		} catch (IllegalArgumentException e) {
+			System.out.println("❌ 잘못된 날짜 형식입니다. (예: 2026-02-26)");
+			return null;
+		}
+	}
 }

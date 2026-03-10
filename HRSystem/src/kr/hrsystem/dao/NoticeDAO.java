@@ -4,6 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import kr.util.DBUtil;
 
@@ -12,7 +16,7 @@ public class NoticeDAO {
     private LogDAO logDao = new LogDAO();
 
     // ==========================
-    // 공통: 전체 공지 목록 조회
+    // 공통: 전체 게시글 목록 조회
     // ==========================
     public void selectNoticeList() {
         Connection conn = null;
@@ -30,34 +34,56 @@ public class NoticeDAO {
                        + "ORDER BY n.fixed DESC, n.notice_id DESC";
 
             pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery(); 
+            rs = pstmt.executeQuery();
 
-            System.out.println("=".repeat(90));
-            System.out.println("번호\t"+"     "+"제목\t\t작성자\t작성일\t"+"     "+"조회수"+"   "+"고정"+"    "+"투표"+"   "+"투표상태");
-            System.out.println("=".repeat(90));
+            printDivider(120);
+            System.out.println("전체 게시글 목록");
+            printDivider(120);
 
+            System.out.println(
+                    pad("번호", 8) +
+                    pad("제목", 36) +
+                    pad("작성자", 12) +
+                    pad("작성일", 14) +
+                    pad("조회수", 8) +
+                    pad("상단고정", 10) +
+                    pad("투표", 8) +
+                    pad("투표상태", 12)
+            );
+
+            printDivider(120);
+
+            boolean hasData = false;
             while (rs.next()) {
-                System.out.print(rs.getInt("notice_id") + "\t");
-                System.out.print(rs.getString("notice_title") + "\t\t");
-                System.out.print(rs.getString("user_name") + "\t");
-                System.out.print(rs.getString("created_at_str") + "\t");
-                System.out.print(rs.getInt("view_count") + "\t");
-                System.out.print(rs.getString("fixed") + "\t");
-                System.out.print(rs.getString("has_vote") + "\t");
-                System.out.print(rs.getString("vote_status") + "\n");
+                hasData = true;
+
+                System.out.println(
+                        pad(String.valueOf(rs.getInt("notice_id")), 8) +
+                        pad(rs.getString("notice_title"), 36) +
+                        pad(rs.getString("user_name"), 12) +
+                        pad(rs.getString("created_at_str"), 14) +
+                        pad(String.valueOf(rs.getInt("view_count")), 8) +
+                        pad(fixedToKor(rs.getString("fixed")), 10) +
+                        pad(hasVoteToKor(rs.getString("has_vote")), 8) +
+                        pad(voteStatusToKor(rs.getString("vote_status")), 12)
+                );
             }
 
-            System.out.println("=".repeat(90));
+            if (!hasData) {
+                System.out.println("등록된 게시글이 없습니다.");
+            }
+
+            printDivider(120);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 게시글 목록 조회 중 오류가 발생했습니다.");
         } finally {
             DBUtil.executeClose(rs, pstmt, conn);
         }
     }
 
     // ==========================
-    // 특정 사용자 공지 목록 조회 (관리자용)
+    // 특정 사용자 게시글 목록 조회 (관리자용)
     // ==========================
     public void selectUserNoticeList(int targetUserId) {
         Connection conn = null;
@@ -69,20 +95,20 @@ public class NoticeDAO {
         try {
             conn = DBUtil.getConnection();
 
-            // ✅ 1) 사용자 이름 먼저 조회
             String userName = null;
             String nameSql = "SELECT user_name FROM usertest WHERE user_id = ?";
             pstmtName = conn.prepareStatement(nameSql);
             pstmtName.setInt(1, targetUserId);
             rsName = pstmtName.executeQuery();
+
             if (rsName.next()) {
                 userName = rsName.getString("user_name");
             } else {
                 System.out.println("❌ 해당 USER_ID(" + targetUserId + ") 사용자가 존재하지 않습니다.");
+                System.out.println("다시 입력해주세요.");
                 return;
             }
 
-            // ✅ 2) 게시글 목록 조회
             String sql = "SELECT n.notice_id, n.notice_title, u.user_name, "
                        + "       TO_CHAR(n.created_at, 'YYYY-MM-DD') AS created_at_str, "
                        + "       n.view_count, n.fixed, n.has_vote, n.vote_status "
@@ -95,33 +121,47 @@ public class NoticeDAO {
             pstmt.setInt(1, targetUserId);
             rs = pstmt.executeQuery();
 
-            System.out.println("=".repeat(90));
-            // ✅ 헤더를 '이름'으로 출력
+            printDivider(120);
             System.out.println("[ " + userName + " ] 님의 게시글 목록");
-            System.out.println("번호\t     제목\t\t작성자\t작성일\t     조회수   고정    투표   투표상태");
-            System.out.println("=".repeat(90));
+            printDivider(120);
+
+            System.out.println(
+                    pad("번호", 8) +
+                    pad("제목", 36) +
+                    pad("작성자", 12) +
+                    pad("작성일", 14) +
+                    pad("조회수", 8) +
+                    pad("상단고정", 10) +
+                    pad("투표", 8) +
+                    pad("투표상태", 12)
+            );
+
+            printDivider(120);
 
             boolean hasData = false;
             while (rs.next()) {
                 hasData = true;
-                System.out.print(rs.getInt("notice_id") + "\t");
-                System.out.print(rs.getString("notice_title") + "\t\t");
-                System.out.print(rs.getString("user_name") + "\t");
-                System.out.print(rs.getString("created_at_str") + "\t");
-                System.out.print(rs.getInt("view_count") + "\t");
-                System.out.print(rs.getString("fixed") + "\t");
-                System.out.print(rs.getString("has_vote") + "\t");
-                System.out.print(rs.getString("vote_status") + "\n");
+
+                System.out.println(
+                        pad(String.valueOf(rs.getInt("notice_id")), 8) +
+                        pad(rs.getString("notice_title"), 36) +
+                        pad(rs.getString("user_name"), 12) +
+                        pad(rs.getString("created_at_str"), 14) +
+                        pad(String.valueOf(rs.getInt("view_count")), 8) +
+                        pad(fixedToKor(rs.getString("fixed")), 10) +
+                        pad(hasVoteToKor(rs.getString("has_vote")), 8) +
+                        pad(voteStatusToKor(rs.getString("vote_status")), 12)
+                );
             }
 
             if (!hasData) {
                 System.out.println("해당 사용자가 작성한 게시글이 없습니다.");
             }
 
-            System.out.println("=".repeat(90));
+            printDivider(120);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 특정 사용자 게시글 목록 조회 중 오류가 발생했습니다.");
         } finally {
             DBUtil.executeClose(rsName, pstmtName, null);
             DBUtil.executeClose(rs, pstmt, conn);
@@ -129,7 +169,7 @@ public class NoticeDAO {
     }
 
     // ==========================
-    // 공지 상세 조회 (조회수 증가)
+    // 게시글 상세 조회 (조회수 증가)
     // ==========================
     public void selectNoticeDetail(int noticeId) {
         Connection conn = null;
@@ -148,7 +188,8 @@ public class NoticeDAO {
             int count = pstmtUp.executeUpdate();
             if (count == 0) {
                 conn.rollback();
-                System.out.println("해당 공지가 존재하지 않습니다.");
+                System.out.println("❌ 해당 게시글이 존재하지 않습니다.");
+                System.out.println("다시 입력해주세요.");
                 return;
             }
 
@@ -165,26 +206,26 @@ public class NoticeDAO {
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                System.out.println("=".repeat(90));
-                System.out.println("번호    : " + rs.getInt("notice_id"));
-                System.out.println("제목    : " + rs.getString("notice_title"));
-                System.out.println("작성자  : " + rs.getString("user_name"));
-                System.out.println("작성일  : " + rs.getString("created_at_str"));
-                System.out.println("조회수  : " + rs.getInt("view_count"));
-                System.out.println("고정    : " + rs.getString("fixed"));
-                System.out.println("투표글  : " + rs.getString("has_vote"));
-                System.out.println("투표상태: " + rs.getString("vote_status"));
-                System.out.println("투표마감: " + (rs.getString("vote_deadline_str") == null ? "-" : rs.getString("vote_deadline_str")));
-                System.out.println("내용    : ");
-                System.out.println(rs.getString("notice_content"));
-                System.out.println("=".repeat(90));
+                printDivider(90);
+                System.out.println("번호      : " + rs.getInt("notice_id"));
+                System.out.println("제목      : " + nvl(rs.getString("notice_title")));
+                System.out.println("작성자    : " + nvl(rs.getString("user_name")));
+                System.out.println("작성일    : " + nvl(rs.getString("created_at_str")));
+                System.out.println("조회수    : " + rs.getInt("view_count"));
+                System.out.println("상단고정  : " + fixedToKor(rs.getString("fixed")));
+                System.out.println("투표글    : " + hasVoteToKor(rs.getString("has_vote")));
+                System.out.println("투표상태  : " + voteStatusToKor(rs.getString("vote_status")));
+                System.out.println("투표마감  : " + nvl(rs.getString("vote_deadline_str")));
+                System.out.println("내용      : ");
+                System.out.println(nvl(rs.getString("notice_content")));
+                printDivider(90);
             }
 
             conn.commit();
 
         } catch (Exception e) {
             try { if (conn != null) conn.rollback(); } catch (Exception ex) {}
-            e.printStackTrace();
+            System.out.println("❌ 게시글 상세 조회 중 오류가 발생했습니다.");
         } finally {
             DBUtil.executeClose(rs, pstmt, null);
             DBUtil.executeClose(null, pstmtUp, conn);
@@ -199,7 +240,7 @@ public class NoticeDAO {
     }
 
     // ==========================
-    // 공지 등록 (관리자/사원 공용)
+    // 게시글 등록 (관리자/사원 공용)
     // ==========================
     public void insertNotice(String title, String content, int writerUserId,
                              String fixed, String hasVote, String voteDeadlineInput,
@@ -216,7 +257,15 @@ public class NoticeDAO {
             String safeFixed = "Y".equalsIgnoreCase(fixed) ? "Y" : "N";
             String safeHasVote = "Y".equalsIgnoreCase(hasVote) ? "Y" : "N";
             String voteStatus = "Y".equals(safeHasVote) ? "O" : "N";
-            Timestamp voteDeadline = parseVoteDeadline(voteDeadlineInput);
+
+            Timestamp voteDeadline = null;
+            try {
+                voteDeadline = parseVoteDeadline(voteDeadlineInput);
+            } catch (IllegalArgumentException e) {
+                System.out.println("❌ " + e.getMessage());
+                System.out.println("다시 입력해주세요.");
+                return;
+            }
 
             String sql =
                 "INSERT INTO notices "
@@ -252,14 +301,15 @@ public class NoticeDAO {
                 writerUserId,
                 "게시판",
                 "NOTICE_CREATE",
-                "공지등록 noticeId=" + noticeId + ", fixed=" + safeFixed + ", hasVote=" + safeHasVote,
+                "게시글등록 noticeId=" + noticeId + ", fixed=" + safeFixed + ", hasVote=" + safeHasVote,
                 "NOTICES",
                 noticeId,
                 loginLogId
             );
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 게시글 등록 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmtSeq, null);
             DBUtil.executeClose(null, pstmt, conn);
@@ -267,7 +317,7 @@ public class NoticeDAO {
     }
 
     // ==========================
-    // 관리자: 공지 수정 (전체 대상)
+    // 관리자: 게시글 수정 (전체 대상)
     // ==========================
     public void updateNotice(int noticeId, String newTitle, String newContent,
                              int actorUserId, Integer loginLogId) {
@@ -288,7 +338,8 @@ public class NoticeDAO {
             rs = pstmtSel.executeQuery();
 
             if (!rs.next()) {
-                System.out.println("해당 공지가 존재하지 않습니다.");
+                System.out.println("❌ 해당 게시글이 존재하지 않습니다.");
+                System.out.println("다시 입력해주세요.");
                 return;
             }
             oldTitle = rs.getString("notice_title");
@@ -304,7 +355,7 @@ public class NoticeDAO {
             int count = pstmt.executeUpdate();
 
             if (count > 0) {
-                System.out.println("공지사항이 수정되었습니다.");
+                System.out.println("게시글이 수정되었습니다.");
 
                 logDao.insertActionLog(
                     actorUserId,
@@ -316,11 +367,13 @@ public class NoticeDAO {
                     loginLogId
                 );
             } else {
-                System.out.println("해당 공지가 존재하지 않습니다.");
+                System.out.println("❌ 해당 게시글이 존재하지 않습니다.");
+                System.out.println("다시 입력해주세요.");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 게시글 수정 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmtSel, null);
             DBUtil.executeClose(null, pstmt, conn);
@@ -328,7 +381,7 @@ public class NoticeDAO {
     }
 
     // ==========================
-    // 관리자: 공지 삭제 (전체 대상)
+    // 관리자: 게시글 삭제 (전체 대상)
     // ==========================
     public void deleteNotice(int noticeId, int actorUserId, Integer loginLogId) {
         Connection conn = null;
@@ -347,7 +400,8 @@ public class NoticeDAO {
             rs = pstmtSel.executeQuery();
 
             if (!rs.next()) {
-                System.out.println("해당 공지가 존재하지 않습니다.");
+                System.out.println("❌ 해당 게시글이 존재하지 않습니다.");
+                System.out.println("다시 입력해주세요.");
                 return;
             }
             oldTitle = rs.getString("notice_title");
@@ -361,7 +415,7 @@ public class NoticeDAO {
             int count = pstmt.executeUpdate();
 
             if (count > 0) {
-                System.out.println("공지사항이 삭제되었습니다.");
+                System.out.println("게시글이 삭제되었습니다.");
 
                 logDao.insertActionLog(
                     actorUserId,
@@ -373,11 +427,13 @@ public class NoticeDAO {
                     loginLogId
                 );
             } else {
-                System.out.println("해당 공지가 존재하지 않습니다.");
+                System.out.println("❌ 해당 게시글이 존재하지 않습니다.");
+                System.out.println("다시 입력해주세요.");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 게시글 삭제 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmtSel, null);
             DBUtil.executeClose(null, pstmt, conn);
@@ -407,7 +463,8 @@ public class NoticeDAO {
             rs = pstmtSel.executeQuery();
 
             if (!rs.next()) {
-                System.out.println("해당 공지가 존재하지 않습니다.");
+                System.out.println("❌ 해당 게시글이 존재하지 않습니다.");
+                System.out.println("다시 입력해주세요.");
                 return;
             }
 
@@ -416,6 +473,7 @@ public class NoticeDAO {
 
             if (ownerUserId != targetUserId) {
                 System.out.println("❌ 선택한 USER_ID가 작성한 게시글이 아닙니다.");
+                System.out.println("다시 입력해주세요.");
                 return;
             }
 
@@ -445,11 +503,13 @@ public class NoticeDAO {
                     loginLogId
                 );
             } else {
-                System.out.println("수정 실패");
+                System.out.println("❌ 수정 실패");
+                System.out.println("다시 입력해주세요.");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 특정 사용자 게시글 수정 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmtSel, null);
             DBUtil.executeClose(null, pstmt, conn);
@@ -479,7 +539,8 @@ public class NoticeDAO {
             rs = pstmtSel.executeQuery();
 
             if (!rs.next()) {
-                System.out.println("해당 공지가 존재하지 않습니다.");
+                System.out.println("❌ 해당 게시글이 존재하지 않습니다.");
+                System.out.println("다시 입력해주세요.");
                 return;
             }
 
@@ -488,6 +549,7 @@ public class NoticeDAO {
 
             if (ownerUserId != targetUserId) {
                 System.out.println("❌ 선택한 USER_ID가 작성한 게시글이 아닙니다.");
+                System.out.println("다시 입력해주세요.");
                 return;
             }
 
@@ -515,11 +577,13 @@ public class NoticeDAO {
                     loginLogId
                 );
             } else {
-                System.out.println("삭제 실패");
+                System.out.println("❌ 삭제 실패");
+                System.out.println("다시 입력해주세요.");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 특정 사용자 게시글 삭제 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmtSel, null);
             DBUtil.executeClose(null, pstmt, conn);
@@ -548,6 +612,7 @@ public class NoticeDAO {
 
             if (!rs.next()) {
                 System.out.println("❌ 수정 실패: 게시글이 없거나 본인 글이 아닙니다.");
+                System.out.println("다시 입력해주세요.");
                 return;
             }
             oldTitle = rs.getString("notice_title");
@@ -577,10 +642,12 @@ public class NoticeDAO {
                 );
             } else {
                 System.out.println("❌ 수정 실패");
+                System.out.println("다시 입력해주세요.");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 내 게시글 수정 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmtSel, null);
             DBUtil.executeClose(null, pstmt, conn);
@@ -609,6 +676,7 @@ public class NoticeDAO {
 
             if (!rs.next()) {
                 System.out.println("❌ 삭제 실패: 게시글이 없거나 본인 글이 아닙니다.");
+                System.out.println("다시 입력해주세요.");
                 return;
             }
             oldTitle = rs.getString("notice_title");
@@ -636,10 +704,12 @@ public class NoticeDAO {
                 );
             } else {
                 System.out.println("❌ 삭제 실패");
+                System.out.println("다시 입력해주세요.");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 내 게시글 삭제 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmtSel, null);
             DBUtil.executeClose(null, pstmt, conn);
@@ -669,7 +739,8 @@ public class NoticeDAO {
             rs = pstmtChk.executeQuery();
 
             if (!rs.next()) {
-                System.out.println("해당 공지가 없습니다.");
+                System.out.println("❌ 해당 게시글이 없습니다.");
+                System.out.println("다시 입력해주세요.");
                 return;
             }
 
@@ -678,7 +749,7 @@ public class NoticeDAO {
             Timestamp deadline = rs.getTimestamp("vote_deadline");
 
             if (!"Y".equalsIgnoreCase(hasVote)) {
-                System.out.println("👉 이 공지는 투표글이 아닙니다.");
+                System.out.println("👉 이 게시글은 투표글이 아닙니다.");
                 return;
             }
 
@@ -691,7 +762,6 @@ public class NoticeDAO {
             if (deadline != null && deadline.before(now)) {
                 System.out.println("👉 투표 마감 시간이 지났습니다.");
 
-                // 선택: 자동 마감 처리
                 DBUtil.executeClose(rs, pstmtChk, null);
 
                 PreparedStatement pstmtClose = null;
@@ -727,7 +797,6 @@ public class NoticeDAO {
             String label = "Y".equalsIgnoreCase(choice) ? "찬성" : "반대";
             System.out.println("✅ 투표 완료! (" + label + ")");
 
-            // ✅ 로그 타입 통일: VOTE_CAST
             logDao.insertActionLog(
                 userId,
                 "게시판",
@@ -739,7 +808,8 @@ public class NoticeDAO {
             );
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 투표 처리 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmtChk, null);
             DBUtil.executeClose(null, pstmt, conn);
@@ -751,12 +821,27 @@ public class NoticeDAO {
     // ==========================
     public void selectVoteResult(int noticeId) {
         Connection conn = null;
+        PreparedStatement pstmtChk = null;
         PreparedStatement pstmt = null;
+        ResultSet rsChk = null;
         ResultSet rs = null;
 
         try {
             conn = DBUtil.getConnection();
 
+            // 1. 게시글 존재 여부 먼저 확인
+            String chkSql = "SELECT notice_id FROM notices WHERE notice_id = ?";
+            pstmtChk = conn.prepareStatement(chkSql);
+            pstmtChk.setInt(1, noticeId);
+            rsChk = pstmtChk.executeQuery();
+
+            if (!rsChk.next()) {
+                System.out.println("❌ 해당 게시글번호가 없습니다.");
+                System.out.println("다시 입력해주세요.");
+                return;
+            }
+
+            // 2. 존재하면 투표 결과 조회
             String sql =
                 "SELECT NVL(SUM(CASE WHEN vote_choice = 'Y' THEN 1 ELSE 0 END), 0) AS YES_CNT, " +
                 "       NVL(SUM(CASE WHEN vote_choice = 'N' THEN 1 ELSE 0 END), 0) AS NO_CNT " +
@@ -768,28 +853,129 @@ public class NoticeDAO {
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                System.out.println("==== 투표 결과 (공지번호: " + noticeId + ") ====");
+                printDivider(40);
+                System.out.println("투표 결과 (게시글번호: " + noticeId + ")");
+                printDivider(40);
                 System.out.println("찬성 : " + rs.getInt("YES_CNT"));
                 System.out.println("반대 : " + rs.getInt("NO_CNT"));
+                printDivider(40);
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 투표 결과 조회 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
+            DBUtil.executeClose(rsChk, pstmtChk, null);
             DBUtil.executeClose(rs, pstmt, conn);
         }
     }
 
     // ==========================
     // 투표 마감일시 파싱
+    // 허용 형식:
+    // 1) yyyy-MM-dd
+    // 2) yyyy-MM-dd HH:mm
+    // 3) yyyy-MM-dd HH:mm:ss
     // ==========================
     private Timestamp parseVoteDeadline(String input) {
         if (input == null) return null;
+
         input = input.trim();
         if (input.length() == 0) return null;
 
-        // 형식: YYYY-MM-DD HH:MM
-        // 초 붙여서 Timestamp 변환
-        return Timestamp.valueOf(input + ":00");
+        try {
+            if (input.matches("\\d{4}-\\d{2}-\\d{2}$")) {
+                LocalDate date = LocalDate.parse(input, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                return Timestamp.valueOf(date.atTime(23, 59, 59));
+            }
+
+            if (input.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}$")) {
+                LocalDateTime dateTime = LocalDateTime.parse(input, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                return Timestamp.valueOf(dateTime);
+            }
+
+            if (input.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$")) {
+                LocalDateTime dateTime = LocalDateTime.parse(input, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                return Timestamp.valueOf(dateTime);
+            }
+
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("투표 마감일시 형식이 잘못되었습니다. 예: 2026-03-11 또는 2026-03-11 18:00");
+        }
+
+        throw new IllegalArgumentException("투표 마감일시 형식이 잘못되었습니다. 예: 2026-03-11 또는 2026-03-11 18:00");
+    }
+
+    // ==========================
+    // 콘솔 출력 정렬용 유틸
+    // ==========================
+    private void printDivider(int length) {
+        System.out.println("=".repeat(length));
+    }
+
+    private boolean isWide(char ch) {
+        Character.UnicodeBlock block = Character.UnicodeBlock.of(ch);
+        return block == Character.UnicodeBlock.HANGUL_SYLLABLES
+                || block == Character.UnicodeBlock.HANGUL_JAMO
+                || block == Character.UnicodeBlock.HANGUL_COMPATIBILITY_JAMO
+                || block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+                || block == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS;
+    }
+
+    private String pad(String s, int width) {
+        if (s == null || s.trim().isEmpty()) {
+            s = "-";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        int len = 0;
+
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            int charWidth = isWide(ch) ? 2 : 1;
+
+            if (len + charWidth > width) {
+                break;
+            }
+
+            sb.append(ch);
+            len += charWidth;
+        }
+
+        while (len < width) {
+            sb.append(' ');
+            len++;
+        }
+
+        return sb.toString();
+    }
+
+    private String nvl(String s) {
+        return (s == null || s.trim().isEmpty()) ? "-" : s;
+    }
+
+    private String fixedToKor(String fixed) {
+        if (fixed == null) return "-";
+        return "Y".equalsIgnoreCase(fixed) ? "고정" : "일반";
+    }
+
+    private String hasVoteToKor(String hasVote) {
+        if (hasVote == null) return "-";
+        return "Y".equalsIgnoreCase(hasVote) ? "투표" : "일반";
+    }
+
+    private String voteStatusToKor(String status) {
+        if (status == null) return "-";
+
+        switch (status.toUpperCase()) {
+            case "O":
+                return "진행중";
+            case "C":
+                return "마감";
+            case "N":
+                return "없음";
+            default:
+                return status;
+        }
     }
 }

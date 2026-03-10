@@ -28,15 +28,15 @@ public class DepartmentManageAdminMenu {
     private void callMenu() throws IOException {
         while (true) {
             System.out.println();
-            System.out.println("┌─────────────────────────────────────────────");
-            System.out.println("│              🏢 부서 관리 (관리자)          ");
-            System.out.println("├─────────────────────────────────────────────");
-            System.out.println("│  1. 부서 조회                               ");
-            System.out.println("│  2. 부서 등록                               ");
-            System.out.println("│  3. 부서 수정                               ");
-            System.out.println("│  4. 부서 삭제                               ");
-            System.out.println("│  0. 뒤로가기                                ");
-            System.out.println("└─────────────────────────────────────────────");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│           🏢 부서 관리 (관리자)          │");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│  [1] 부서 조회                           │");
+            System.out.println("│  [2] 부서 등록                           │");
+            System.out.println("│  [3] 부서 수정                           │");
+            System.out.println("│  [4] 부서 삭제                           │");
+            System.out.println("│  [0] 뒤로가기                            │");
+            System.out.println("+──────────────────────────────────────────+");
             System.out.print("선택 >> ");
 
             try {
@@ -51,7 +51,7 @@ public class DepartmentManageAdminMenu {
                         System.out.println("\n[ 부서 등록 ]");
                         dao.selectDepartment();
 
-                        System.out.print("등록할 부서명(취소: 0): ");
+                        System.out.print("등록할 부서명(뒤로가기: 0): ");
                         String deptName = br.readLine().trim();
 
                         if ("0".equals(deptName)) {
@@ -71,7 +71,7 @@ public class DepartmentManageAdminMenu {
                         System.out.println("\n[ 부서 수정 ]");
                         dao.selectDepartment();
 
-                        System.out.print("수정할 부서번호(취소: 0): ");
+                        System.out.print("수정할 부서번호(뒤로가기: 0): ");
                         int deptNum = Integer.parseInt(br.readLine());
 
                         if (deptNum == 0) {
@@ -79,7 +79,7 @@ public class DepartmentManageAdminMenu {
                             break;
                         }
 
-                        System.out.print("새 부서명(취소: 0): ");
+                        System.out.print("새 부서명(뒤로가기: 0): ");
                         String newDeptName = br.readLine().trim();
 
                         if ("0".equals(newDeptName)) {
@@ -99,7 +99,7 @@ public class DepartmentManageAdminMenu {
                         System.out.println("\n[ 부서 삭제 ]");
                         dao.selectDepartment();
 
-                        System.out.print("삭제할 부서번호(취소: 0): ");
+                        System.out.print("삭제할 부서번호(뒤로가기: 0): ");
                         int deleteDeptNum = Integer.parseInt(br.readLine());
 
                         if (deleteDeptNum == 0) {
@@ -107,7 +107,7 @@ public class DepartmentManageAdminMenu {
                             break;
                         }
 
-                        System.out.print("정말 삭제하시겠습니까? (Y/N, 취소: 0): ");
+                        System.out.print("정말 삭제하시겠습니까? (Y/N), 뒤로가기: 0): ");
                         String yn = br.readLine().trim().toUpperCase();
 
                         if ("0".equals(yn)) {

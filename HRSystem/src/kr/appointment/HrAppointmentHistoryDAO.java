@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +16,9 @@ import kr.util.DBUtil;
 
 public class HrAppointmentHistoryDAO {
 
+    // ==========================
     // 이력 1건 저장
+    // ==========================
     public int insertHistory(
             int targetUserId,
             String changeType,      // DEPT / POSITION / EMP_STATUS
@@ -56,13 +61,16 @@ public class HrAppointmentHistoryDAO {
             return pstat.executeUpdate();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 인사발령 이력 저장 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         }
 
         return 0;
     }
 
+    // ==========================
     // 전체 조회
+    // ==========================
     public List<Map<String, Object>> selectAllHistory() {
         String sql =
             "SELECT h.HISTORY_ID, h.TARGET_USER_ID, tu.USER_NAME AS TARGET_USER_NAME, " +
@@ -77,7 +85,9 @@ public class HrAppointmentHistoryDAO {
         return selectHistoryBySql(sql, null);
     }
 
+    // ==========================
     // 사원별 조회
+    // ==========================
     public List<Map<String, Object>> selectHistoryByUserId(int targetUserId) {
         String sql =
             "SELECT h.HISTORY_ID, h.TARGET_USER_ID, tu.USER_NAME AS TARGET_USER_NAME, " +
@@ -93,8 +103,17 @@ public class HrAppointmentHistoryDAO {
         return selectHistoryBySql(sql, new Object[]{targetUserId});
     }
 
+    // ==========================
     // 유형별 조회
+    // ==========================
     public List<Map<String, Object>> selectHistoryByType(String changeType) {
+        if (!isValidChangeType(changeType)) {
+            System.out.println("❌ 변경 유형 입력이 잘못되었습니다.");
+            System.out.println("가능한 값: DEPT / POSITION / EMP_STATUS");
+            System.out.println("다시 입력해주세요.");
+            return new ArrayList<>();
+        }
+
         String sql =
             "SELECT h.HISTORY_ID, h.TARGET_USER_ID, tu.USER_NAME AS TARGET_USER_NAME, " +
             "       h.CHANGE_TYPE, h.BEFORE_VALUE, h.AFTER_VALUE, h.BEFORE_LABEL, h.AFTER_LABEL, " +
@@ -106,11 +125,32 @@ public class HrAppointmentHistoryDAO {
             " WHERE h.CHANGE_TYPE = ? " +
             " ORDER BY h.HISTORY_ID DESC";
 
-        return selectHistoryBySql(sql, new Object[]{changeType});
+        return selectHistoryBySql(sql, new Object[]{changeType.toUpperCase()});
     }
 
+    // ==========================
     // 기간 조회 (YYYY-MM-DD)
+    // ==========================
     public List<Map<String, Object>> selectHistoryByDateRange(String fromDate, String toDate) {
+        try {
+            validateDateInput(fromDate);
+            validateDateInput(toDate);
+
+            LocalDate from = LocalDate.parse(fromDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            LocalDate to = LocalDate.parse(toDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            if (from.isAfter(to)) {
+                System.out.println("❌ 시작일이 종료일보다 늦을 수 없습니다.");
+                System.out.println("다시 입력해주세요.");
+                return new ArrayList<>();
+            }
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ " + e.getMessage());
+            System.out.println("다시 입력해주세요.");
+            return new ArrayList<>();
+        }
+
         String sql =
             "SELECT h.HISTORY_ID, h.TARGET_USER_ID, tu.USER_NAME AS TARGET_USER_NAME, " +
             "       h.CHANGE_TYPE, h.BEFORE_VALUE, h.AFTER_VALUE, h.BEFORE_LABEL, h.AFTER_LABEL, " +
@@ -125,6 +165,9 @@ public class HrAppointmentHistoryDAO {
         return selectHistoryBySql(sql, new Object[]{fromDate, toDate});
     }
 
+    // ==========================
+    // 공통 조회 실행
+    // ==========================
     private List<Map<String, Object>> selectHistoryBySql(String sql, Object[] params) {
         List<Map<String, Object>> list = new ArrayList<>();
 
@@ -165,9 +208,153 @@ public class HrAppointmentHistoryDAO {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 인사발령 이력 조회 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         }
 
         return list;
+    }
+
+    // ==========================
+    // 인사발령 이력 콘솔 출력
+    // ==========================
+    public void printHistoryList(List<Map<String, Object>> list) {
+        printDivider(180);
+        System.out.println("인사발령 이력 조회");
+        printDivider(180);
+
+        System.out.println(
+                pad("이력ID", 8) +
+                pad("대상자ID", 10) +
+                pad("대상자명", 10) +
+                pad("변경유형", 12) +
+                pad("이전값", 14) +
+                pad("변경값", 14) +
+                pad("이전라벨", 16) +
+                pad("변경라벨", 16) +
+                pad("변경사유", 24) +
+                pad("처리자", 10) +
+                pad("메뉴", 14) +
+                pad("로그ID", 10) +
+                pad("변경일시", 18)
+        );
+
+        printDivider(180);
+
+        if (list == null || list.isEmpty()) {
+            System.out.println("조회된 인사발령 이력이 없습니다.");
+            printDivider(180);
+            return;
+        }
+
+        for (Map<String, Object> row : list) {
+            System.out.println(
+                    pad(String.valueOf(row.get("HISTORY_ID")), 8) +
+                    pad(String.valueOf(row.get("TARGET_USER_ID")), 10) +
+                    pad((String) row.get("TARGET_USER_NAME"), 10) +
+                    pad(changeTypeToKor((String) row.get("CHANGE_TYPE")), 12) +
+                    pad((String) row.get("BEFORE_VALUE"), 14) +
+                    pad((String) row.get("AFTER_VALUE"), 14) +
+                    pad((String) row.get("BEFORE_LABEL"), 16) +
+                    pad((String) row.get("AFTER_LABEL"), 16) +
+                    pad((String) row.get("CHANGE_REASON"), 24) +
+                    pad((String) row.get("CHANGED_BY_NAME"), 10) +
+                    pad((String) row.get("SOURCE_MENU"), 14) +
+                    pad(row.get("LOGIN_LOG_ID") == null ? "-" : String.valueOf(row.get("LOGIN_LOG_ID")), 10) +
+                    pad(tsToMinuteStr((Timestamp) row.get("CHANGED_AT")), 18)
+            );
+        }
+
+        printDivider(180);
+    }
+
+    // ==========================
+    // 날짜 입력 검증
+    // ==========================
+    private void validateDateInput(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            throw new IllegalArgumentException("날짜를 입력해주세요. 형식: YYYY-MM-DD");
+        }
+
+        try {
+            LocalDate.parse(input.trim(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("날짜 형식이 잘못되었습니다. 예: 2026-03-10");
+        }
+    }
+
+    // ==========================
+    // 변경유형 검증
+    // ==========================
+    private boolean isValidChangeType(String changeType) {
+        if (changeType == null) return false;
+
+        String type = changeType.trim().toUpperCase();
+        return "DEPT".equals(type) || "POSITION".equals(type) || "EMP_STATUS".equals(type);
+    }
+
+    // ==========================
+    // 콘솔 정렬용 유틸
+    // ==========================
+    private void printDivider(int length) {
+        System.out.println("=".repeat(length));
+    }
+
+    private String tsToMinuteStr(Timestamp ts) {
+        if (ts == null) return "-";
+        String s = ts.toString();
+        return s.length() >= 16 ? s.substring(0, 16) : s;
+    }
+
+    private String changeTypeToKor(String changeType) {
+        if (changeType == null) return "-";
+
+        switch (changeType.toUpperCase()) {
+            case "DEPT":
+                return "부서변경";
+            case "POSITION":
+                return "직급변경";
+            case "EMP_STATUS":
+                return "재직상태변경";
+            default:
+                return changeType;
+        }
+    }
+
+    private boolean isWide(char ch) {
+        Character.UnicodeBlock block = Character.UnicodeBlock.of(ch);
+        return block == Character.UnicodeBlock.HANGUL_SYLLABLES
+                || block == Character.UnicodeBlock.HANGUL_JAMO
+                || block == Character.UnicodeBlock.HANGUL_COMPATIBILITY_JAMO
+                || block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+                || block == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS;
+    }
+
+    private String pad(String s, int width) {
+        if (s == null || s.trim().isEmpty()) {
+            s = "-";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        int len = 0;
+
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            int charWidth = isWide(ch) ? 2 : 1;
+
+            if (len + charWidth > width) {
+                break;
+            }
+
+            sb.append(ch);
+            len += charWidth;
+        }
+
+        while (len < width) {
+            sb.append(' ');
+            len++;
+        }
+
+        return sb.toString();
     }
 }

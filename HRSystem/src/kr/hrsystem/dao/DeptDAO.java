@@ -61,64 +61,67 @@ public class DeptDAO {
     // ==========================
     public void insertDepartment(String deptName, int adminUserId, Integer loginLogId) {
         Connection conn = null;
+        PreparedStatement pstmtMax = null;
         PreparedStatement pstmt = null;
-        PreparedStatement pstmtSeq = null;
         ResultSet rs = null;
 
         try {
             conn = DBUtil.getConnection();
 
-            String sql = "INSERT INTO dept (dept_num, dept_name) "
-                       + "VALUES (seq_dept.NEXTVAL, ?)";
+            // 1. 현재 DEPT 테이블 기준 다음 부서번호 구하기
+            String nextNumSql = "SELECT NVL(MAX(DEPT_NUM), 0) + 10 AS NEXT_DEPT_NUM FROM DEPT";
+            pstmtMax = conn.prepareStatement(nextNumSql);
+            rs = pstmtMax.executeQuery();
 
+            int nextDeptNum = 10;
+            if (rs.next()) {
+                nextDeptNum = rs.getInt("NEXT_DEPT_NUM");
+            }
+
+            DBUtil.executeClose(rs, pstmtMax, null);
+
+            // 2. insert
+            String sql = "INSERT INTO dept (dept_num, dept_name) VALUES (?, ?)";
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, deptName);
+            pstmt.setInt(1, nextDeptNum);
+            pstmt.setString(2, deptName);
 
             int count = pstmt.executeUpdate();
 
-            // 방금 생성된 dept_num 가져오기
-            Integer deptNum = null;
-            pstmtSeq = conn.prepareStatement("SELECT seq_dept.CURRVAL AS dept_num FROM dual");
-            rs = pstmtSeq.executeQuery();
-            if (rs.next()) {
-                deptNum = rs.getInt("dept_num");
-            }
-
             if (count > 0) {
-                System.out.println("✅ 부서 등록 완료! (부서번호=" + deptNum + ")");
+                System.out.println("✅ 부서 등록 완료! (부서번호=" + nextDeptNum + ")");
 
                 logDao.insertActionLog(
                     adminUserId,
                     "부서관리",
                     "DEPT_CREATE",
-                    "부서 등록: dept_num=" + deptNum + ", dept_name=" + deptName,
+                    "부서 등록: dept_num=" + nextDeptNum + ", dept_name=" + deptName,
                     "DEPT",
-                    deptNum,
+                    nextDeptNum,
                     (loginLogId != null && loginLogId > 0) ? loginLogId : null
                 );
             }
 
         } catch (java.sql.SQLIntegrityConstraintViolationException e) {
-            // 무결성 제약 위반(중복 포함)
-            if (e.getErrorCode() == 1) { // ORA-00001
-                System.out.println("❌ 부서명이 중복되었습니다!");
+            if (e.getErrorCode() == 1) {
+                System.out.println("❌ 부서명이 중복되었거나 부서번호가 중복되었습니다!");
             } else {
                 System.out.println("❌ 무결성 제약조건 위배로 부서 등록에 실패했습니다.");
             }
 
         } catch (java.sql.SQLException e) {
-            // 드라이버/상황에 따라 여기로 들어올 수도 있어서 한 번 더 처리
             if (e.getErrorCode() == 1) {
-                System.out.println("❌ 부서명이 중복되었습니다!");
+                System.out.println("❌ 부서명이 중복되었거나 부서번호가 중복되었습니다!");
             } else {
                 System.out.println("❌ DB 오류로 부서 등록에 실패했습니다.");
             }
 
         } catch (Exception e) {
             System.out.println("❌ 시스템 오류로 부서 등록에 실패했습니다.");
+            e.printStackTrace();
 
         } finally {
-            DBUtil.executeClose(rs, pstmtSeq, null);
+            DBUtil.executeClose(rs, pstmtMax, null);
             DBUtil.executeClose(null, pstmt, conn);
         }
     }

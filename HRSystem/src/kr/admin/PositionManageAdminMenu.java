@@ -34,16 +34,16 @@ public class PositionManageAdminMenu {
     private void callMenu() throws IOException {
         while (true) {
             System.out.println();
-            System.out.println("┌─────────────────────────────────────────────");
-            System.out.println("│              🏷 직급 관리 (관리자)          ");
-            System.out.println("├─────────────────────────────────────────────");
-            System.out.println("│  1. 직급 조회                               ");
-            System.out.println("│  2. 직급 등록                               ");
-            System.out.println("│  3. 직급 수정                               ");
-            System.out.println("│  4. 직급 삭제                               ");
-            System.out.println("│  5. 직급별 기본급 설정                      ");
-            System.out.println("│  0. 뒤로가기                                ");
-            System.out.println("└─────────────────────────────────────────────");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│          🏷 직급 관리 (관리자)           │");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│  [1] 직급 조회                           │");
+            System.out.println("│  [2] 직급 등록                           │");
+            System.out.println("│  [3] 직급 수정                           │");
+            System.out.println("│  [4] 직급 삭제                           │");
+            System.out.println("│  [5] 직급별 기본급 설정                  │");
+            System.out.println("│  [0] 뒤로가기                            │");
+            System.out.println("+──────────────────────────────────────────+");
             System.out.print("선택 >> ");
 
             try {
@@ -60,7 +60,7 @@ public class PositionManageAdminMenu {
                     case 2:
                     	dao.selectPosition();
 
-                    	System.out.print("등록할 직급명(취소: 0): ");
+                    	System.out.print("등록할 직급명(뒤로가기: 0): ");
                     	String positionName = br.readLine().trim();
                     	if ("0".equals(positionName)) {
                     	    System.out.println("직급 등록을 취소했습니다.");
@@ -71,7 +71,7 @@ public class PositionManageAdminMenu {
                     	    break;
                     	}
 
-                    	System.out.print("기본급(취소: 0): ");
+                    	System.out.print("기본급(뒤로가기: 0): ");
                     	String salInput = br.readLine().trim();
                     	if ("0".equals(salInput)) {
                     	    System.out.println("직급 등록을 취소했습니다.");
@@ -95,7 +95,7 @@ public class PositionManageAdminMenu {
                     case 3:
                     	dao.selectPosition();
 
-                    	System.out.print("수정할 직급번호(취소: 0): ");
+                    	System.out.print("수정할 직급번호(뒤로가기: 0): ");
                     	String numInput = br.readLine().trim();
                     	if ("0".equals(numInput)) {
                     	    System.out.println("직급 수정을 취소했습니다.");
@@ -109,7 +109,7 @@ public class PositionManageAdminMenu {
                     	    break;
                     	}
 
-                    	System.out.print("새 직급명(취소: 0): ");
+                    	System.out.print("새 직급명(뒤로가기: 0): ");
                     	String newPositionName = br.readLine().trim();
                     	if ("0".equals(newPositionName)) {
                     	    System.out.println("직급 수정을 취소했습니다.");
@@ -120,7 +120,7 @@ public class PositionManageAdminMenu {
                     	    break;
                     	}
 
-                    	System.out.print("새 기본급(취소: 0): ");
+                    	System.out.print("새 기본급(뒤로가기: 0): ");
                     	String newSalInput = br.readLine().trim();
                     	if ("0".equals(newSalInput)) {
                     	    System.out.println("직급 수정을 취소했습니다.");
@@ -144,7 +144,7 @@ public class PositionManageAdminMenu {
                     case 4:
                     	dao.selectPosition();
 
-                    	System.out.print("삭제할 직급번호(취소: 0): ");
+                    	System.out.print("삭제할 직급번호(뒤로가기: 0): ");
                     	String delNumInput = br.readLine().trim();
                     	if ("0".equals(delNumInput)) {
                     	    System.out.println("직급 삭제를 취소했습니다.");
@@ -158,7 +158,7 @@ public class PositionManageAdminMenu {
                     	    break;
                     	}
 
-                    	System.out.print("정말 삭제하시겠습니까? (Y/N, 취소: 0): ");
+                    	System.out.print("정말 삭제하시겠습니까? (Y/N), 뒤로가기: 0): ");
                     	String yn = br.readLine().trim().toUpperCase();
                     	if ("0".equals(yn)) {
                     	    System.out.println("직급 삭제를 취소했습니다.");
@@ -185,7 +185,7 @@ public class PositionManageAdminMenu {
                     case 5:
                     	dao.selectPosition();
 
-                    	System.out.print("기본급 변경할 직급번호(취소: 0): ");
+                    	System.out.print("기본급 변경할 직급번호(뒤로가기: 0): ");
                     	String salaryNumInput = br.readLine().trim();
                     	if ("0".equals(salaryNumInput)) {
                     	    System.out.println("기본급 변경을 취소했습니다.");
@@ -199,7 +199,7 @@ public class PositionManageAdminMenu {
                     	    break;
                     	}
 
-                    	System.out.print("새 기본급(취소: 0): ");
+                    	System.out.print("새 기본급(뒤로가기: 0): ");
                     	String newSalaryInput = br.readLine().trim();
                     	if ("0".equals(newSalaryInput)) {
                     	    System.out.println("기본급 변경을 취소했습니다.");

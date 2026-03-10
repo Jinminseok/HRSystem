@@ -46,7 +46,7 @@ public class UserManageAdminMenu {
         while (true) {
             System.out.println();
             System.out.println("+──────────────────────────────────────────+");
-            System.out.println("│             👥 사원 관리 (관리자)        │");
+            System.out.println("│           👥 사원 관리 (관리자)          │");
             System.out.println("+──────────────────────────────────────────+");
             System.out.println("│  [1] 승인대기 사원 목록 조회             │");
             System.out.println("│  [2] 사원 승인 처리                      │");
@@ -81,7 +81,7 @@ public class UserManageAdminMenu {
                         }
 
                         if (approveUserId == 0) {
-                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            
                             break; // case 2 종료 → 사원관리 메뉴로 복귀
                         }
 
@@ -154,7 +154,7 @@ public class UserManageAdminMenu {
                         }
 
                         if (rejectUserId == 0) {
-                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            
                             break; // case 3 종료 → 사원관리 메뉴로 복귀
                         }
 
@@ -190,7 +190,7 @@ public class UserManageAdminMenu {
                         String inputUserId = br.readLine().trim();
 
                         if ("0".equals(inputUserId)) {
-                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            
                             break;
                         }
 
@@ -220,7 +220,7 @@ public class UserManageAdminMenu {
                         String newDeptName = br.readLine().trim();
 
                         if ("0".equals(newDeptName)) {
-                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            
                             break;
                         }
 
@@ -238,7 +238,7 @@ public class UserManageAdminMenu {
                         String newPositionName = br.readLine().trim();
 
                         if ("0".equals(newPositionName)) {
-                            System.out.println("이전 메뉴로 돌아갑니다.");
+                           
                             break;
                         }
 
@@ -255,7 +255,7 @@ public class UserManageAdminMenu {
                         String empStatusInput = br.readLine().trim();
 
                         if ("0".equals(empStatusInput)) {
-                            System.out.println("이전 메뉴로 돌아갑니다.");
+                            
                             break;
                         }
 
@@ -317,7 +317,7 @@ public class UserManageAdminMenu {
         while (true) {
             System.out.println();
             System.out.println("+──────────────────────────────────────────+");
-            System.out.println("│            📋 사원 목록 조회 (관리자)    │");
+            System.out.println("│         📋 사원 목록 조회 (관리자)       │");
             System.out.println("+──────────────────────────────────────────+");
             System.out.println("│  [1] 부서별 사원 목록 조회               │");
             System.out.println("│  [2] 직급별 사원 목록 조회               │");

@@ -4,15 +4,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import kr.util.DBUtil;
 
 public class AttendanceDAO {
 
     private LogDAO logDao = new LogDAO();
+
     private String tsToMinuteStr(Timestamp ts) {
         if (ts == null) return "-";
-        // 2026-02-20 08:50:00.0 -> 2026-02-20 08:50
         String s = ts.toString();
         return s.length() >= 16 ? s.substring(0, 16) : s;
     }
@@ -20,14 +25,17 @@ public class AttendanceDAO {
     // ==========================
     // 1. 출근하기 (로그 포함)
     // ==========================
-
     public void checkIn(int userId, int loginLogId) {
+
+        if (!existsUser(userId)) {
+            System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
+            System.out.println("다시 입력해주세요.");
+            return;
+        }
 
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
-        
-        
 
         String checkSql =
             "SELECT COUNT(*) FROM attendance " +
@@ -57,7 +65,7 @@ public class AttendanceDAO {
             DBUtil.executeClose(rs, pstmt, null);
 
             Timestamp now = new Timestamp(System.currentTimeMillis());
-            int inStatus = calculateInStatus(now); // 저장용(화면에는 안 보여줌)
+            int inStatus = calculateInStatus(now);
 
             pstmt = conn.prepareStatement(insertSql);
             pstmt.setInt(1, userId);
@@ -68,7 +76,6 @@ public class AttendanceDAO {
             DBUtil.executeClose(null, pstmt, null);
 
             if (count > 0) {
-                // ✅ 찍힌 시간 조회해서 출력
                 pstmt = conn.prepareStatement(selectTimeSql);
                 pstmt.setInt(1, userId);
                 rs = pstmt.executeQuery();
@@ -80,7 +87,6 @@ public class AttendanceDAO {
                     System.out.println("✅ 출근 처리 완료!");
                 }
 
-                // 로그 기록은 그대로
                 logDao.insertActionLog(
                     userId,
                     "근태관리",
@@ -93,7 +99,8 @@ public class AttendanceDAO {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 출근 처리 중 오류가 발생했습니다.");
+            System.out.println("다시 시도해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmt, conn);
         }
@@ -103,6 +110,12 @@ public class AttendanceDAO {
     // 2. 퇴근하기 (로그 포함)
     // ==========================
     public void checkOut(int userId, int loginLogId) {
+
+        if (!existsUser(userId)) {
+            System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
+            System.out.println("다시 입력해주세요.");
+            return;
+        }
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -136,7 +149,6 @@ public class AttendanceDAO {
             }
 
             Timestamp alreadyOut = rs.getTimestamp("CHECK_OUT");
-            int inStatus = rs.getInt("IN_STATUS");
 
             if (alreadyOut != null) {
                 System.out.println("👉 이미 퇴근 처리되었습니다.");
@@ -145,7 +157,7 @@ public class AttendanceDAO {
             }
 
             Timestamp now = new Timestamp(System.currentTimeMillis());
-            int outStatus = calculateOutStatus(now); // 저장용(화면에는 안 보여줌)
+            int outStatus = calculateOutStatus(now);
 
             DBUtil.executeClose(rs, pstmt, null);
 
@@ -158,7 +170,6 @@ public class AttendanceDAO {
             DBUtil.executeClose(null, pstmt, null);
 
             if (count > 0) {
-                // ✅ 찍힌 시간 조회해서 출력
                 pstmt = conn.prepareStatement(selectTimeSql);
                 pstmt.setInt(1, userId);
                 rs = pstmt.executeQuery();
@@ -175,7 +186,6 @@ public class AttendanceDAO {
                     System.out.println();
                 }
 
-                // 로그 기록은 그대로
                 logDao.insertActionLog(
                     userId,
                     "근태관리",
@@ -188,7 +198,8 @@ public class AttendanceDAO {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 퇴근 처리 중 오류가 발생했습니다.");
+            System.out.println("다시 시도해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmt, conn);
         }
@@ -206,7 +217,7 @@ public class AttendanceDAO {
 
         boolean isOnTimeIn = (inHour < baseInHour) || (inHour == baseInHour && inMinute <= baseInMinute);
 
-        return isOnTimeIn ? 1 : 2; // 1:정상출근, 2:지각
+        return isOnTimeIn ? 1 : 2;
     }
 
     // ==========================
@@ -223,9 +234,9 @@ public class AttendanceDAO {
         boolean isEarlyOut    = (outHour < baseOutHour) || (outHour == baseOutHour && outMinute < baseOutMinute);
         boolean isOvertimeOut = (outHour > baseOutHour) || (outHour == baseOutHour && outMinute > baseOutMinute);
 
-        if (isOnTimeOut) return 1;   // 정상퇴근
-        if (isEarlyOut) return 2;    // 조퇴
-        if (isOvertimeOut) return 3; // 연장
+        if (isOnTimeOut) return 1;
+        if (isEarlyOut) return 2;
+        if (isOvertimeOut) return 3;
         return 0;
     }
 
@@ -267,6 +278,12 @@ public class AttendanceDAO {
     // ==========================
     public void selectAll(int userId) {
 
+        if (!existsUser(userId)) {
+            System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
+            System.out.println("다시 입력해주세요.");
+            return;
+        }
+
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -291,6 +308,7 @@ public class AttendanceDAO {
             boolean hasData = false;
             System.out.println("\n======================================= 전체 근태 조회 =======================================");
             System.out.println();
+
             while (rs.next()) {
                 hasData = true;
 
@@ -308,7 +326,6 @@ public class AttendanceDAO {
                     + (checkOut == null ? "퇴근 전" : checkOut)
                     + " | 상태 : " + makeStatusLabel(inStatus, outStatus)
                     + " | 근무시간 : " + (checkOut == null ? "-" : hour + "시간")
-                    
                 );
                 System.out.println();
             }
@@ -319,7 +336,8 @@ public class AttendanceDAO {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 전체 근태 조회 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmt, conn);
         }
@@ -329,6 +347,18 @@ public class AttendanceDAO {
     // 월별 근태 조회
     // ==========================
     public void selectByMonth(int userId, String yearMonth) {
+
+        if (!existsUser(userId)) {
+            System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
+            System.out.println("다시 입력해주세요.");
+            return;
+        }
+
+        if (!isValidYearMonth(yearMonth)) {
+            System.out.println("❌ 조회 월 형식이 잘못되었습니다.");
+            System.out.println("예: 2026-02 형식으로 다시 입력해주세요.");
+            return;
+        }
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -355,6 +385,7 @@ public class AttendanceDAO {
             boolean hasData = false;
             System.out.println("\n======================== " + yearMonth + " 월 근태 조회 ========================");
             System.out.println();
+
             while (rs.next()) {
                 hasData = true;
 
@@ -380,7 +411,8 @@ public class AttendanceDAO {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 월별 근태 조회 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmt, conn);
         }
@@ -391,12 +423,25 @@ public class AttendanceDAO {
     // ==========================
     public void selectMonthTotal(int userId, String yearMonth) {
 
+        if (!existsUser(userId)) {
+            System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
+            System.out.println("다시 입력해주세요.");
+            return;
+        }
+
+        if (!isValidYearMonth(yearMonth)) {
+            System.out.println("❌ 조회 월 형식이 잘못되었습니다.");
+            System.out.println("예: 2026-02 형식으로 다시 입력해주세요.");
+            return;
+        }
+
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
 
         String sql =
-            "SELECT ROUND(SUM((CHECK_OUT - CHECK_IN) * 24), 2) AS TOTAL_HOUR " +
+            "SELECT COUNT(*) AS RECORD_CNT, " +
+            "       ROUND(SUM((CHECK_OUT - CHECK_IN) * 24), 2) AS TOTAL_HOUR " +
             "FROM attendance " +
             "WHERE USER_ID = ? " +
             "AND TO_CHAR(ATT_DATE, 'YYYY-MM') = ? " +
@@ -411,6 +456,14 @@ public class AttendanceDAO {
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
+                int recordCnt = rs.getInt("RECORD_CNT");
+
+                if (recordCnt == 0) {
+                    System.out.println("👉 해당 월의 근태 기록이 없습니다.");
+                    System.out.println();
+                    return;
+                }
+
                 double total = rs.getDouble("TOTAL_HOUR");
                 System.out.println("\n==== " + yearMonth + " 월 총 근무시간 ====");
                 System.out.println();
@@ -419,7 +472,8 @@ public class AttendanceDAO {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 월 총 근무시간 조회 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmt, conn);
         }
@@ -430,12 +484,24 @@ public class AttendanceDAO {
     // ==========================
     public void selectMonthStatusCount(int userId, String yearMonth) {
 
+        if (!existsUser(userId)) {
+            System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
+            System.out.println("다시 입력해주세요.");
+            return;
+        }
+
+        if (!isValidYearMonth(yearMonth)) {
+            System.out.println("❌ 조회 월 형식이 잘못되었습니다.");
+            System.out.println("예: 2026-02 형식으로 다시 입력해주세요.");
+            return;
+        }
+
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
 
         String sql =
-            "SELECT " +
+            "SELECT COUNT(*) AS RECORD_CNT, " +
             "  SUM(CASE WHEN IN_STATUS = 1 THEN 1 ELSE 0 END) AS NORMAL_IN_CNT, " +
             "  SUM(CASE WHEN IN_STATUS = 2 THEN 1 ELSE 0 END) AS LATE_CNT, " +
             "  SUM(CASE WHEN OUT_STATUS = 1 THEN 1 ELSE 0 END) AS NORMAL_OUT_CNT, " +
@@ -453,9 +519,16 @@ public class AttendanceDAO {
             pstmt.setString(2, yearMonth);
             rs = pstmt.executeQuery();
 
-            System.out.println("\n======== " + yearMonth + "월 상태별 횟수 ========");
-
             if (rs.next()) {
+                int recordCnt = rs.getInt("RECORD_CNT");
+
+                if (recordCnt == 0) {
+                    System.out.println("👉 해당 월의 근태 기록이 없습니다.");
+                    System.out.println();
+                    return;
+                }
+
+                System.out.println("\n======== " + yearMonth + "월 상태별 횟수 ========");
                 System.out.println("정상출근 : " + rs.getInt("NORMAL_IN_CNT") + "회");
                 System.out.println("지각     : " + rs.getInt("LATE_CNT") + "회");
                 System.out.println("정상퇴근 : " + rs.getInt("NORMAL_OUT_CNT") + "회");
@@ -466,7 +539,8 @@ public class AttendanceDAO {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 월 상태별 횟수 조회 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmt, conn);
         }
@@ -476,12 +550,35 @@ public class AttendanceDAO {
     // 관리자 근태 수정 (로그 포함 / before→after)
     // ==========================
     public void updateAttendance(int targetUserId, String date, String inTime, String outTime) {
-        // 기존 호출 호환용 (행위자 정보 없으면 대상 사용자로 기록)
         updateAttendance(targetUserId, date, inTime, outTime, targetUserId, null);
     }
 
     public void updateAttendance(int targetUserId, String date, String inTime, String outTime,
                                  int actorUserId, Integer loginLogId) {
+
+        if (!existsUser(targetUserId)) {
+            System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
+            System.out.println("다시 입력해주세요.");
+            return;
+        }
+
+        if (!isValidDate(date)) {
+            System.out.println("❌ 날짜 형식이 잘못되었습니다.");
+            System.out.println("예: 2026-02-20 형식으로 다시 입력해주세요.");
+            return;
+        }
+
+        if (!isValidTimeInput(inTime)) {
+            System.out.println("❌ 출근 시간 형식이 잘못되었습니다.");
+            System.out.println("예: 08:50 또는 NULL 형식으로 다시 입력해주세요.");
+            return;
+        }
+
+        if (!isValidTimeInput(outTime)) {
+            System.out.println("❌ 퇴근 시간 형식이 잘못되었습니다.");
+            System.out.println("예: 17:00 또는 NULL 형식으로 다시 입력해주세요.");
+            return;
+        }
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -501,7 +598,6 @@ public class AttendanceDAO {
         try {
             conn = DBUtil.getConnection();
 
-            // ✅ 변경 전 조회 (before)
             pstmtSel = conn.prepareStatement(selectSql);
             pstmtSel.setInt(1, targetUserId);
             pstmtSel.setString(2, date);
@@ -528,6 +624,12 @@ public class AttendanceDAO {
             Timestamp inTs = parseDateTime(date, inTime);
             Timestamp outTs = parseDateTime(date, outTime);
 
+            if (inTs != null && outTs != null && outTs.before(inTs)) {
+                System.out.println("❌ 퇴근 시간은 출근 시간보다 빠를 수 없습니다.");
+                System.out.println("다시 입력해주세요.");
+                return;
+            }
+
             int inStatus = (inTs == null) ? 0 : calculateInStatus(inTs);
             int outStatus = (outTs == null) ? 0 : calculateOutStatus(outTs);
 
@@ -551,7 +653,6 @@ public class AttendanceDAO {
                 System.out.println("✅ 근태 수정 완료! 상태: " + finalStatus);
                 System.out.println();
 
-                // ✅ 관리자 수정 로그 (before -> after)
                 String beforeText =
                     "before[in=" + tsToStr(beforeIn) +
                     ", out=" + tsToStr(beforeOut) +
@@ -577,21 +678,94 @@ public class AttendanceDAO {
                 System.out.println();
             }
 
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ " + e.getMessage());
+            System.out.println("다시 입력해주세요.");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("❌ 근태 수정 중 오류가 발생했습니다.");
+            System.out.println("다시 입력해주세요.");
         } finally {
             DBUtil.executeClose(rs, pstmtSel, null);
             DBUtil.executeClose(null, pstmt, conn);
         }
     }
 
+    // ==========================
+    // 유효성 검사
+    // ==========================
+    private boolean existsUser(int userId) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnection();
+            String sql = "SELECT COUNT(*) FROM USERTEST WHERE USER_ID = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, userId);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            return false;
+        } finally {
+            DBUtil.executeClose(rs, pstmt, conn);
+        }
+
+        return false;
+    }
+
+    private boolean isValidYearMonth(String yearMonth) {
+        try {
+            YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM"));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean isValidDate(String date) {
+        try {
+            LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean isValidTimeInput(String time) {
+        if (time == null) return false;
+
+        String value = time.trim();
+
+        if (value.length() == 0) return true;
+        if ("NULL".equalsIgnoreCase(value)) return true;
+
+        try {
+            LocalTime.parse(value, DateTimeFormatter.ofPattern("HH:mm"));
+            return true;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+    }
+
     // "NULL" / "" 처리 + "YYYY-MM-DD HH:MM:SS" 생성
     private Timestamp parseDateTime(String date, String time) {
         if (time == null) return null;
+
         time = time.trim();
 
         if (time.equalsIgnoreCase("NULL") || time.length() == 0) {
             return null;
+        }
+
+        try {
+            LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm"));
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("날짜 또는 시간 형식이 잘못되었습니다.");
         }
 
         return Timestamp.valueOf(date + " " + time + ":00");
@@ -599,7 +773,7 @@ public class AttendanceDAO {
 
     private String tsToStr(Timestamp ts) {
         if (ts == null) return "NULL";
-        String s = ts.toString(); // 2026-02-20 08:50:00.0
+        String s = ts.toString();
         return s.length() >= 16 ? s.substring(0, 16) : s;
     }
 }
