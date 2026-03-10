@@ -29,20 +29,29 @@ public class salary_MAIN {
         return text + " ".repeat(Math.max(0, length - currentLength));
     }
 
+    // [메인 메뉴]
     public void runSalaryMenu() {
         while (true) {
-            System.out.println("\n  ● 급여 상세 관리 시스템");
-            System.out.println("  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-            System.out.println("  1 · 수당 미등록 내역 조회 및 등록");
-            System.out.println("  2 · 월별 총급여 상세 조회 (명세서)");
-            System.out.println("  3 · 급여 내역 관리 (수정/삭제)");
-            System.out.println("  4 · 총급여 지급 여부 관리 (N/Y 관리)");
-            System.out.println("  0 · 프로그램 종료 (관리자 화면으로)");
-            System.out.println("  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│           급여 상세 관리 시스템          │");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│  1. 수당 미등록 관리                     │");
+            System.out.println("│  2. 월별 총급여 조회                     │");
+            System.out.println("│  3. 수당 내역 관리                       │");
+            System.out.println("│  4. 총급여 지급 여부 관리                │");
+            System.out.println("│  0. 뒤로가기                             │");   
+            System.out.println("+──────────────────────────────────────────+");
             System.out.print("  선택 >> ");
             try {
                 String input = br.readLine();
                 if (input == null || input.isEmpty()) continue;
+                
+                // ★ [FIXED: 메인 메뉴 숫자 체크]
+                if (!input.matches("\\d+")) {
+                    System.out.println("  ⚠️ 숫자를 입력하세요.");
+                    continue;
+                }
+                
                 int menu = Integer.parseInt(input);
                 if (menu == 0) return;
                 switch (menu) {
@@ -50,164 +59,280 @@ public class salary_MAIN {
                     case 2: showSummaryMenu(); break;
                     case 3: manageSalaryMenu(); break;
                     case 4: new payment_MAIN(br, adminUserId, loginLogId); break;
-                    default: System.out.println("  ❌ 잘못된 번호입니다.");
+                    default: System.out.println("  ❌ 존재하지 않는 번호입니다.");
                 }
-            } catch (Exception e) { System.out.println("  ⚠️ 숫자만 입력하세요."); }
+            } catch (Exception e) { 
+                // ★ [FIXED: 시스템 에러 메시지 은폐]
+                System.out.println("  ⚠️ 숫자를 입력하세요."); 
+            }
         }
     }
 
-    // [1] 급여 미등록 내역 조회 및 등록
+    // [1] 수당 미등록 관리
     private void showUnpaidMenu() throws IOException {
         while (true) {
-            System.out.print("\n  ○ 대상 선택 (1.부서별 / 2.전체 / 0.이전) >> ");
+        	System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│             수당 미등록 관리             │");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│  1. 부서 검색                            │");
+            System.out.println("│  2. 전체 검색                            │");            
+            System.out.println("│  0. 뒤로가기                             │");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.print("  선택 >> ");
             String input = br.readLine();
-            if (input.equals("0")) return; // 메인 1~4번 메뉴로 이동
+            if (input == null || input.equals("0")) return;
+            
+            // ★ [FIXED: 숫자 체크]
+            if (!input.matches("[1-2]")) {
+                System.out.println("  ⚠️ 숫자를 입력하세요. (1 또는 2)"); continue;
+            }
+            
             int type = Integer.parseInt(input);
-
             int dNum = -1;
+
             if (type == 1) { 
-                dao.showDepartmentList(); 
-                System.out.print("  ○ 부서번호 입력 (0.이전 / 99.처음으로) >> "); 
-                input = br.readLine();
-                if (input.equals("99")) return; // 메인 메뉴로 점프
-                if (input.equals("0")) continue; // 대상 선택 단계로
-                dNum = Integer.parseInt(input);
+                while(true) {
+                    dao.showDepartmentList();
+                    System.out.println("0. 뒤로 가기");
+                    System.out.print("  ○ 부서번호 입력 >> ");
+                    String dStr = br.readLine();
+                    if (dStr.equals("0")) { dNum = -2; break; }
+                    // ★ [FIXED: 부서번호 숫자 체크]
+                    if (!dStr.matches("\\d+")) { System.out.println("  ⚠️ 숫자를 입력하세요."); continue; }
+                    
+                    int tempDNum = Integer.parseInt(dStr);
+                    if (dao.checkDeptExists(tempDNum)) {
+                        dNum = tempDNum; break;
+                    } else {
+                        System.out.println("  ❌ 존재하지 않는 부서입니다. 다시 입력하세요.");
+                    }
+                }
+                if (dNum == -2) continue;
             }
             
             while (true) {
                 dao.showUnpaidWorkers(dNum);
-                System.out.println("\n  [ 1.개별 등록 | 2.일괄 등록 | 0.이전 | 99.처음으로 ]");
-                System.out.print("  작업 선택 >> ");
-                input = br.readLine();
-                if (input.equals("99")) return; // 메인 메뉴로 점프
-                if (input.equals("0")) break; // 부서/전체 선택 단계로
+                System.out.println("+──────────────────────────────────────────+");
+                System.out.println("│             수당 미등록 관리             │");
+                System.out.println("+──────────────────────────────────────────+");
+                System.out.println("│  1. 개별 등록                            │");
+                System.out.println("│  2. 일괄 등록                            │");            
+                System.out.println("│  0. 뒤로가기                             │");
+                System.out.println("+──────────────────────────────────────────+");                
                 
-                int act = Integer.parseInt(input);
-                if (act == 1) {
-                    System.out.print("  ○ 사번 입력 >> "); int uid = Integer.parseInt(br.readLine());
-                    dao.showAttendanceList(uid);
-                    System.out.print("  ○ 근태ID 입력 >> "); int aid = Integer.parseInt(br.readLine());
-                    if (dao.insertSalary(uid, aid) > 0) System.out.println("  ✅ 등록 완료!");
-                } else if (act == 2) {
-                    System.out.print("  ⚠️ 미등록 내역을 일괄 등록하시겠습니까? (Y/N) : ");
-                    if (br.readLine().equalsIgnoreCase("Y")) {
-                        int count = dao.insertSalaryBatch(dNum);
-                        System.out.println("  ✅ 총 " + count + "건 등록 완료!");
+                System.out.print("  선택 >> ");
+                input = br.readLine();
+                if (input.equals("0")) break;
+                // ★ [FIXED: 작업 선택 숫자 체크]
+                if (!input.matches("[1-2]")) { System.out.println("  ⚠️ 숫자를 입력하세요."); continue; }
+                
+                if (Integer.parseInt(input) == 1) {
+                    while(true) {
+                    	System.out.println("0. 뒤로 가기");
+                        System.out.print("  ○ 사번 입력 >> "); 
+                        String uidStr = br.readLine();
+                        if (uidStr.equals("0")) break;
+                        // ★ [FIXED: 사번 숫자 체크]
+                        if (!uidStr.matches("\\d+")) { System.out.println("  ⚠️ 숫자를 입력하세요."); continue; }
+                        
+                        int uid = Integer.parseInt(uidStr);
+                        if (!dao.showAttendanceList(uid)) {
+                            System.out.println("  ❌ 존재하지 않는 사번이거나 미등록 내역이 없습니다."); continue;
+                        }
+                        
+                        boolean success = false;
+                        while(true) {
+                        	System.out.println("0. 뒤로 가기");
+                            System.out.print("  ○ 근태ID 입력 >> "); 
+                            String aidStr = br.readLine();
+                            if (aidStr.equals("0")) break;
+                            // ★ [FIXED: 근태ID 숫자 체크]
+                            if (!aidStr.matches("\\d+")) { System.out.println("  ⚠️ 숫자를 입력하세요."); continue; }
+                            
+                            if (dao.insertSalary(uid, Integer.parseInt(aidStr)) > 0) {
+                                System.out.println("  ✅ 등록 성공!"); success = true; break;
+                            } else {
+                                System.out.println("  ❌ 존재하지 않는 근태ID입니다.");
+                            }
+                        }
+                        if (success) break;
                     }
+                } else {
+                    dao.insertSalaryBatch(dNum); System.out.println("  ✅ 완료!");
                 }
             }
         }
     }
 
-    // [2] 월별 급여 합계 조회 (명세서)
+    // [2] 월별 총급여 조회
     private void showSummaryMenu() throws IOException {
         while (true) {
-            System.out.println("\n  ● 월별 급여 요약 조회 (명세서)");
-            System.out.print("  ○ 대상 범위 (1.부서별 / 2.전체 / 0.이전) >> ");
+        	System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│             월별 총급여 조회             │");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│  1. 부서 검색                            │");
+            System.out.println("│  2. 전체 검색                            │");            
+            System.out.println("│  0. 뒤로가기                             │");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.print("  선택 >> ");
             String input = br.readLine();
-            if (input.equals("0")) return; // 메인 메뉴로 이동
-            int type = Integer.parseInt(input);
-
+            if (input == null || input.equals("0")) return;
+            if (!input.matches("[1-2]")) { System.out.println("  ⚠️ 숫자를 입력하세요."); continue; }
+            
             int dNum = -1;
-            if (type == 1) {
-                dao.showDepartmentList();
-                System.out.print("  ○ 부서번호 입력 (0.이전 / 99.처음으로) >> ");
-                input = br.readLine();
-                if (input.equals("99")) return;
-                if (input.equals("0")) continue;
-                dNum = Integer.parseInt(input);
+            if (input.equals("1")) {
+                while (true) {
+                    dao.showDepartmentList();
+                	System.out.println("0. 뒤로 가기");
+                    System.out.print("  ○ 부서번호 입력 >> ");
+                    input = br.readLine();
+                    if (input.equals("0")) { dNum = -2; break; }
+                    if (!input.matches("\\d+")) { System.out.println("  ⚠️ 숫자를 입력하세요."); continue; }
+                    dNum = Integer.parseInt(input);
+                    if (!dao.checkDeptExists(dNum)) { System.out.println("  ❌ 없는 부서입니다."); continue; }
+                    break;
+                }
+                if (dNum == -2) continue;
             }
 
             while (true) {
                 dao.showUserListByDept(dNum);
-                System.out.print("  ○ 사번 선택 (0.이전 / 99.처음으로) >> ");
-                input = br.readLine();
-                if (input.equals("99")) return;
-                int uid = Integer.parseInt(input);
-                if (uid == 0) break; // 범위 선택 단계로
-
-                System.out.print("  ○ 조회 월 (YYYY-MM / 0.이전) >> ");
-                String month = br.readLine();
-                if (month.equals("0")) continue; // 사원 선택 단계로
-
-                Map<String, Object> s = dao.selectMonthlySummary(uid, month);
-                if (s != null) {
-                    System.out.println("\n  ● [" + month + "] " + s.get("userName") + " 사원 급여 명세");
-                    System.out.println("  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                    System.out.println("  · 기본급   : " + String.format("%12s", String.format("%,d", (int)s.get("salBase"))) + " 원");
-                    System.out.println("  · 휴일수당 : " + String.format("%12s", String.format("%,d", (int)s.get("salHoliday"))) + " 원");
-                    System.out.println("  · 야근수당 : " + String.format("%12s", String.format("%,d", (int)s.get("salOvertime"))) + " 원");
-                    System.out.println("  · 공제세금 : " + String.format("%12s", String.format("%,d", (int)s.get("salTax"))) + " 원");
-                    System.out.println("  ──────────────────────────────");
-                    System.out.println("  ✨ 실수령액 : " + String.format("%12s", String.format("%,d", (int)s.get("salTotal"))) + " 원");
-                    System.out.println("  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                } else {
-                    System.out.println("  ❌ 해당 월의 급여 정보가 없습니다.");
+                int uid = 0;
+                while (true) {
+                	System.out.println("0. 뒤로 가기");
+                    System.out.print("  ○ 사번 선택 >> ");
+                    input = br.readLine();
+                    if (input.equals("0")) { uid = -1; break; }
+                    if (!input.matches("\\d+")) { System.out.println("  ⚠️ 숫자를 입력하세요."); continue; }
+                    uid = Integer.parseInt(input);
+                    if (!dao.checkUserExists(uid)) { System.out.println("  ❌ 없는 사번입니다."); continue; }
+                    break;
                 }
-                System.out.println("\n  (계속 조회: Enter, 뒤로 가기: 0, 처음으로: 99)");
-                String next = br.readLine();
-                if (next.equals("99")) return;
-                if (next.equals("0")) break;
+                if (uid == -1) break;
+
+                while (true) {
+                	System.out.println("0. 뒤로 가기");
+                    System.out.print("  ○ 조회 월 (YYYY-MM) >> ");
+                    String month = br.readLine();
+                    if (month.equals("0")) { uid = -2; break; }
+                    if (!month.matches("\\d{4}-\\d{2}")) { System.out.println("  ⚠️ 형식 오류! (예: 2026-03)"); continue; }
+
+                    Map<String, Object> s = dao.selectMonthlySummary(uid, month);
+                    if (s != null && s.get("userName") != null) {
+                        System.out.println("+──────────────────────────────────────────────────────────────────+");
+                        System.out.println("  ● [" + month + "] " + s.get("userName") + " 사원 급여 명세");
+                        System.out.println("  ✨ 실수령액 : " + String.format("%,d", (int)s.get("salTotal")) + " 원");
+                        System.out.println("+──────────────────────────────────────────────────────────────────+");
+                        break; 
+                    } else {
+                        System.out.println("  ❌ 급여 내역이 없습니다.");
+                    }
+                }
+                if (uid == -2) continue; 
+            	System.out.println("0. 뒤로 가기");
+                System.out.print("Enter 계속 >> ");
+                if ("0".equals(br.readLine())) break;
             }
         }
     }
 
-    // [3] 급여 내역 관리 (수정/삭제/초기화)
+    // [3] 수당 내역 관리
     private void manageSalaryMenu() throws IOException {
-        while (true) {
-            System.out.print("\n  ○ 관리 범위 (1.부서별 / 2.전체 / 0.이전) >> ");
+        while (true) {            
+        	System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│              수당 내역 관리              │");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.println("│  1. 부서 검색                            │");
+            System.out.println("│  2. 전체 검색                            │");            
+            System.out.println("│  0. 뒤로가기                             │");
+            System.out.println("+──────────────────────────────────────────+");
+            System.out.print("  선택 >> ");
             String input = br.readLine();
-            if (input.equals("0")) return;
-            int type = Integer.parseInt(input);
-
+            if (input == null || input.equals("0")) return;
+            if (!input.matches("[1-2]")) { System.out.println("  ⚠️ 숫자를 입력하세요."); continue; }
+            
             int dNum = -1;
-            if (type == 1) { 
-                dao.showDepartmentList(); 
-                System.out.print("  ○ 부서번호 입력 (0.이전 / 99.처음으로) >> "); 
-                input = br.readLine();
-                if (input.equals("99")) return;
-                if (input.equals("0")) continue;
-                dNum = Integer.parseInt(input);
+            if (input.equals("1")) { 
+                while (true) {
+                    dao.showDepartmentList(); 
+                    System.out.println("0. 뒤로 가기");
+                    System.out.print("  ○ 부서번호 입력 >> ");
+                    input = br.readLine();
+                    if (input.equals("0")) { dNum = -2; break; }
+                    if (!input.matches("\\d+")) { System.out.println("  ⚠️ 숫자를 입력하세요."); continue; }
+                    dNum = Integer.parseInt(input);
+                    if (!dao.checkDeptExists(dNum)) { System.out.println("  ❌ 없는 부서입니다."); continue; }
+                    break;
+                }
+                if (dNum == -2) continue;
             }
             
             while (true) {
                 List<Map<String, Object>> list = dao.selectSalaryList(dNum);
-                System.out.println("\n  ● 급여 상세 내역 목록 (등록 완료 건)");
-                System.out.println("  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                System.out.println("  " + align("ID", 6) + align("사번", 8) + align("이름", 10) + align("기본급", 14) + align("야근수당", 14) + align("휴일수당", 14) + "세금");
-                System.out.println("  ────────────────────────────────────────────────────────────────────────────────────────────");
+                if (list.isEmpty()) { System.out.println("  ❌ 데이터가 없습니다."); break; }
                 
+                // --- 목록 출력 (UI 유지) ---
+                System.out.println("+──────────────────────────────────────────────────────────────────────────────────────────────────+");
+                System.out.println("  ● 급여 상세 내역 목록 (등록 완료 건)");
+                System.out.println("+──────────────────────────────────────────────────────────────────────────────────────────────────+");
+                System.out.println("  " + align("ID", 6) + align("사번", 10) + align("이름", 12) + align("기본급", 14) + 
+                	    align("야근수당", 14) + 
+                	    align("휴일수당", 14) + 
+                	    align("세금", 12) + 
+                	    "실수령액");
+                System.out.println("+──────────────────────────────────────────────────────────────────────────────────────────────────+");
                 for (Map<String, Object> s : list) {
-                    System.out.println("  " + align(String.valueOf(s.get("salId")), 6) + 
-                                       align(String.valueOf(s.get("userId")), 8) + 
-                                       align((String)s.get("userName"), 10) + 
-                                       align(String.format("%,d", (int)s.get("salBase")) + "원", 14) + 
-                                       align(String.format("%,d", (int)s.get("salOvertime")) + "원", 14) + 
-                                       align(String.format("%,d", (int)s.get("salHoliday")) + "원", 14) + 
-                                       String.format("%,d", (int)s.get("salTax")) + "원");
+                    System.out.println("  " + align(String.valueOf(s.get("salId")), 6) + align(String.valueOf(s.get("userId")), 8) + align((String)s.get("userName"), 10) + align(String.format("%,d", (int)s.get("salBase")), 14) + align(String.format("%,d", (int)s.get("salOvertime")), 14) + align(String.format("%,d", (int)s.get("salHoliday")), 14) + String.format("%,d", (int)s.get("salTax")) + "원");
                 }
-                System.out.println("  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                System.out.println("+──────────────────────────────────────────────────────────────────────────────────────────────────+");
                 
-                System.out.println("\n  [ 1.수정 | 2.삭제 | 3.일괄 삭제 | 0.이전 | 99.처음으로 ]");
-                System.out.print("  작업 선택 >> ");
+                System.out.println("1.수정");
+                System.out.println("2.삭제");
+                System.out.println("3.일괄삭제");
+                System.out.println("0.뒤로 가기");
+                System.out.print("작업 선택 >> ");
                 input = br.readLine();
-                if (input.equals("99")) return;
                 if (input.equals("0")) break;
+                if (!input.matches("[1-3]")) { System.out.println("  ⚠️ 숫자를 입력하세요."); continue; }
 
                 int act = Integer.parseInt(input);
-                if (act == 1) {
-                    System.out.print("  ○ SAL_ID >> "); int sid = Integer.parseInt(br.readLine());
-                    System.out.print("  ○ 변경 야근수당 >> "); int ot = Integer.parseInt(br.readLine());
-                    System.out.print("  ○ 변경 휴일수당 >> "); int ho = Integer.parseInt(br.readLine());
-                    if (dao.updateSalary(sid, ot, ho) > 0) System.out.println("  ✅ 수정 완료!");
-                } else if (act == 2) {
-                    System.out.print("  ○ 삭제할 SAL_ID >> "); int sid = Integer.parseInt(br.readLine());
-                    if (dao.deleteSalary(sid) > 0) System.out.println("  ✅ 삭제 완료!");
+                if (act == 1 || act == 2) {
+                    while (true) {
+                    	System.out.println("0. 뒤로 가기");
+                        System.out.print("  ○ ID 입력 >> ");
+                        String sidStr = br.readLine();
+                        if (sidStr.equals("0")) break;
+                        if (!sidStr.matches("\\d+")) { System.out.println("  ⚠️ 숫자를 입력하세요."); continue; }
+                        
+                        int sid = Integer.parseInt(sidStr);
+                        boolean isExist = list.stream().anyMatch(m -> (int)m.get("salId") == sid);
+                        if (!isExist) { System.out.println("  ❌ 목록에 없는 ID입니다."); continue; }
+
+                        if (act == 1) { // 수정
+                            int ot = 0, ho = 0;
+                            while(true) {
+                                System.out.print("  ○ 변경 야근수당 >> "); String s = br.readLine();
+                                if(s.matches("\\d+")) { ot = Integer.parseInt(s); break; }
+                                System.out.println("  ⚠️ 숫자를 입력하세요.");
+                            }
+                            while(true) {
+                                System.out.print("  ○ 변경 휴일수당 >> "); String s = br.readLine();
+                                if(s.matches("\\d+")) { ho = Integer.parseInt(s); break; }
+                                System.out.println("  ⚠️ 숫자를 입력하세요.");
+                            }
+                            dao.updateSalary(sid, ot, ho); System.out.println("  ✅ 수정 완료!");
+                        } else {
+                            dao.deleteSalary(sid); System.out.println("  ✅ 삭제 완료!");
+                        }
+                        break; 
+                    }
                 } else if (act == 3) {
-                    System.out.print("  ⚠️ 전체 내역을 초기화하시겠습니까? (Y/N) : ");
-                    if (br.readLine().equalsIgnoreCase("Y")) {
-                        int count = dao.deleteSalaryBatch(dNum);
-                        System.out.println("  ✅ " + count + "건 삭제 완료!");
+                    while(true) {
+                        System.out.print("  ⚠️ 전체 초기화? (Y/N) : ");
+                        String confirm = br.readLine();
+                        if (confirm.equalsIgnoreCase("Y")) { dao.deleteSalaryBatch(dNum); break; }
+                        else if (confirm.equalsIgnoreCase("N")) break;
+                        else System.out.println("  ⚠️ Y 또는 N만 가능합니다.");
                     }
                 }
             }

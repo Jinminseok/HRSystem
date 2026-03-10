@@ -55,10 +55,11 @@ public class payment_DAO {
             if (deptNum != -1) pstmt.setInt(3, deptNum);
             rs = pstmt.executeQuery();
 
-            System.out.println("\n  ● " + month + " 급여 지급 현황");
-            System.out.println("  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            System.out.println("+─────────────────────────────────────────────────────────────────────────+");
+            System.out.println("│                    " + month + " 급여 지급 현황                               │");
+            System.out.println("+─────────────────────────────────────────────────────────────────────────+"); 
             System.out.println("  " + align("사번", 9) + align("이름", 11) + align("실수령액", 17) + align("지급일", 17) + align("상태", 13));
-            System.out.println("  ────────────────────────────────────────────────────────────");
+            System.out.println("──────────────────────────────────────────────────────────────────────────");
             
             boolean hasData = false;
             while(rs.next()) {
@@ -74,7 +75,7 @@ public class payment_DAO {
                                    align(date, 14) + status);
             }
             if(!hasData) System.out.println("  ! 데이터가 존재하지 않습니다.");
-            System.out.println("  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            System.out.println("+─────────────────────────────────────────────────────────────────────────+"); 
             
         } catch (Exception e) { e.printStackTrace(); }
     }
@@ -107,10 +108,11 @@ public class payment_DAO {
             rs = pstmt.executeQuery();
 
             String title = targetStatus.equals("N") ? "미지급자 (처리 가능)" : "지급 완료자 (취소 가능)";
-            System.out.println("\n  ● " + month + " " + title);
-            System.out.println("  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            System.out.println("+─────────────────────────────────────────────────────────────────────────+");
+            System.out.println("                     " + month + " " + title + "                          ");
+            System.out.println("+─────────────────────────────────────────────────────────────────────────+");
             System.out.println("  " + align("사번", 10) + align("이름", 12) + align("기본급", 16) + "실수령액");
-            System.out.println("  ────────────────────────────────────────────────────────────");
+            System.out.println("+─────────────────────────────────────────────────────────────────────────+");
             
             boolean hasData = false;
             while(rs.next()) {
@@ -122,11 +124,11 @@ public class payment_DAO {
                                    String.format("%,d", (int)(total * 0.9)) + "원");
             }
             if(!hasData) System.out.println("  ! 대상 사원이 없습니다.");
-            System.out.println("  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            System.out.println("───────────────────────────────────────────────────────────────────────────");
         } catch (Exception e) { e.printStackTrace(); }
     }
 
-    // [처리] 개별 지급 완료 (로직 유지, DTO 불필요)
+    // [처리] 개별 지급 완료 (로직 유지, DTO 불필요)`
     public int processPayment(int userId, String month) {
         try {
             getConnection();
