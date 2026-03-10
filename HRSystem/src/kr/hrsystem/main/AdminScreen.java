@@ -97,7 +97,7 @@ public class AdminScreen {
                         break;
 
                     case 9:
-                        System.out.println("▶ 통계 화면으로 이동");
+                        new StatsMain(br, userId, loginLogId);
                         break;
 
                     case 10:
