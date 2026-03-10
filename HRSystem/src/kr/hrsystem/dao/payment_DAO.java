@@ -27,7 +27,7 @@ public class payment_DAO {
         }
         return text + " ".repeat(Math.max(0, length - currentLength));
     }
-
+  
     // [조회] 급여 지급 현황 목록 (부서/전체)
     public void showDeptPaymentStatus(int deptNum, String month) {
         try {

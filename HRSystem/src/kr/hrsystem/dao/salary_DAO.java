@@ -26,7 +26,7 @@ public class salary_DAO {
         }
         return text + " ".repeat(Math.max(0, length - currentLength));
     }
-
+ 
     public void showDepartmentList() {
         try {
             getConnection();

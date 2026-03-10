@@ -335,7 +335,7 @@ public class salary_MAIN {
                         else System.out.println("  ⚠️ Y 또는 N만 가능합니다.");
                     }
                 }
-            }
+            } 
         }
     }
 }
