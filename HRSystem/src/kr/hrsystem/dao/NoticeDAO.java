@@ -83,6 +83,74 @@ public class NoticeDAO {
     }
 
     // ==========================
+    // 투표 게시글 목록 조회
+    // ==========================
+    public void selectVoteNoticeList() {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnection();
+
+            String sql = "SELECT n.notice_id, n.notice_title, u.user_name, "
+                       + "       TO_CHAR(n.created_at, 'YYYY-MM-DD') AS created_at_str, "
+                       + "       n.view_count, n.fixed, n.has_vote, n.vote_status "
+                       + "FROM notices n "
+                       + "JOIN usertest u ON n.user_id = u.user_id "
+                       + "WHERE n.has_vote = 'Y' "
+                       + "ORDER BY n.fixed DESC, n.notice_id DESC";
+
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+
+            printDivider(120);
+            System.out.println("투표 게시글 목록");
+            printDivider(120);
+
+            System.out.println(
+                    pad("번호", 8) +
+                    pad("제목", 36) +
+                    pad("작성자", 12) +
+                    pad("작성일", 14) +
+                    pad("조회수", 8) +
+                    pad("상단고정", 10) +
+                    pad("투표", 8) +
+                    pad("투표상태", 12)
+            );
+
+            printDivider(120);
+
+            boolean hasData = false;
+            while (rs.next()) {
+                hasData = true;
+
+                System.out.println(
+                        pad(String.valueOf(rs.getInt("notice_id")), 8) +
+                        pad(rs.getString("notice_title"), 36) +
+                        pad(rs.getString("user_name"), 12) +
+                        pad(rs.getString("created_at_str"), 14) +
+                        pad(String.valueOf(rs.getInt("view_count")), 8) +
+                        pad(fixedToKor(rs.getString("fixed")), 10) +
+                        pad(hasVoteToKor(rs.getString("has_vote")), 8) +
+                        pad(voteStatusToKor(rs.getString("vote_status")), 12)
+                );
+            }
+
+            if (!hasData) {
+                System.out.println("등록된 투표 게시글이 없습니다.");
+            }
+
+            printDivider(120);
+
+        } catch (Exception e) {
+            System.out.println("❌ 투표 게시글 목록 조회 중 오류가 발생했습니다.");
+        } finally {
+            DBUtil.executeClose(rs, pstmt, conn);
+        }
+    }
+
+    // ==========================
     // 특정 사용자 게시글 목록 조회 (관리자용)
     // ==========================
     public void selectUserNoticeList(int targetUserId) {
@@ -818,6 +886,7 @@ public class NoticeDAO {
 
     // ==========================
     // 관리자용 투표 결과 조회
+    // 투표글만 조회 가능
     // ==========================
     public void selectVoteResult(int noticeId) {
         Connection conn = null;
@@ -829,8 +898,8 @@ public class NoticeDAO {
         try {
             conn = DBUtil.getConnection();
 
-            // 1. 게시글 존재 여부 먼저 확인
-            String chkSql = "SELECT notice_id FROM notices WHERE notice_id = ?";
+            // 1. 게시글 존재 + 투표글 여부 확인
+            String chkSql = "SELECT notice_id, has_vote FROM notices WHERE notice_id = ?";
             pstmtChk = conn.prepareStatement(chkSql);
             pstmtChk.setInt(1, noticeId);
             rsChk = pstmtChk.executeQuery();
@@ -841,7 +910,14 @@ public class NoticeDAO {
                 return;
             }
 
-            // 2. 존재하면 투표 결과 조회
+            String hasVote = rsChk.getString("has_vote");
+            if (!"Y".equalsIgnoreCase(hasVote)) {
+                System.out.println("❌ 해당 게시글은 투표 게시글이 아닙니다.");
+                System.out.println("다시 입력해주세요.");
+                return;
+            }
+
+            // 2. 투표 결과 조회
             String sql =
                 "SELECT NVL(SUM(CASE WHEN vote_choice = 'Y' THEN 1 ELSE 0 END), 0) AS YES_CNT, " +
                 "       NVL(SUM(CASE WHEN vote_choice = 'N' THEN 1 ELSE 0 END), 0) AS NO_CNT " +

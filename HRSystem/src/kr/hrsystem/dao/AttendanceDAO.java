@@ -306,7 +306,7 @@ public class AttendanceDAO {
             rs = pstmt.executeQuery();
 
             boolean hasData = false;
-            System.out.println("\n======================================= 전체 근태 조회 =======================================");
+            System.out.println("\n========================================== 전체 근태 조회 ==========================================");
             System.out.println();
 
             while (rs.next()) {
@@ -383,7 +383,7 @@ public class AttendanceDAO {
             rs = pstmt.executeQuery();
 
             boolean hasData = false;
-            System.out.println("\n======================== " + yearMonth + " 월 근태 조회 ========================");
+            System.out.println("\n=========================== " + yearMonth + " 월 근태 조회 ===========================");
             System.out.println();
 
             while (rs.next()) {

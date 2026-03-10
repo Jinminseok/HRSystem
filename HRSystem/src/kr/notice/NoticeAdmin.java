@@ -131,7 +131,7 @@ public class NoticeAdmin {
                     }
 
                     case 6: { // 투표 결과 조회
-                        dao.selectNoticeList();
+                        dao.selectVoteNoticeList();
 
                         Integer noticeId = readIntWithBack("투표 결과 볼 게시글번호 (뒤로가기: 0) : ");
                         if (noticeId == null) break;
@@ -229,7 +229,6 @@ public class NoticeAdmin {
         }
 
         if ("0".equals(input.trim())) {
-           
             return null;
         }
 
@@ -247,7 +246,6 @@ public class NoticeAdmin {
         input = input.trim();
 
         if ("0".equals(input)) {
-            
             return null;
         }
 

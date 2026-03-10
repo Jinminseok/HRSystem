@@ -74,7 +74,7 @@ public class LogAdminMenu {
             System.out.println("│        🔐 로그인 로그 조회       │");
             System.out.println("+──────────────────────────────────+");
             System.out.println("│ [1] 전체 로그인 로그             │");
-            System.out.println("│ [2] 중요 로그인 로그             │");
+            System.out.println("│ [2] 최근 로그인 로그             │");
             System.out.println("│ [0] 뒤로가기                     │");
             System.out.println("+──────────────────────────────────+");
             System.out.print("선택 >> ");
@@ -116,8 +116,8 @@ public class LogAdminMenu {
             System.out.println("+────────────────────────────────────+");
             System.out.println("│ [1] 전체 행동 로그                 │");
             System.out.println("│ [2] 중요 행동 로그                 │");
-            System.out.println("│ [3] 근태 중요 로그                 │");
-            System.out.println("│ [4] 게시판/투표 중요 로그          │");
+            System.out.println("│ [3] 최근 근태 로그                 │");
+            System.out.println("│ [4] 최근 게시판/투표 로그          │");
             System.out.println("│ [0] 뒤로가기                       │");
             System.out.println("+────────────────────────────────────+");
             System.out.print("선택 >> ");

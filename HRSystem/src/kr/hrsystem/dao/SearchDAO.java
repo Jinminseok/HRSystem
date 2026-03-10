@@ -55,12 +55,12 @@ public class SearchDAO {
     private void printHeader() {
         printDivider(90);
         System.out.println(
-                pad("ID", 8) +
-                pad("LOGIN_ID", 18) +
-                pad("NAME", 12) +
-                pad("DEPT", 14) +
-                pad("POS", 14) +
-                pad("JOIN_DATE", 14)
+                pad("사번", 8) +
+                pad("로그인ID", 18) +
+                pad("이름", 12) +
+                pad("부서", 14) +
+                pad("직급", 14) +
+                pad("가입일", 14)
         );
         printDivider(90);
     }

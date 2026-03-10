@@ -10,9 +10,9 @@ import java.util.List;
 import kr.util.DBUtil;
 
 public class MyInfoDAO {
-	
-	private static final String LINE = "───────────────────────────────────────────";
-	
+
+    private static final int BOX_WIDTH = 53; // 박스 내부 폭
+
     // 1) 로그인한 사용자 내 정보 조회 (오늘 출근/퇴근시간 포함)
     public void selectMyInfo(int userId) {
         Connection conn = null;
@@ -45,18 +45,20 @@ public class MyInfoDAO {
 
             if (rs.next()) {
                 System.out.println();
-                System.out.println("+───────────────────────────────────────────────+");
-                System.out.println("│              🙋 내 정보 조회                  │");
-                System.out.println("+───────────────────────────────────────────────+");
-                System.out.println("│  아이디        :  " + rs.getString("LOGIN_ID") +"\t\t\t│");
-                System.out.println("│  이름          :  " + rs.getString("USER_NAME")+"\t\t\t│");
-                System.out.println("│  부서          :  " + rs.getString("DEPT_NAME")+"\t\t\t│");
-                System.out.println("│  직급          :  " + rs.getString("POSITION_NAME")+"\t\t\t│");
-                System.out.println("│  이메일        :  " + rs.getString("EMAIL")+"\t│");
-                System.out.println("│  전화번호      :  " + rs.getString("PHONE")+"\t\t│");
-                System.out.println("│  오늘 출근시간 :  " + nvlTime(rs.getString("CHECK_IN"))+"\t\t│");
-                System.out.println("│  오늘 퇴근시간 :  " + nvlTime(rs.getString("CHECK_OUT"))+"\t\t│");
-                System.out.println("+───────────────────────────────────────────────+");
+                printBoxLine();
+                printBoxCenter("🙋 내 정보 조회");
+                printBoxLine();
+
+                printInfoRow("아이디", rs.getString("LOGIN_ID"));
+                printInfoRow("이름", rs.getString("USER_NAME"));
+                printInfoRow("부서", rs.getString("DEPT_NAME"));
+                printInfoRow("직급", rs.getString("POSITION_NAME"));
+                printInfoRow("이메일", rs.getString("EMAIL"));
+                printInfoRow("전화번호", rs.getString("PHONE"));
+                printInfoRow("오늘 출근시간", nvlTime(rs.getString("CHECK_IN")));
+                printInfoRow("오늘 퇴근시간", nvlTime(rs.getString("CHECK_OUT")));
+
+                printBoxLine();
             } else {
                 System.out.println("❌ 사용자 정보를 찾을 수 없습니다.");
             }
@@ -64,7 +66,7 @@ public class MyInfoDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            // 네 DBUtil 메서드명이 excuteClose 라서 그대로 사용
+            // 네 DBUtil 메서드명 그대로 사용
             DBUtil.excuteClose(rs, pstmt, conn);
         }
     }
@@ -202,9 +204,13 @@ public class MyInfoDAO {
 
             for (int i = 0; i < params.size(); i++) {
                 Object v = params.get(i);
-                if (v instanceof String) pstmt.setString(i + 1, (String) v);
-                else if (v instanceof Integer) pstmt.setInt(i + 1, (Integer) v);
-                else pstmt.setObject(i + 1, v);
+                if (v instanceof String) {
+                    pstmt.setString(i + 1, (String) v);
+                } else if (v instanceof Integer) {
+                    pstmt.setInt(i + 1, (Integer) v);
+                } else {
+                    pstmt.setObject(i + 1, v);
+                }
             }
 
             return pstmt.executeUpdate();
@@ -222,6 +228,89 @@ public class MyInfoDAO {
         } finally {
             DBUtil.excuteClose(null, pstmt, conn);
         }
+    }
+
+    // ==========================
+    // 출력 유틸
+    // ==========================
+    private void printBoxLine() {
+        System.out.println("+" + "─".repeat(BOX_WIDTH) + "+");
+    }
+
+    private void printBoxCenter(String text) {
+        int textWidth = displayWidth(text);
+        int left = Math.max(0, (BOX_WIDTH - textWidth) / 2);
+        int right = Math.max(0, BOX_WIDTH - textWidth - left);
+
+        System.out.println("│" + " ".repeat(left) + text + " ".repeat(right) + "│");
+    }
+
+    private void printInfoRow(String label, String value) {
+        String safeValue = nvl(value);
+        String prefix = "  " + label + " : ";
+        int remainWidth = BOX_WIDTH - displayWidth(prefix);
+
+        String fittedValue = fitToWidth(safeValue, remainWidth);
+        int spaces = BOX_WIDTH - displayWidth(prefix) - displayWidth(fittedValue);
+
+        if (spaces < 0) spaces = 0;
+
+        System.out.println("│" + prefix + fittedValue + " ".repeat(spaces) + "│");
+    }
+
+    private String fitToWidth(String text, int width) {
+        if (text == null) text = "-";
+
+        if (displayWidth(text) <= width) {
+            return text;
+        }
+
+        String suffix = "...";
+        int suffixWidth = displayWidth(suffix);
+
+        StringBuilder sb = new StringBuilder();
+        int len = 0;
+
+        for (int i = 0; i < text.length(); i++) {
+            char ch = text.charAt(i);
+            int chWidth = isWide(ch) ? 2 : 1;
+
+            if (len + chWidth + suffixWidth > width) {
+                break;
+            }
+
+            sb.append(ch);
+            len += chWidth;
+        }
+
+        sb.append(suffix);
+        return sb.toString();
+    }
+
+    private int displayWidth(String text) {
+        if (text == null || text.isEmpty()) return 0;
+
+        int len = 0;
+        for (int i = 0; i < text.length(); i++) {
+            len += isWide(text.charAt(i)) ? 2 : 1;
+        }
+        return len;
+    }
+
+    private boolean isWide(char ch) {
+        Character.UnicodeBlock block = Character.UnicodeBlock.of(ch);
+        return block == Character.UnicodeBlock.HANGUL_SYLLABLES
+                || block == Character.UnicodeBlock.HANGUL_JAMO
+                || block == Character.UnicodeBlock.HANGUL_COMPATIBILITY_JAMO
+                || block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+                || block == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS;
+    }
+
+    // ==========================
+    // 공통 유틸
+    // ==========================
+    private String nvl(String value) {
+        return (value == null || value.trim().isEmpty()) ? "-" : value;
     }
 
     private String nvlTime(String value) {
