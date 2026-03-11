@@ -219,10 +219,15 @@ public class Salary_Admin {
 
                     Map<String, Object> s = dao.selectMonthlySummary(uid, month);
                     if (s != null && s.get("userName") != null) {
-                        System.out.println("+──────────────────────────────────────────────────────────────────+");
-                        System.out.println("  ● [" + month + "] " + s.get("userName") + " 사원 급여 명세");
-                        System.out.println("  ✨ 실수령액 : " + String.format("%,d", (int)s.get("salTotal")) + " 원");
-                        System.out.println("+──────────────────────────────────────────────────────────────────+");
+                    	System.out.println("\n  ● [" + month + "] " + s.get("userName") + " 사원 급여 명세");
+                        System.out.println("+──────────────────────────────────────────────────────────────────────────────────+");                        
+                        System.out.println("  · 기본급   : " + String.format("%12s", String.format("%,d", (int)s.get("salBase"))) + " 원");
+                        System.out.println("  · 휴일수당 : " + String.format("%12s", String.format("%,d", (int)s.get("salHoliday"))) + " 원");
+                        System.out.println("  · 야근수당 : " + String.format("%12s", String.format("%,d", (int)s.get("salOvertime"))) + " 원");
+                        System.out.println("  · 공제세금 : " + String.format("%12s", String.format("%,d", (int)s.get("salTax"))) + " 원");
+                        System.out.println("+──────────────────────────────────────────────────────────────────────────────────+");
+                        System.out.println("  ✨ 실수령액 : " + String.format("%12s", String.format("%,d", (int)s.get("salTotal"))) + " 원");
+                        System.out.println("+──────────────────────────────────────────────────────────────────────────────────+");                    	
                         break; 
                     } else {
                         System.out.println("  ❌ 급여 내역이 없습니다.");

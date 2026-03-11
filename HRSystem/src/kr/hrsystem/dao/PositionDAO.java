@@ -23,7 +23,7 @@ public class PositionDAO {
 
             pstmt = conn.prepareStatement(sql);
             rs = pstmt.executeQuery();
-
+  
             System.out.println("=".repeat(50));
             System.out.println("직급번호    직급명\t  기본급");
             System.out.println("=".repeat(50));

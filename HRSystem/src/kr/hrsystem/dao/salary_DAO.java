@@ -70,12 +70,14 @@ public class salary_DAO {
             getConnection();
             // 기존의 OUT_STATUS 필터를 제거하여 '출근은 했는데 급여 등록 안 된 모든 건'을 찾습니다.
             String sql = "SELECT a.ATT_ID, u.USER_ID, u.USER_NAME, d.DEPT_NAME, " +
-                         "TO_CHAR(a.ATT_DATE, 'YYYY-MM-DD') as ADATE, " +
-                         "TO_CHAR(a.CHECK_IN, 'HH24:MI') as CIN, TO_CHAR(a.CHECK_OUT, 'HH24:MI') as COUT " +
-                         "FROM ATTENDANCE a " +
-                         "JOIN USERTEST u ON a.USER_ID = u.USER_ID " +
-                         "JOIN DEPT d ON u.DEPT_NUM = d.DEPT_NUM " +
-                         "WHERE a.ATT_ID NOT IN (SELECT ATT_ID FROM SALARY_MANAGEMENT WHERE ATT_ID IS NOT NULL) ";
+                    "TO_CHAR(a.ATT_DATE, 'YYYY-MM-DD') as ADATE, " +
+                    "TO_CHAR(a.CHECK_IN, 'HH24:MI') as CIN, TO_CHAR(a.CHECK_OUT, 'HH24:MI') as COUT " +
+                    "FROM ATTENDANCE a " +
+                    "JOIN USERTEST u ON a.USER_ID = u.USER_ID " +
+                    "JOIN DEPT d ON u.DEPT_NUM = d.DEPT_NUM " +
+                    "WHERE a.ATT_ID NOT IN (SELECT ATT_ID FROM SALARY_MANAGEMENT WHERE ATT_ID IS NOT NULL) " +
+                    "AND (TO_CHAR(a.ATT_DATE, 'D') IN ('1', '7') " + // 휴일(토, 일)
+                    "OR TO_CHAR(a.CHECK_OUT, 'HH24:MI') >= '18:00') "; // 17:59 이후 퇴근(야근)
             
             if (deptNum != -1) sql += "AND u.DEPT_NUM = ? ";
             sql += "ORDER BY a.ATT_DATE DESC";
@@ -260,13 +262,22 @@ public class salary_DAO {
     public int insertSalaryBatch(int deptNum) {
         int count = 0;
         try {
-            getConnection();
-            // 수정 포인트: 필터 없이 모든 미등록 건을 일괄 처리
-            String sql = "SELECT ATT_ID, USER_ID FROM ATTENDANCE WHERE ATT_ID NOT IN (SELECT ATT_ID FROM SALARY_MANAGEMENT WHERE ATT_ID IS NOT NULL) ";
-            if (deptNum != -1) sql += "AND USER_ID IN (SELECT USER_ID FROM USERTEST WHERE DEPT_NUM = ?)";
+            getConnection();           
+            String sql = "SELECT a.ATT_ID, a.USER_ID FROM ATTENDANCE a " +
+                    "JOIN USERTEST u ON a.USER_ID = u.USER_ID " +
+                    "WHERE a.ATT_ID NOT IN (SELECT ATT_ID FROM SALARY_MANAGEMENT WHERE ATT_ID IS NOT NULL) " +
+                    "AND (TO_CHAR(a.ATT_DATE, 'D') IN ('1', '7') " + // 휴일이거나
+                    "OR TO_CHAR(a.CHECK_OUT, 'HH24:MI') >= '18:00') "; // 야근인 경우만!
+            
+            if (deptNum != -1) sql += "AND u.DEPT_NUM = ? ";
             pstmt = conn.prepareStatement(sql); if (deptNum != -1) pstmt.setInt(1, deptNum);
             ResultSet rsList = pstmt.executeQuery();
-            while(rsList.next()) if(insertSalary(rsList.getInt("USER_ID"), rsList.getInt("ATT_ID")) > 0) count++;
+            while(rsList.next()) {
+                // 필터링된 대상자들만 하나씩 insertSalary로 등록
+                if(insertSalary(rsList.getInt("USER_ID"), rsList.getInt("ATT_ID")) > 0) {
+                    count++;
+                }
+            }             
         } catch (Exception e) { e.printStackTrace(); }
         return count;
     }
