@@ -12,22 +12,24 @@ import kr.hrsystem.dao.HrAppointmentHistoryDAO;
 import kr.hrsystem.dao.PositionDAO;
 import kr.hrsystem.dao.SearchDAO;
 import kr.hrsystem.dao.OrgChartDAO;
-
+// 클래스 선언 + 필드 (사원관리 기능에서 공통적으로 사용하는 객체)
 public class UserManage_Admin {
 
-    private BufferedReader br;
-    private int adminUserId;
-    private int loginLogId;
-    private LoginDAO userDao;
+    private BufferedReader br;// 관리자가 입력하는 값 처리
+    private int adminUserId;// 현재 로그인한 관리자 ID
+    private int loginLogId;// 현재 로그인 세션의 로그 ID
+    private LoginDAO userDao;// 사원관련 DB 작업
     private LogDAO logDao;
-    private HrAppointmentHistoryDAO historyDao;
-    private DeptDAO deptDao;
-    private PositionDAO positionDao;
- 
+    private HrAppointmentHistoryDAO historyDao;// 인사발령 이력저장
+    private DeptDAO deptDao;// 부서 관련 기능
+    private PositionDAO positionDao;// 직급 관련 기능
+ // 생성자 - 관리자가 AdminScreen에서 1번 사원관리 누르면 이 클래스 실행
     public UserManage_Admin(BufferedReader br, int adminUserId, int loginLogId) {
+    	//내부 초기화, 관리자 정보 저장
         this.br = br;
         this.adminUserId = adminUserId;
         this.loginLogId = loginLogId;
+        //DAO 생성, DB 작업 준비
         this.userDao = new LoginDAO();
         this.logDao = new LogDAO();
         this.historyDao = new HrAppointmentHistoryDAO();
@@ -35,15 +37,15 @@ public class UserManage_Admin {
         this.positionDao = new PositionDAO();
 
         try {
-            menu();
+            menu();// 사원관리 메뉴 menu() 실행
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void menu() throws IOException {
+    private void menu() throws IOException {// 관리자가 사원관리에서 사용할 기능 메뉴를 보여줌
 
-        while (true) {
+        while (true) {// true이기 때문에 관리자가 0번 뒤로가기 누르기 전까지 계속 반복
             System.out.println();
             System.out.println("+──────────────────────────────────────────+");
             System.out.println("│           👥 사원 관리 (관리자)          │");
@@ -59,14 +61,15 @@ public class UserManage_Admin {
             try {
                 int no = Integer.parseInt(br.readLine());
 
-                switch (no) {
+                switch (no) {// 관리자가 입력한 메뉴 번호 읽고 switch문으로 기능 분기
                     case 1:
-                        // 승인대기 목록
+                        // 승인대기 목록 조회 - 조회 조건 APPROVAL_STATUS값이 (PENDONG,REJECTED) 인 사용자
                         userDao.selectPendingUsers();
                         break;
 
                     case 2: {
-                        // 사원 승인 처리
+                        // 사원 승인 처리- 관리자가 승인할 사용자 ID 선택
+                    	// 먼저 승인대기 목록을 보여주고 그 다음 USER_ID를 입력 
                         userDao.selectPendingUsers();
 
                         System.out.print("승인할 USER_ID(돌아가기: 0) : ");
