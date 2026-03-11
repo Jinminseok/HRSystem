@@ -11,9 +11,9 @@ import kr.util.DBUtil;
 
 public class MyInfoDAO {
 
-    private static final int BOX_WIDTH = 53; // 박스 내부 폭
+    private static final int BOX_WIDTH = 53; // 내 정보 출력 박스 내부 폭
 
-    // 1) 로그인한 사용자 내 정보 조회 (오늘 출근/퇴근시간 포함)
+    // 로그인한 사용자의 내 정보 조회 (오늘 출근/퇴근시간 포함)
     public void selectMyInfo(int userId) {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -49,6 +49,7 @@ public class MyInfoDAO {
                 printBoxCenter("🙋 내 정보 조회");
                 printBoxLine();
 
+                // 조회한 사용자 정보를 박스 형태로 출력
                 printInfoRow("아이디", rs.getString("LOGIN_ID"));
                 printInfoRow("이름", rs.getString("USER_NAME"));
                 printInfoRow("부서", rs.getString("DEPT_NAME"));
@@ -66,13 +67,14 @@ public class MyInfoDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            // 네 DBUtil 메서드명 그대로 사용
+            // DB 자원 정리
             DBUtil.excuteClose(rs, pstmt, conn);
         }
     }
 
-    // 2) 비밀번호 수정
+    // 비밀번호 수정
     public int updatePassword(int userId, String newPassword) {
+        // 빈값이면 수정하지 않음
         if (isBlank(newPassword)) return 0;
 
         Connection conn = null;
@@ -100,8 +102,9 @@ public class MyInfoDAO {
         }
     }
 
-    // 3) 이메일 수정
+    // 이메일 수정
     public int updateEmail(int userId, String newEmail) {
+        // 빈값이면 수정하지 않음
         if (isBlank(newEmail)) return 0;
 
         Connection conn = null;
@@ -122,6 +125,7 @@ public class MyInfoDAO {
             return pstmt.executeUpdate();
 
         } catch (SQLException e) {
+            // 이메일 중복 예외 처리
             if (e.getErrorCode() == 1) {
                 System.out.println("❌ 이미 사용 중인 이메일입니다.");
             } else {
@@ -136,8 +140,9 @@ public class MyInfoDAO {
         }
     }
 
-    // 4) 전화번호 수정
+    // 전화번호 수정
     public int updatePhone(int userId, String newPhone) {
+        // 빈값이면 수정하지 않음
         if (isBlank(newPhone)) return 0;
 
         Connection conn = null;
@@ -165,8 +170,8 @@ public class MyInfoDAO {
         }
     }
 
-    // 5) 내 정보 일괄 수정 (비밀번호/이메일/전화번호)
-    // 빈값은 수정 안함
+    // 내 정보 일괄 수정 (비밀번호/이메일/전화번호)
+    // 빈값은 수정하지 않음
     public int updateMyInfo(int userId, String newPassword, String newEmail, String newPhone) {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -177,6 +182,7 @@ public class MyInfoDAO {
 
             boolean hasField = false;
 
+            // 입력된 값만 동적으로 UPDATE 항목에 추가
             if (!isBlank(newPassword)) {
                 sql.append("PASSWORD = ?, ");
                 params.add(newPassword.trim());
@@ -193,6 +199,7 @@ public class MyInfoDAO {
                 hasField = true;
             }
 
+            // 수정할 항목이 없으면 종료
             if (!hasField) return 0;
 
             sql.append("USER_MODIFIED_DATE = SYSDATE ");
@@ -202,6 +209,7 @@ public class MyInfoDAO {
             conn = DBUtil.getConnection();
             pstmt = conn.prepareStatement(sql.toString());
 
+            // 파라미터를 순서대로 바인딩
             for (int i = 0; i < params.size(); i++) {
                 Object v = params.get(i);
                 if (v instanceof String) {
@@ -216,6 +224,7 @@ public class MyInfoDAO {
             return pstmt.executeUpdate();
 
         } catch (SQLException e) {
+            // 이메일 중복 예외 처리
             if (e.getErrorCode() == 1) {
                 System.out.println("❌ 이미 사용 중인 이메일입니다.");
             } else {
@@ -233,10 +242,13 @@ public class MyInfoDAO {
     // ==========================
     // 출력 유틸
     // ==========================
+
+    // 박스 윗줄/아랫줄 출력
     private void printBoxLine() {
         System.out.println("+" + "─".repeat(BOX_WIDTH) + "+");
     }
 
+    // 제목을 박스 가운데 정렬해서 출력
     private void printBoxCenter(String text) {
         int textWidth = displayWidth(text);
         int left = Math.max(0, (BOX_WIDTH - textWidth) / 2);
@@ -245,6 +257,7 @@ public class MyInfoDAO {
         System.out.println("│" + " ".repeat(left) + text + " ".repeat(right) + "│");
     }
 
+    // 항목명과 값을 한 줄로 출력
     private void printInfoRow(String label, String value) {
         String safeValue = nvl(value);
         String prefix = "  " + label + " : ";
@@ -258,6 +271,7 @@ public class MyInfoDAO {
         System.out.println("│" + prefix + fittedValue + " ".repeat(spaces) + "│");
     }
 
+    // 박스 너비를 넘는 문자열은 잘라서 ... 처리
     private String fitToWidth(String text, int width) {
         if (text == null) text = "-";
 
@@ -287,6 +301,7 @@ public class MyInfoDAO {
         return sb.toString();
     }
 
+    // 문자열의 실제 출력 길이 계산
     private int displayWidth(String text) {
         if (text == null || text.isEmpty()) return 0;
 
@@ -297,6 +312,7 @@ public class MyInfoDAO {
         return len;
     }
 
+    // 한글/중문처럼 폭이 2칸인 문자 판별
     private boolean isWide(char ch) {
         Character.UnicodeBlock block = Character.UnicodeBlock.of(ch);
         return block == Character.UnicodeBlock.HANGUL_SYLLABLES
@@ -309,14 +325,18 @@ public class MyInfoDAO {
     // ==========================
     // 공통 유틸
     // ==========================
+
+    // null 또는 빈 문자열이면 "-" 반환
     private String nvl(String value) {
         return (value == null || value.trim().isEmpty()) ? "-" : value;
     }
 
+    // 시간값이 없으면 "기록 없음" 반환
     private String nvlTime(String value) {
         return (value == null || value.trim().isEmpty()) ? "기록 없음" : value;
     }
 
+    // null 또는 공백 여부 확인
     private boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
     }

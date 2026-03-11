@@ -15,9 +15,7 @@ public class NoticeDAO {
 
     private LogDAO logDao = new LogDAO();
 
-    // ==========================
-    // 공통: 전체 게시글 목록 조회
-    // ==========================
+    // 전체 게시글 목록 조회
     public void selectNoticeList() {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -57,6 +55,7 @@ public class NoticeDAO {
             while (rs.next()) {
                 hasData = true;
 
+                // 게시글 목록 한 줄씩 출력
                 System.out.println(
                         pad(String.valueOf(rs.getInt("notice_id")), 8) +
                         pad(rs.getString("notice_title"), 36) +
@@ -82,9 +81,7 @@ public class NoticeDAO {
         }
     }
 
-    // ==========================
-    // 투표 게시글 목록 조회
-    // ==========================
+    // 투표 게시글만 조회
     public void selectVoteNoticeList() {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -125,6 +122,7 @@ public class NoticeDAO {
             while (rs.next()) {
                 hasData = true;
 
+                // 투표 게시글 목록 한 줄씩 출력
                 System.out.println(
                         pad(String.valueOf(rs.getInt("notice_id")), 8) +
                         pad(rs.getString("notice_title"), 36) +
@@ -150,9 +148,7 @@ public class NoticeDAO {
         }
     }
 
-    // ==========================
-    // 특정 사용자 게시글 목록 조회 (관리자용)
-    // ==========================
+    // 특정 사용자가 작성한 게시글 목록 조회 (관리자용)
     public void selectUserNoticeList(int targetUserId) {
         Connection conn = null;
         PreparedStatement pstmtName = null;
@@ -169,6 +165,7 @@ public class NoticeDAO {
             pstmtName.setInt(1, targetUserId);
             rsName = pstmtName.executeQuery();
 
+            // 대상 사용자 존재 여부 확인
             if (rsName.next()) {
                 userName = rsName.getString("user_name");
             } else {
@@ -210,6 +207,7 @@ public class NoticeDAO {
             while (rs.next()) {
                 hasData = true;
 
+                // 특정 사용자의 게시글 목록 출력
                 System.out.println(
                         pad(String.valueOf(rs.getInt("notice_id")), 8) +
                         pad(rs.getString("notice_title"), 36) +
@@ -236,9 +234,7 @@ public class NoticeDAO {
         }
     }
 
-    // ==========================
-    // 게시글 상세 조회 (조회수 증가)
-    // ==========================
+    // 게시글 상세 조회 + 조회수 1 증가
     public void selectNoticeDetail(int noticeId) {
         Connection conn = null;
         PreparedStatement pstmtUp = null;
@@ -253,6 +249,7 @@ public class NoticeDAO {
             pstmtUp = conn.prepareStatement(upSql);
             pstmtUp.setInt(1, noticeId);
 
+            // 조회수 증가, 게시글이 없으면 롤백
             int count = pstmtUp.executeUpdate();
             if (count == 0) {
                 conn.rollback();
@@ -274,6 +271,7 @@ public class NoticeDAO {
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
+                // 게시글 상세 정보 출력
                 printDivider(90);
                 System.out.println("번호      : " + rs.getInt("notice_id"));
                 System.out.println("제목      : " + nvl(rs.getString("notice_title")));
@@ -300,16 +298,12 @@ public class NoticeDAO {
         }
     }
 
-    // ==========================
     // 내 게시글 조회
-    // ==========================
     public void selectMyNoticeList(int userId) {
         selectUserNoticeList(userId);
     }
 
-    // ==========================
     // 게시글 등록 (관리자/사원 공용)
-    // ==========================
     public void insertNotice(String title, String content, int writerUserId,
                              String fixed, String hasVote, String voteDeadlineInput,
                              Integer loginLogId) {
@@ -322,12 +316,14 @@ public class NoticeDAO {
         try {
             conn = DBUtil.getConnection();
 
+            // 고정글/투표글 입력값 정리
             String safeFixed = "Y".equalsIgnoreCase(fixed) ? "Y" : "N";
             String safeHasVote = "Y".equalsIgnoreCase(hasVote) ? "Y" : "N";
             String voteStatus = "Y".equals(safeHasVote) ? "O" : "N";
 
             Timestamp voteDeadline = null;
             try {
+                // 투표 마감일시 파싱
                 voteDeadline = parseVoteDeadline(voteDeadlineInput);
             } catch (IllegalArgumentException e) {
                 System.out.println("❌ " + e.getMessage());
@@ -355,6 +351,7 @@ public class NoticeDAO {
 
             DBUtil.executeClose(null, pstmt, null);
 
+            // 방금 등록된 게시글 번호 조회
             pstmtSeq = conn.prepareStatement("SELECT seq_notices.CURRVAL AS notice_id FROM dual");
             rs = pstmtSeq.executeQuery();
 
@@ -365,6 +362,7 @@ public class NoticeDAO {
 
             System.out.println(count + "개의 게시글이 등록되었습니다.");
 
+            // 게시글 등록 로그 저장
             logDao.insertActionLog(
                 writerUserId,
                 "게시판",
@@ -384,9 +382,7 @@ public class NoticeDAO {
         }
     }
 
-    // ==========================
-    // 관리자: 게시글 수정 (전체 대상)
-    // ==========================
+    // 관리자: 모든 게시글 수정
     public void updateNotice(int noticeId, String newTitle, String newContent,
                              int actorUserId, Integer loginLogId) {
 
@@ -405,6 +401,7 @@ public class NoticeDAO {
             pstmtSel.setInt(1, noticeId);
             rs = pstmtSel.executeQuery();
 
+            // 수정 전 기존 제목 조회
             if (!rs.next()) {
                 System.out.println("❌ 해당 게시글이 존재하지 않습니다.");
                 System.out.println("다시 입력해주세요.");
@@ -425,6 +422,7 @@ public class NoticeDAO {
             if (count > 0) {
                 System.out.println("게시글이 수정되었습니다.");
 
+                // 관리자 수정 로그 저장
                 logDao.insertActionLog(
                     actorUserId,
                     "게시판",
@@ -448,9 +446,7 @@ public class NoticeDAO {
         }
     }
 
-    // ==========================
-    // 관리자: 게시글 삭제 (전체 대상)
-    // ==========================
+    // 관리자: 모든 게시글 삭제
     public void deleteNotice(int noticeId, int actorUserId, Integer loginLogId) {
         Connection conn = null;
         PreparedStatement pstmtSel = null;
@@ -467,6 +463,7 @@ public class NoticeDAO {
             pstmtSel.setInt(1, noticeId);
             rs = pstmtSel.executeQuery();
 
+            // 삭제 전 기존 제목 조회
             if (!rs.next()) {
                 System.out.println("❌ 해당 게시글이 존재하지 않습니다.");
                 System.out.println("다시 입력해주세요.");
@@ -485,6 +482,7 @@ public class NoticeDAO {
             if (count > 0) {
                 System.out.println("게시글이 삭제되었습니다.");
 
+                // 관리자 삭제 로그 저장
                 logDao.insertActionLog(
                     actorUserId,
                     "게시판",
@@ -508,9 +506,7 @@ public class NoticeDAO {
         }
     }
 
-    // ==========================
-    // 관리자: 특정 사용자 글 수정
-    // ==========================
+    // 관리자: 특정 사용자의 게시글 수정
     public void updateNoticeByAdminForUser(int noticeId, int targetUserId, String newTitle, String newContent,
                                            int adminUserId, Integer loginLogId) {
 
@@ -530,6 +526,7 @@ public class NoticeDAO {
             pstmtSel.setInt(1, noticeId);
             rs = pstmtSel.executeQuery();
 
+            // 게시글 존재 여부와 작성자 확인
             if (!rs.next()) {
                 System.out.println("❌ 해당 게시글이 존재하지 않습니다.");
                 System.out.println("다시 입력해주세요.");
@@ -559,6 +556,7 @@ public class NoticeDAO {
             if (count > 0) {
                 System.out.println("✅ 특정 사용자 게시글 수정 완료");
 
+                // 관리자(사용자별) 수정 로그 저장
                 logDao.insertActionLog(
                     adminUserId,
                     "게시판",
@@ -584,9 +582,7 @@ public class NoticeDAO {
         }
     }
 
-    // ==========================
-    // 관리자: 특정 사용자 글 삭제
-    // ==========================
+    // 관리자: 특정 사용자의 게시글 삭제
     public void deleteNoticeByAdminForUser(int noticeId, int targetUserId,
                                            int adminUserId, Integer loginLogId) {
 
@@ -606,6 +602,7 @@ public class NoticeDAO {
             pstmtSel.setInt(1, noticeId);
             rs = pstmtSel.executeQuery();
 
+            // 게시글 존재 여부와 작성자 확인
             if (!rs.next()) {
                 System.out.println("❌ 해당 게시글이 존재하지 않습니다.");
                 System.out.println("다시 입력해주세요.");
@@ -633,6 +630,7 @@ public class NoticeDAO {
             if (count > 0) {
                 System.out.println("✅ 특정 사용자 게시글 삭제 완료");
 
+                // 관리자(사용자별) 삭제 로그 저장
                 logDao.insertActionLog(
                     adminUserId,
                     "게시판",
@@ -658,9 +656,7 @@ public class NoticeDAO {
         }
     }
 
-    // ==========================
-    // 사원: 내 게시글 수정 (본인만)
-    // ==========================
+    // 사원: 본인 게시글만 수정
     public void updateMyNotice(int noticeId, int userId, String newTitle, String newContent, Integer loginLogId) {
         Connection conn = null;
         PreparedStatement pstmtSel = null;
@@ -678,6 +674,7 @@ public class NoticeDAO {
             pstmtSel.setInt(2, userId);
             rs = pstmtSel.executeQuery();
 
+            // 본인 글인지 확인
             if (!rs.next()) {
                 System.out.println("❌ 수정 실패: 게시글이 없거나 본인 글이 아닙니다.");
                 System.out.println("다시 입력해주세요.");
@@ -699,6 +696,7 @@ public class NoticeDAO {
             if (count > 0) {
                 System.out.println("✅ 내 게시글이 수정되었습니다.");
 
+                // 내 게시글 수정 로그 저장
                 logDao.insertActionLog(
                     userId,
                     "게시판",
@@ -722,9 +720,7 @@ public class NoticeDAO {
         }
     }
 
-    // ==========================
-    // 사원: 내 게시글 삭제 (본인만)
-    // ==========================
+    // 사원: 본인 게시글만 삭제
     public void deleteMyNotice(int noticeId, int userId, Integer loginLogId) {
         Connection conn = null;
         PreparedStatement pstmtSel = null;
@@ -742,6 +738,7 @@ public class NoticeDAO {
             pstmtSel.setInt(2, userId);
             rs = pstmtSel.executeQuery();
 
+            // 본인 글인지 확인
             if (!rs.next()) {
                 System.out.println("❌ 삭제 실패: 게시글이 없거나 본인 글이 아닙니다.");
                 System.out.println("다시 입력해주세요.");
@@ -761,6 +758,7 @@ public class NoticeDAO {
             if (count > 0) {
                 System.out.println("✅ 내 게시글이 삭제되었습니다.");
 
+                // 내 게시글 삭제 로그 저장
                 logDao.insertActionLog(
                     userId,
                     "게시판",
@@ -784,9 +782,7 @@ public class NoticeDAO {
         }
     }
 
-    // ==========================
-    // 투표 참여 (찬성/반대)
-    // ==========================
+    // 투표 참여 또는 기존 투표 수정
     public void voteNotice(int noticeId, int userId, String choice, Integer loginLogId) {
 
         Connection conn = null;
@@ -806,6 +802,7 @@ public class NoticeDAO {
             pstmtChk.setInt(1, noticeId);
             rs = pstmtChk.executeQuery();
 
+            // 게시글 존재 여부와 투표 가능 여부 확인
             if (!rs.next()) {
                 System.out.println("❌ 해당 게시글이 없습니다.");
                 System.out.println("다시 입력해주세요.");
@@ -832,6 +829,7 @@ public class NoticeDAO {
 
                 DBUtil.executeClose(rs, pstmtChk, null);
 
+                // 마감 시간이 지났으면 상태를 마감(C)으로 변경
                 PreparedStatement pstmtClose = null;
                 try {
                     pstmtClose = conn.prepareStatement("UPDATE notices SET vote_status='C' WHERE notice_id=?");
@@ -865,6 +863,7 @@ public class NoticeDAO {
             String label = "Y".equalsIgnoreCase(choice) ? "찬성" : "반대";
             System.out.println("✅ 투표 완료! (" + label + ")");
 
+            // 투표 로그 저장
             logDao.insertActionLog(
                 userId,
                 "게시판",
@@ -884,10 +883,7 @@ public class NoticeDAO {
         }
     }
 
-    // ==========================
     // 관리자용 투표 결과 조회
-    // 투표글만 조회 가능
-    // ==========================
     public void selectVoteResult(int noticeId) {
         Connection conn = null;
         PreparedStatement pstmtChk = null;
@@ -898,7 +894,7 @@ public class NoticeDAO {
         try {
             conn = DBUtil.getConnection();
 
-            // 1. 게시글 존재 + 투표글 여부 확인
+            // 게시글 존재 여부 + 투표글 여부 확인
             String chkSql = "SELECT notice_id, has_vote FROM notices WHERE notice_id = ?";
             pstmtChk = conn.prepareStatement(chkSql);
             pstmtChk.setInt(1, noticeId);
@@ -917,7 +913,7 @@ public class NoticeDAO {
                 return;
             }
 
-            // 2. 투표 결과 조회
+            // 찬성/반대 수 집계 조회
             String sql =
                 "SELECT NVL(SUM(CASE WHEN vote_choice = 'Y' THEN 1 ELSE 0 END), 0) AS YES_CNT, " +
                 "       NVL(SUM(CASE WHEN vote_choice = 'N' THEN 1 ELSE 0 END), 0) AS NO_CNT " +
@@ -946,13 +942,7 @@ public class NoticeDAO {
         }
     }
 
-    // ==========================
-    // 투표 마감일시 파싱
-    // 허용 형식:
-    // 1) yyyy-MM-dd
-    // 2) yyyy-MM-dd HH:mm
-    // 3) yyyy-MM-dd HH:mm:ss
-    // ==========================
+    // 투표 마감일시 문자열을 Timestamp로 변환
     private Timestamp parseVoteDeadline(String input) {
         if (input == null) return null;
 
@@ -960,16 +950,19 @@ public class NoticeDAO {
         if (input.length() == 0) return null;
 
         try {
+            // 날짜만 입력하면 23:59:59로 처리
             if (input.matches("\\d{4}-\\d{2}-\\d{2}$")) {
                 LocalDate date = LocalDate.parse(input, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 return Timestamp.valueOf(date.atTime(23, 59, 59));
             }
 
+            // yyyy-MM-dd HH:mm 형식 처리
             if (input.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}$")) {
                 LocalDateTime dateTime = LocalDateTime.parse(input, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
                 return Timestamp.valueOf(dateTime);
             }
 
+            // yyyy-MM-dd HH:mm:ss 형식 처리
             if (input.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$")) {
                 LocalDateTime dateTime = LocalDateTime.parse(input, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 return Timestamp.valueOf(dateTime);
@@ -985,10 +978,13 @@ public class NoticeDAO {
     // ==========================
     // 콘솔 출력 정렬용 유틸
     // ==========================
+
+    // 구분선 출력
     private void printDivider(int length) {
         System.out.println("=".repeat(length));
     }
 
+    // 한글/중문처럼 폭이 2칸인 문자 판별
     private boolean isWide(char ch) {
         Character.UnicodeBlock block = Character.UnicodeBlock.of(ch);
         return block == Character.UnicodeBlock.HANGUL_SYLLABLES
@@ -998,6 +994,7 @@ public class NoticeDAO {
                 || block == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS;
     }
 
+    // 콘솔 정렬을 위해 문자열 길이 맞춤
     private String pad(String s, int width) {
         if (s == null || s.trim().isEmpty()) {
             s = "-";
@@ -1026,20 +1023,24 @@ public class NoticeDAO {
         return sb.toString();
     }
 
+    // null 또는 공백 문자열이면 "-" 반환
     private String nvl(String s) {
         return (s == null || s.trim().isEmpty()) ? "-" : s;
     }
 
+    // 고정 여부를 한글로 변환
     private String fixedToKor(String fixed) {
         if (fixed == null) return "-";
         return "Y".equalsIgnoreCase(fixed) ? "고정" : "일반";
     }
 
+    // 투표글 여부를 한글로 변환
     private String hasVoteToKor(String hasVote) {
         if (hasVote == null) return "-";
         return "Y".equalsIgnoreCase(hasVote) ? "투표" : "일반";
     }
 
+    // 투표 상태 코드를 한글로 변환
     private String voteStatusToKor(String status) {
         if (status == null) return "-";
 

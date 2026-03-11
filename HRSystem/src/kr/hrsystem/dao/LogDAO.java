@@ -10,7 +10,7 @@ import kr.util.DBUtil;
 
 public class LogDAO {
 
-    // 1) 로그인 시도 기록 (성공/실패)
+    // 로그인 시도 기록 저장 (성공/실패)
     public int insertLoginHistory(Integer userId, String loginId, String result, String failReason) {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -25,6 +25,8 @@ public class LogDAO {
                        + "VALUES (seq_login_history.NEXTVAL, ?, ?, ?, ?)";
 
             pstmt = conn.prepareStatement(sql);
+
+            // 로그인 사용자 정보가 없으면 null 저장
             if (userId == null) pstmt.setNull(1, java.sql.Types.NUMERIC);
             else pstmt.setInt(1, userId);
 
@@ -36,6 +38,7 @@ public class LogDAO {
 
             DBUtil.executeClose(null, pstmt, null);
 
+            // 방금 저장된 로그인 로그 ID 조회
             String seqSql = "SELECT seq_login_history.CURRVAL AS id FROM dual";
             pstmt = conn.prepareStatement(seqSql);
             rs = pstmt.executeQuery();
@@ -53,7 +56,7 @@ public class LogDAO {
         return loginLogId;
     }
 
-    // 2) 로그아웃 기록
+    // 로그아웃 시간 저장
     public void updateLogoutTime(int loginLogId) {
         if (loginLogId <= 0) return;
 
@@ -78,7 +81,7 @@ public class LogDAO {
         }
     }
 
-    // 3) 사용자 행동 로그 기록
+    // 사용자 행동 로그 저장
     public void insertActionLog(int userId, String menuName, String actionType,
                                 String actionDesc, String targetTable, Integer targetId,
                                 Integer loginLogId) {
@@ -100,9 +103,11 @@ public class LogDAO {
             pstmt.setString(4, actionDesc);
             pstmt.setString(5, targetTable);
 
+            // 대상 ID가 없으면 null 저장
             if (targetId == null) pstmt.setNull(6, java.sql.Types.NUMERIC);
             else pstmt.setInt(6, targetId);
 
+            // 로그인 로그 ID가 없으면 null 저장
             if (loginLogId == null || loginLogId <= 0) {
                 pstmt.setNull(7, java.sql.Types.NUMERIC);
             } else {
@@ -118,9 +123,7 @@ public class LogDAO {
         }
     }
 
-    // =========================================================
-    // 기존 전체 조회
-    // =========================================================
+    // 로그인 이력 전체 조회
     public void selectLoginHistory() {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -153,6 +156,7 @@ public class LogDAO {
         }
     }
 
+    // 행동 로그 전체 조회
     public void selectActionLog() {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -184,11 +188,7 @@ public class LogDAO {
         }
     }
 
-    // =========================================================
-    // 중요 로그 전용 조회
-    // =========================================================
-
-    // 4) 중요 로그인 로그 (최근 N건)
+    // 최근 N건의 로그인 중요 로그 조회
     public void selectImportantLoginHistory(int limit) {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -228,7 +228,7 @@ public class LogDAO {
         }
     }
 
-    // 5) 중요 행동 로그 전체 (최근 N건)
+    // 최근 N건의 중요 행동 로그 조회
     public void selectImportantActionLog(int limit) {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -270,7 +270,7 @@ public class LogDAO {
         }
     }
 
-    // 6) 근태 중요 로그만 (최근 N건)
+    // 최근 N건의 근태 관련 중요 로그 조회
     public void selectImportantAttendanceActionLog(int limit) {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -307,7 +307,7 @@ public class LogDAO {
         }
     }
 
-    // 7) 게시판/투표 중요 로그만 (최근 N건)
+    // 최근 N건의 게시판/투표 관련 중요 로그 조회
     public void selectImportantBoardActionLog(int limit) {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -344,7 +344,7 @@ public class LogDAO {
         }
     }
 
-    // 8) 오늘 중요 로그 요약
+    // 오늘 발생한 중요 로그 건수를 요약해서 출력
     public void selectTodayImportantSummary() {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -434,9 +434,7 @@ public class LogDAO {
         }
     }
 
-    // =========================================================
-    // 출력 정렬용 helper
-    // =========================================================
+    // 로그인 이력 출력용 헤더
     private void printLoginHeader() {
         printDivider(112);
         System.out.println(
@@ -451,6 +449,7 @@ public class LogDAO {
         printDivider(112);
     }
 
+    // 로그인 이력 한 줄 출력
     private void printLoginRow(ResultSet rs) throws Exception {
         String result = "S".equals(rs.getString("login_result")) ? "성공" : "실패";
 
@@ -465,6 +464,7 @@ public class LogDAO {
         );
     }
 
+    // 행동 로그 출력용 헤더
     private void printActionHeader(String title) {
         System.out.println("\n[ " + title + " ]");
         printDivider(112);
@@ -479,6 +479,7 @@ public class LogDAO {
         printDivider(112);
     }
 
+    // 행동 로그 1건 출력
     private void printActionRow(ResultSet rs) throws Exception {
         Object targetIdObj = rs.getObject("target_id");
 
@@ -501,6 +502,7 @@ public class LogDAO {
                 pad(actionType, 12)
         );
 
+        // 긴 설명은 여러 줄로 나눠서 출력
         List<String> descLines = wrapText(actionDesc, 92);
         if (descLines.isEmpty()) {
             System.out.println("   설명 : -");
@@ -515,6 +517,7 @@ public class LogDAO {
         printDivider(112);
     }
 
+    // 메뉴명을 짧게 변환
     private String shortMenuName(String menuName) {
         if (menuName == null) return "-";
 
@@ -532,6 +535,7 @@ public class LogDAO {
         }
     }
 
+    // 행동 타입 코드를 한글명으로 변환
     private String actionTypeToKor(String actionType) {
         if (actionType == null) return "-";
 
@@ -565,6 +569,7 @@ public class LogDAO {
         }
     }
 
+    // 대상 테이블명을 한글명으로 변환
     private String targetTableToKor(String targetTable) {
         if (targetTable == null) return "-";
 
@@ -586,14 +591,17 @@ public class LogDAO {
         }
     }
 
+    // null 또는 빈 문자열이면 "-" 반환
     private String nvl(String s) {
         return (s == null || s.trim().isEmpty()) ? "-" : s;
     }
 
+    // 구분선 출력
     private void printDivider(int n) {
         System.out.println("=".repeat(n));
     }
 
+    // 한글/중문처럼 너비 2칸 문자인지 확인
     private boolean isWide(char ch) {
         Character.UnicodeBlock block = Character.UnicodeBlock.of(ch);
         return block == Character.UnicodeBlock.HANGUL_SYLLABLES
@@ -603,6 +611,7 @@ public class LogDAO {
                 || block == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS;
     }
 
+    // 문자열의 실제 출력 너비 계산
     private int displayWidth(String s) {
         if (s == null || s.isEmpty()) return 0;
 
@@ -613,6 +622,7 @@ public class LogDAO {
         return len;
     }
 
+    // 콘솔 정렬을 위해 문자열 길이를 맞춤
     private String pad(String s, int width) {
         if (s == null || s.trim().isEmpty()) {
             s = "-";
@@ -641,6 +651,7 @@ public class LogDAO {
         return sb.toString();
     }
 
+    // 긴 문자열을 지정 너비에 맞게 줄바꿈
     private List<String> wrapText(String text, int width) {
         List<String> lines = new ArrayList<>();
 
@@ -673,10 +684,12 @@ public class LogDAO {
         return lines;
     }
 
+    // 박스 테두리 출력
     private void printBoxLine(int width) {
         System.out.println("+" + "─".repeat(width) + "+");
     }
 
+    // 박스 가운데 정렬 출력
     private void printBoxCenter(String text, int width) {
         int textWidth = displayWidth(text);
         int left = Math.max(0, (width - textWidth) / 2);
@@ -685,6 +698,7 @@ public class LogDAO {
         System.out.println("│" + " ".repeat(left) + text + " ".repeat(right) + "│");
     }
 
+    // 박스 한 줄 출력
     private void printBoxRow(String label, String value, int width) {
         String leftText = "  " + label;
         String rightText = value;

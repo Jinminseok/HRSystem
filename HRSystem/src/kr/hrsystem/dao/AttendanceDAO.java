@@ -16,17 +16,17 @@ public class AttendanceDAO {
 
     private LogDAO logDao = new LogDAO();
 
+    // Timestamp를 "yyyy-MM-dd HH:mm" 형식처럼 분까지만 잘라서 출력
     private String tsToMinuteStr(Timestamp ts) {
         if (ts == null) return "-";
         String s = ts.toString();
         return s.length() >= 16 ? s.substring(0, 16) : s;
     }
 
-    // ==========================
-    // 1. 출근하기 (로그 포함)
-    // ==========================
+    // 출근 처리 + 출근 로그 저장
     public void checkIn(int userId, int loginLogId) {
  
+        // 존재하는 사용자 여부 확인
         if (!existsUser(userId)) {
             System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
             System.out.println("다시 입력해주세요.");
@@ -52,6 +52,7 @@ public class AttendanceDAO {
         try {
             conn = DBUtil.getConnection();
 
+            //이미 출근했는지 확인
             pstmt = conn.prepareStatement(checkSql);
             pstmt.setInt(1, userId);
             rs = pstmt.executeQuery();
@@ -67,6 +68,7 @@ public class AttendanceDAO {
             Timestamp now = new Timestamp(System.currentTimeMillis());
             int inStatus = calculateInStatus(now);
 
+            // 출근 시간과 출근 상태 저장
             pstmt = conn.prepareStatement(insertSql);
             pstmt.setInt(1, userId);
             pstmt.setInt(2, inStatus);
@@ -76,6 +78,7 @@ public class AttendanceDAO {
             DBUtil.executeClose(null, pstmt, null);
 
             if (count > 0) {
+                // 저장된 출근시간 다시 조회해서 출력
                 pstmt = conn.prepareStatement(selectTimeSql);
                 pstmt.setInt(1, userId);
                 rs = pstmt.executeQuery();
@@ -87,6 +90,7 @@ public class AttendanceDAO {
                     System.out.println("✅ 출근 처리 완료!");
                 }
 
+                // 출근 처리 로그 저장
                 logDao.insertActionLog(
                     userId,
                     "근태관리",
@@ -106,11 +110,10 @@ public class AttendanceDAO {
         }
     }
 
-    // ==========================
-    // 2. 퇴근하기 (로그 포함)
-    // ==========================
+    // 퇴근 처리 + 퇴근 로그 저장
     public void checkOut(int userId, int loginLogId) {
 
+        // 존재하는 사용자 여부 확인
         if (!existsUser(userId)) {
             System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
             System.out.println("다시 입력해주세요.");
@@ -138,6 +141,7 @@ public class AttendanceDAO {
         try {
             conn = DBUtil.getConnection();
 
+            // 오늘 출근 기록 조회
             pstmt = conn.prepareStatement(selectSql);
             pstmt.setInt(1, userId);
             rs = pstmt.executeQuery();
@@ -150,6 +154,7 @@ public class AttendanceDAO {
 
             Timestamp alreadyOut = rs.getTimestamp("CHECK_OUT");
 
+            // 이미 퇴근했으면 중복 퇴근 방지
             if (alreadyOut != null) {
                 System.out.println("👉 이미 퇴근 처리되었습니다.");
                 System.out.println();
@@ -161,6 +166,7 @@ public class AttendanceDAO {
 
             DBUtil.executeClose(rs, pstmt, null);
 
+            // 퇴근 시간과 퇴근 상태 저장
             pstmt = conn.prepareStatement(updateSql);
             pstmt.setInt(1, outStatus);
             pstmt.setInt(2, userId);
@@ -170,6 +176,7 @@ public class AttendanceDAO {
             DBUtil.executeClose(null, pstmt, null);
 
             if (count > 0) {
+                // 저장된 출퇴근 시간 다시 조회해서 출력
                 pstmt = conn.prepareStatement(selectTimeSql);
                 pstmt.setInt(1, userId);
                 rs = pstmt.executeQuery();
@@ -186,6 +193,7 @@ public class AttendanceDAO {
                     System.out.println();
                 }
 
+                // 퇴근 처리 로그 저장
                 logDao.insertActionLog(
                     userId,
                     "근태관리",
@@ -205,9 +213,7 @@ public class AttendanceDAO {
         }
     }
 
-    // ==========================
-    // 출근 상태 계산
-    // ==========================
+    // 출근 시간이 09:00 이전/이내면 정상출근(1), 이후면 지각(2)
     private int calculateInStatus(Timestamp checkIn) {
         int inHour = checkIn.toLocalDateTime().getHour();
         int inMinute = checkIn.toLocalDateTime().getMinute();
@@ -220,9 +226,7 @@ public class AttendanceDAO {
         return isOnTimeIn ? 1 : 2;
     }
 
-    // ==========================
-    // 퇴근 상태 계산
-    // ==========================
+    // 퇴근 시간이 17:00 기준으로 정상퇴근/조퇴/연장 상태 계산
     private int calculateOutStatus(Timestamp checkOut) {
         int outHour = checkOut.toLocalDateTime().getHour();
         int outMinute = checkOut.toLocalDateTime().getMinute();
@@ -240,9 +244,7 @@ public class AttendanceDAO {
         return 0;
     }
 
-    // ==========================
-    // 상태 문자열
-    // ==========================
+    // 출근 상태 코드를 문자열로 변환
     private String inStatusToString(int status) {
         switch (status) {
             case 1: return "정상출근";
@@ -251,6 +253,7 @@ public class AttendanceDAO {
         }
     }
 
+    // 퇴근 상태 코드를 문자열로 변환
     private String outStatusToString(int status) {
         switch (status) {
             case 1: return "정상퇴근";
@@ -260,10 +263,12 @@ public class AttendanceDAO {
         }
     }
 
+    // 출근상태 / 퇴근상태를 묶어서 표시용 문자열 생성
     private String makeStatusLabel(int inStatus, int outStatus) {
         return inStatusToString(inStatus) + " / " + outStatusToString(outStatus);
     }
 
+    // 최종 상태를 하나의 대표 문자열로 변환
     private String finalStatusToString(int inStatus, int outStatus) {
         if (inStatus == 2) return "지각";
         if (outStatus == 2) return "조퇴";
@@ -273,11 +278,10 @@ public class AttendanceDAO {
         return "미정";
     }
 
-    // ==========================
-    // 전체 근태 조회
-    // ==========================
+    // 전체 근태 기록 조회
     public void selectAll(int userId) {
 
+        // 존재하는 사용자 여부 확인
         if (!existsUser(userId)) {
             System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
             System.out.println("다시 입력해주세요.");
@@ -319,6 +323,7 @@ public class AttendanceDAO {
                 int inStatus = rs.getInt("IN_STATUS");
                 int outStatus = rs.getInt("OUT_STATUS");
 
+                // 날짜별 출근/퇴근/상태/근무시간 출력
                 System.out.println(
                     "[" + attDate + "] "
                     + (checkIn == null ? "출근기록없음" : checkIn)
@@ -343,17 +348,17 @@ public class AttendanceDAO {
         }
     }
 
-    // ==========================
-    // 월별 근태 조회
-    // ==========================
+    // 입력한 월의 근태 기록 조회
     public void selectByMonth(int userId, String yearMonth) {
 
+        // 존재하는 사용자 여부 확인
         if (!existsUser(userId)) {
             System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
             System.out.println("다시 입력해주세요.");
             return;
         }
 
+        // yyyy-MM 형식 검사
         if (!isValidYearMonth(yearMonth)) {
             System.out.println("❌ 조회 월 형식이 잘못되었습니다.");
             System.out.println("예: 2026-02 형식으로 다시 입력해주세요.");
@@ -395,6 +400,7 @@ public class AttendanceDAO {
                 int inStatus = rs.getInt("IN_STATUS");
                 int outStatus = rs.getInt("OUT_STATUS");
 
+                // 해당 월의 날짜별 출퇴근 상태 출력
                 System.out.println(
                     "[" + attDate + "] "
                     + (checkIn == null ? "출근기록없음" : checkIn)
@@ -418,17 +424,17 @@ public class AttendanceDAO {
         }
     }
 
-    // ==========================
-    // 월 총 근무시간 조회
-    // ==========================
+    // 입력한 월의 총 근무시간 조회
     public void selectMonthTotal(int userId, String yearMonth) {
 
+        // 존재하는 사용자 여부 확인
         if (!existsUser(userId)) {
             System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
             System.out.println("다시 입력해주세요.");
             return;
         }
 
+        // yyyy-MM 형식 검사
         if (!isValidYearMonth(yearMonth)) {
             System.out.println("❌ 조회 월 형식이 잘못되었습니다.");
             System.out.println("예: 2026-02 형식으로 다시 입력해주세요.");
@@ -479,17 +485,17 @@ public class AttendanceDAO {
         }
     }
 
-    // ==========================
-    // 월별 상태별 횟수 조회
-    // ==========================
+    // 입력한 월의 상태별 횟수 조회
     public void selectMonthStatusCount(int userId, String yearMonth) {
 
+        // 존재하는 사용자 여부 확인
         if (!existsUser(userId)) {
             System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
             System.out.println("다시 입력해주세요.");
             return;
         }
 
+        // yyyy-MM 형식 검사
         if (!isValidYearMonth(yearMonth)) {
             System.out.println("❌ 조회 월 형식이 잘못되었습니다.");
             System.out.println("예: 2026-02 형식으로 다시 입력해주세요.");
@@ -528,6 +534,7 @@ public class AttendanceDAO {
                     return;
                 }
 
+                // 해당 월의 정상출근/지각/조퇴/연장 횟수 출력
                 System.out.println("\n======== " + yearMonth + "월 상태별 횟수 ========");
                 System.out.println("정상출근 : " + rs.getInt("NORMAL_IN_CNT") + "회");
                 System.out.println("지각     : " + rs.getInt("LATE_CNT") + "회");
@@ -546,34 +553,37 @@ public class AttendanceDAO {
         }
     }
 
-    // ==========================
-    // 관리자 근태 수정 (로그 포함 / before→after)
-    // ==========================
+    // 관리자용 근태 수정 메서드 오버로딩
     public void updateAttendance(int targetUserId, String date, String inTime, String outTime) {
         updateAttendance(targetUserId, date, inTime, outTime, targetUserId, null);
     }
 
+    // 관리자 근태 수정 + 수정 전/후 로그 저장
     public void updateAttendance(int targetUserId, String date, String inTime, String outTime,
                                  int actorUserId, Integer loginLogId) {
 
+        // 존재하는 사용자 여부 확인
         if (!existsUser(targetUserId)) {
             System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
             System.out.println("다시 입력해주세요.");
             return;
         }
 
+        // 날짜 형식 검사
         if (!isValidDate(date)) {
             System.out.println("❌ 날짜 형식이 잘못되었습니다.");
             System.out.println("예: 2026-02-20 형식으로 다시 입력해주세요.");
             return;
         }
 
+        // 출근 시간 형식 검사
         if (!isValidTimeInput(inTime)) {
             System.out.println("❌ 출근 시간 형식이 잘못되었습니다.");
             System.out.println("예: 08:50 또는 NULL 형식으로 다시 입력해주세요.");
             return;
         }
 
+        // 퇴근 시간 형식 검사
         if (!isValidTimeInput(outTime)) {
             System.out.println("❌ 퇴근 시간 형식이 잘못되었습니다.");
             System.out.println("예: 17:00 또는 NULL 형식으로 다시 입력해주세요.");
@@ -598,6 +608,7 @@ public class AttendanceDAO {
         try {
             conn = DBUtil.getConnection();
 
+            // 수정 전 기존 근태 정보 조회
             pstmtSel = conn.prepareStatement(selectSql);
             pstmtSel.setInt(1, targetUserId);
             pstmtSel.setString(2, date);
@@ -624,6 +635,7 @@ public class AttendanceDAO {
             Timestamp inTs = parseDateTime(date, inTime);
             Timestamp outTs = parseDateTime(date, outTime);
 
+            // 퇴근시간이 출근시간보다 빠른 경우 방지
             if (inTs != null && outTs != null && outTs.before(inTs)) {
                 System.out.println("❌ 퇴근 시간은 출근 시간보다 빠를 수 없습니다.");
                 System.out.println("다시 입력해주세요.");
@@ -653,6 +665,7 @@ public class AttendanceDAO {
                 System.out.println("✅ 근태 수정 완료! 상태: " + finalStatus);
                 System.out.println();
 
+                // 수정 전/후 기록을 로그 문자열로 생성
                 String beforeText =
                     "before[in=" + tsToStr(beforeIn) +
                     ", out=" + tsToStr(beforeOut) +
@@ -663,6 +676,7 @@ public class AttendanceDAO {
                     ", out=" + tsToStr(outTs) +
                     ", status=" + finalStatus + "]";
 
+                // 근태 수정 이력 로그 저장
                 logDao.insertActionLog(
                     actorUserId,
                     "근태관리",
@@ -690,9 +704,7 @@ public class AttendanceDAO {
         }
     }
 
-    // ==========================
-    // 유효성 검사
-    // ==========================
+    // USER_ID가 실제로 존재하는지 확인
     private boolean existsUser(int userId) {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -717,6 +729,7 @@ public class AttendanceDAO {
         return false;
     }
 
+    // yyyy-MM 형식 검사
     private boolean isValidYearMonth(String yearMonth) {
         try {
             YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM"));
@@ -726,6 +739,7 @@ public class AttendanceDAO {
         }
     }
 
+    // yyyy-MM-dd 형식 검사
     private boolean isValidDate(String date) {
         try {
             LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -735,6 +749,7 @@ public class AttendanceDAO {
         }
     }
 
+    // 시간 입력값이 HH:mm 또는 NULL/공백인지 검사
     private boolean isValidTimeInput(String time) {
         if (time == null) return false;
 
@@ -751,7 +766,7 @@ public class AttendanceDAO {
         }
     }
 
-    // "NULL" / "" 처리 + "YYYY-MM-DD HH:MM:SS" 생성
+    // 날짜+시간 문자열을 Timestamp로 변환, NULL/공백은 null 처리
     private Timestamp parseDateTime(String date, String time) {
         if (time == null) return null;
 
@@ -771,6 +786,7 @@ public class AttendanceDAO {
         return Timestamp.valueOf(date + " " + time + ":00");
     }
 
+    // Timestamp를 문자열로 변환, null이면 "NULL"
     private String tsToStr(Timestamp ts) {
         if (ts == null) return "NULL";
         String s = ts.toString();

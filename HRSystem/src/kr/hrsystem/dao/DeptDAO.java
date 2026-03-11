@@ -10,9 +10,7 @@ public class DeptDAO {
 
     private LogDAO logDao = new LogDAO();
 
-    // ==========================
-    // 1. 부서 전체 조회
-    // ==========================
+    // 전체 부서 목록 조회
     public void selectDepartment() {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -56,9 +54,7 @@ public class DeptDAO {
         }
     }
 
-    // ==========================
-    // 2. 부서 등록 (로그 포함)
-    // ==========================
+    // 부서 등록 + 등록 로그 저장
     public void insertDepartment(String deptName, int adminUserId, Integer loginLogId) {
         Connection conn = null;
         PreparedStatement pstmtMax = null;
@@ -68,7 +64,7 @@ public class DeptDAO {
         try {
             conn = DBUtil.getConnection();
 
-            // 1. 현재 DEPT 테이블 기준 다음 부서번호 구하기
+            // 현재 가장 큰 부서번호 기준으로 다음 부서번호 생성
             String nextNumSql = "SELECT NVL(MAX(DEPT_NUM), 0) + 10 AS NEXT_DEPT_NUM FROM DEPT";
             pstmtMax = conn.prepareStatement(nextNumSql);
             rs = pstmtMax.executeQuery();
@@ -80,7 +76,7 @@ public class DeptDAO {
 
             DBUtil.executeClose(rs, pstmtMax, null);
 
-            // 2. insert
+            // 새 부서 등록
             String sql = "INSERT INTO dept (dept_num, dept_name) VALUES (?, ?)";
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, nextDeptNum);
@@ -91,6 +87,7 @@ public class DeptDAO {
             if (count > 0) {
                 System.out.println("✅ 부서 등록 완료! (부서번호=" + nextDeptNum + ")");
 
+                // 부서 등록 이력 로그 저장
                 logDao.insertActionLog(
                     adminUserId,
                     "부서관리",
@@ -125,9 +122,8 @@ public class DeptDAO {
             DBUtil.executeClose(null, pstmt, conn);
         }
     }
-    // ==========================
-    // 3. 부서 수정 (로그 포함)
-    // ==========================
+
+    // 부서명 수정 + 수정 로그 저장
     public void updateDepartment(int deptNum, String newDeptName, int adminUserId, Integer loginLogId) {
         Connection conn = null;
         PreparedStatement pstmtSel = null;
@@ -137,7 +133,7 @@ public class DeptDAO {
         try {
             conn = DBUtil.getConnection();
 
-            // 변경 전 조회
+            // 수정 전 기존 부서명 조회
             String selSql = "SELECT dept_name FROM dept WHERE dept_num = ?";
             pstmtSel = conn.prepareStatement(selSql);
             pstmtSel.setInt(1, deptNum);
@@ -153,6 +149,7 @@ public class DeptDAO {
 
             DBUtil.executeClose(rs, pstmtSel, null);
 
+            // 부서명 수정
             String sql = "UPDATE dept SET dept_name = ? WHERE dept_num = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, newDeptName);
@@ -163,6 +160,7 @@ public class DeptDAO {
             if (count > 0) {
                 System.out.println("✅ 부서 수정 완료!");
 
+                // 수정 전/후 부서명 로그 저장
                 logDao.insertActionLog(
                     adminUserId,
                     "부서관리",
@@ -185,9 +183,7 @@ public class DeptDAO {
         }
     }
 
-    // ==========================
-    // 4. 부서 삭제 (로그 포함)
-    // ==========================
+    // 부서 삭제 + 삭제 로그 저장
     public void deleteDepartment(int deptNum, int adminUserId, Integer loginLogId) {
         Connection conn = null;
         PreparedStatement pstmtSel = null;
@@ -213,6 +209,7 @@ public class DeptDAO {
 
             DBUtil.executeClose(rs, pstmtSel, null);
 
+            // 해당 부서 삭제
             String sql = "DELETE FROM dept WHERE dept_num = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, deptNum);
@@ -222,6 +219,7 @@ public class DeptDAO {
             if (count > 0) {
                 System.out.println("✅ 부서 삭제 완료!");
 
+                // 삭제된 부서 정보 로그 저장
                 logDao.insertActionLog(
                     adminUserId,
                     "부서관리",
@@ -236,7 +234,7 @@ public class DeptDAO {
             }
 
         } catch (Exception e) {
-            // FK 걸려있으면 ORA-02292 가능
+            
             System.out.println("❌ 부서 삭제 실패 (해당 부서를 사용하는 사원이 있을 수 있음)");
             e.printStackTrace();
         } finally {
@@ -244,7 +242,8 @@ public class DeptDAO {
             DBUtil.executeClose(null, pstmt, conn);
         }
     }
- // ✅ 부서 목록 UI 출력 (조직도 스타일)
+
+    // 부서 목록을 간단한 UI 형태로 출력
     public void printDeptListUI() {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -276,11 +275,11 @@ public class DeptDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DBUtil.excuteClose(rs, pstmt, conn); // 너 프로젝트에서 DeptDAO는 excuteClose 쓰는 쪽이 많았지
+            DBUtil.excuteClose(rs, pstmt, conn); 
         }
     }
 
-    // ✅ 부서명으로 부서번호 찾기 (없으면 -1)
+    // 부서명으로 부서번호 조회, 없으면 -1 반환
     public int getDeptNumByName(String deptName) {
         Connection conn = null;
         PreparedStatement pstmt = null;

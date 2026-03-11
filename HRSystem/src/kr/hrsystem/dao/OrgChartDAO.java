@@ -8,9 +8,7 @@ import kr.util.DBUtil;
 
 public class OrgChartDAO {
 
-    // ==========================
-    // 현재 DEPT 테이블 부서목록 안내문 출력
-    // ==========================
+    // 현재 등록된 부서 목록 안내문 출력
     public void printDeptGuide() {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -43,6 +41,7 @@ public class OrgChartDAO {
             while (rs.next()) {
                 hasData = true;
 
+                // 부서번호와 부서명 출력
                 System.out.println(
                         pad(String.valueOf(rs.getInt("DEPT_NUM")), 10) +
                         pad(rs.getString("DEPT_NAME"), 20)
@@ -63,9 +62,7 @@ public class OrgChartDAO {
         }
     }
 
-    // ==========================
     // 전체 조직도 조회
-    // ==========================
     public void selectAllOrgChart() {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -105,6 +102,7 @@ public class OrgChartDAO {
                 String deptName = rs.getString("DEPT_NAME");
                 if (deptName == null) deptName = "-";
 
+                // 부서가 바뀌면 부서명 헤더 출력
                 if (!deptName.equals(currentDept)) {
                     currentDept = deptName;
                     System.out.println();
@@ -124,6 +122,7 @@ public class OrgChartDAO {
                     System.out.println("-".repeat(120));
                 }
 
+                // 사원 정보를 한 줄씩 출력
                 System.out.println(
                         pad(String.valueOf(rs.getInt("USER_ID")), 8) +
                         pad(rs.getString("USER_NAME"), 10) +
@@ -148,9 +147,7 @@ public class OrgChartDAO {
         }
     }
 
-    // ==========================
-    // 부서별 조직도 조회
-    // ==========================
+    // 입력한 부서명으로 조직도 조회
     public void selectOrgChartByDeptName(String deptKeyword) {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -201,6 +198,7 @@ public class OrgChartDAO {
             while (rs.next()) {
                 hasData = true;
 
+                // 검색된 부서의 사원 정보 출력
                 System.out.println(
                         pad(String.valueOf(rs.getInt("USER_ID")), 8) +
                         pad(rs.getString("USER_NAME"), 10) +
@@ -226,9 +224,7 @@ public class OrgChartDAO {
         }
     }
 
-    // ==========================
-    // 재직상태 한글 변환
-    // ==========================
+    // 재직상태 코드를 한글로 변환
     private String empStatusKor(String status) {
         if (status == null) return "-";
 
@@ -244,10 +240,13 @@ public class OrgChartDAO {
     // ==========================
     // 콘솔 정렬용 유틸
     // ==========================
+
+    // 구분선 출력
     private void printDivider(int length) {
         System.out.println("=".repeat(length));
     }
 
+    // 한글/중문처럼 폭이 2칸인 문자 판별
     private boolean isWide(char ch) {
         Character.UnicodeBlock block = Character.UnicodeBlock.of(ch);
         return block == Character.UnicodeBlock.HANGUL_SYLLABLES
@@ -257,6 +256,7 @@ public class OrgChartDAO {
                 || block == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS;
     }
 
+    // 콘솔 정렬을 위해 문자열 길이 맞춤
     private String pad(String s, int width) {
         if (s == null || s.trim().isEmpty()) {
             s = "-";
