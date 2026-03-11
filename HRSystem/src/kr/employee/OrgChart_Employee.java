@@ -10,6 +10,7 @@ public class OrgChart_Employee {
     private BufferedReader br;
     private OrgChartDAO dao;
 
+    // 조직도 조회 화면에 필요한 객체를 생성하고 메뉴 실행
     public OrgChart_Employee(BufferedReader br) {
         this.br = br;
         this.dao = new OrgChartDAO();
@@ -21,6 +22,7 @@ public class OrgChart_Employee {
         }
     } 
 
+    // 조직도 조회 메뉴 화면
     private void menu() throws IOException {
         while (true) {
             System.out.println();
@@ -38,27 +40,30 @@ public class OrgChart_Employee {
 
                 switch (no) {
                     case 1:
+                        // 전체 조직도 조회
                         dao.selectAllOrgChart();
                         break;
 
                     case 2:
-                    	 dao.printDeptGuide();
+                        // 부서명을 입력받아 해당 부서 조직도 조회
+                    	dao.printDeptGuide();
 
-                         System.out.print("부서명 입력(뒤로가기: 0) : ");
-                         String keyword = br.readLine().trim();
+                        System.out.print("부서명 입력(뒤로가기: 0) : ");
+                        String keyword = br.readLine().trim();
 
-                         if ("0".equals(keyword)) {
-                             System.out.println("↩ 부서별 조회를 취소했습니다.");
-                             break;
-                         }
-                         if (keyword.isEmpty()) {
-                             System.out.println("❌ 검색어를 입력하세요.");
-                             break;
-                         }
-                         dao.selectOrgChartByDeptName(keyword);
-                         break;
+                        if ("0".equals(keyword)) {
+                            System.out.println("↩ 부서별 조회를 취소했습니다.");
+                            break;
+                        }
+                        if (keyword.isEmpty()) {
+                            System.out.println("❌ 검색어를 입력하세요.");
+                            break;
+                        }
+                        dao.selectOrgChartByDeptName(keyword);
+                        break;
 
                     case 0:
+                        // 이전 화면으로 이동
                         return;
 
                     default:
@@ -66,6 +71,7 @@ public class OrgChart_Employee {
                 }
 
             } catch (NumberFormatException e) {
+                // 숫자가 아닌 값 입력 시 예외 처리
                 System.out.println("숫자만 입력하세요.");
             }
         }

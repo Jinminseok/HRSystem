@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-
 import kr.hrsystem.dao.LogDAO;
 import kr.hrsystem.dao.LoginDAO;
 
@@ -16,6 +15,7 @@ public class ShareScreen {
 	private LogDAO logDao;
 	private static final String LINE = "───────────────────────────────────────────";
 
+	// 프로그램 시작 시 메뉴 화면 실행
 	public ShareScreen() {
 		try {
 			br = new BufferedReader(new InputStreamReader(System.in));
@@ -31,6 +31,7 @@ public class ShareScreen {
 		new ShareScreen();
 	}
 
+	// 첫 화면: 로그인 / 회원가입 / 종료 메뉴
 	private void shareMenu() throws IOException {
 
 		while (true) {
@@ -66,7 +67,7 @@ public class ShareScreen {
 		}
 	}
 
-	// 로그인 
+	// 로그인 처리 후 권한에 따라 관리자/사원 화면으로 이동
 	private void loginScreen() throws IOException {
 
 		System.out.print("아이디 : ");
@@ -77,7 +78,7 @@ public class ShareScreen {
 
 		Map<String, Object> u = dao.loginAsMap(id, pw);
 
-		// 1) 계정 불일치
+		// 계정 정보가 없으면 로그인 실패
 		if (u == null) {
 			logDao.insertLoginHistory(null, id, "F", "아이디 또는 비밀번호 불일치");
 			System.out.println("❌ 아이디 또는 비밀번호가 틀렸습니다.");
@@ -89,21 +90,22 @@ public class ShareScreen {
 		String approvalStatus = (String) u.get("APPROVAL_STATUS");
 		String userRole = (String) u.get("USER_ROLE");
 
-		// 2) 승인 안 된 계정
+		// 승인되지 않은 계정은 로그인 불가
 		if (!"APPROVED".equalsIgnoreCase(approvalStatus)) {
 			logDao.insertLoginHistory(userId, id, "F", "승인대기 또는 승인거절 상태");
 			System.out.println("⛔ 관리자 승인 후 로그인 가능합니다. (현재 상태: " + approvalStatus + ")");
 			return;
 		}
 
-		// 3) 로그인 성공
+		// 로그인 성공 이력 저장
 		int loginLogId = logDao.insertLoginHistory(userId, id, "S", null);
+
 		System.out.println();
 		System.out.println("✅ 로그인 성공!");
 		System.out.println(userName + "님 환영합니다.");
 		System.out.println(LINE);
 
-		// 4) 권한 분기
+		// 권한별 화면 분기
 		if ("ADMIN".equalsIgnoreCase(userRole)) {
 			new AdminScreen(br, userId, loginLogId);
 		} else {
@@ -111,7 +113,7 @@ public class ShareScreen {
 		}
 	}
 
-	// 회원가입
+	// 회원가입 처리
 	private void signScreen() throws IOException {
 
 		System.out.print("아이디 : ");
@@ -122,8 +124,9 @@ public class ShareScreen {
 			return;
 		}
 
+		// 아이디 중복 체크
 		if (dao.existsLoginId(id)) {
-			System.out.println("❌ 이미 사용 s중인 아이디입니다. 다른 아이디를 입력하세요.");
+			System.out.println("❌ 이미 사용 중인 아이디입니다. 다른 아이디를 입력하세요.");
 			return;
 		}
 
@@ -144,7 +147,6 @@ public class ShareScreen {
 		if (result > 0) {
 			System.out.println("✅ 회원가입 완료! (관리자 승인 후 로그인 가능)");
 			System.out.println(LINE);
-		
 		} else if (result == -1) {
 			System.out.println("❌ 이미 사용 중인 아이디입니다. 다른 아이디를 입력하세요.");
 		} else {

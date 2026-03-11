@@ -9,9 +9,10 @@ public class MyInfoUpdate_employee {
 
 	private BufferedReader br;
 	private int userId;
-	private int loginLogId; // 지금은 안 써도 나중 로그용으로 받아둠
+	private int loginLogId; // 로그인 정보(추후 로그 기록 등에 사용 가능)
 	private MyInfoDAO myInfoDao;
 
+	// 내 정보 수정 화면에 필요한 값들을 전달받아 메뉴 실행
 	public MyInfoUpdate_employee(BufferedReader br, int userId, int loginLogId) {
 		this.br = br;
 		this.userId = userId;
@@ -25,6 +26,7 @@ public class MyInfoUpdate_employee {
 		}
 	}
 
+	// 내 정보 수정 메뉴 화면
 	private void menu() throws IOException {
 		while (true) {
 			System.out.println();
@@ -44,10 +46,11 @@ public class MyInfoUpdate_employee {
 
 				switch (no) {
 				case 1: {
+					// 비밀번호 수정
 					String newPw = readRequiredOrCancel("새 비밀번호");
 					if (newPw == null) {
 						System.out.println("↩ 비밀번호 수정이 취소되었습니다.");
-						break; // 메뉴로
+						break;
 					}
 					if (newPw.isEmpty()) {
 						System.out.println("❌ 비밀번호를 입력하세요.");
@@ -63,10 +66,11 @@ public class MyInfoUpdate_employee {
 				}
 
 				case 2: {
+					// 이메일 수정
 					String newEmail = readRequiredOrCancel("새 이메일");
 					if (newEmail == null) {
 						System.out.println("↩ 이메일 수정이 취소되었습니다.");
-						break; // 메뉴로
+						break;
 					}
 					if (newEmail.isEmpty()) {
 						System.out.println("❌ 이메일을 입력하세요.");
@@ -82,10 +86,11 @@ public class MyInfoUpdate_employee {
 				}
 
 				case 3: {
+					// 전화번호 수정
 					String newPhone = readRequiredOrCancel("새 전화번호");
 					if (newPhone == null) {
 						System.out.println("↩ 전화번호 수정이 취소되었습니다.");
-						break; // 메뉴로
+						break;
 					}
 					if (newPhone.isEmpty()) {
 						System.out.println("❌ 전화번호를 입력하세요.");
@@ -101,7 +106,7 @@ public class MyInfoUpdate_employee {
 				}
 
 				case 4: {
-
+					// 비밀번호, 이메일, 전화번호를 한 번에 수정
 					String pw = readOptionalOrCancel("새 비밀번호");
 					if (pw == null) {
 						System.out.println("↩ 수정이 취소되었습니다.");
@@ -131,6 +136,7 @@ public class MyInfoUpdate_employee {
 				}
 
 				case 0:
+					// 이전 화면으로 이동
 					return;
 
 				default:
@@ -138,29 +144,31 @@ public class MyInfoUpdate_employee {
 				}
 
 			} catch (NumberFormatException e) {
+				// 숫자가 아닌 값 입력 시 예외 처리
 				System.out.println("숫자만 입력하세요.");
 			}
 		}
 	}
-	//0누를시 취소
+
+	// 필수 입력값을 받되, 0 입력 시 취소
 	private String readRequiredOrCancel(String label) throws IOException {
 		System.out.print(label + " (뒤로가기 : 0) : ");
 		String input = br.readLine();
 		if (input == null) return null;
 
 		input = input.trim();
-		if ("0".equals(input)) return null;  
-		return input; 
+		if ("0".equals(input)) return null;
+		return input;
 	}
 
-	
+	// 선택 입력값을 받되, 0 입력 시 취소
 	private String readOptionalOrCancel(String label) throws IOException {
 		System.out.print(label + " (뒤로가기: 0) : ");
 		String input = br.readLine();
 		if (input == null) return null;
 
 		input = input.trim();
-		if ("0".equals(input)) return null;  
-		return input; 
+		if ("0".equals(input)) return null;
+		return input;
 	}
 }

@@ -5,14 +5,14 @@ import java.io.IOException;
 
 import kr.hrsystem.dao.NoticeDAO;
 
-
 public class Notice_Employee {
 
     private BufferedReader br;
     private NoticeDAO dao;
     private int userId;
-    private Integer loginLogId; // ✅ null 허용
+    private Integer loginLogId; // 로그 기록용
 
+    // 게시판 화면에 필요한 값들을 전달받아 메뉴 실행
     public Notice_Employee(BufferedReader br, int userId, Integer loginLogId) {
         this.br = br;
         this.userId = userId;
@@ -26,6 +26,7 @@ public class Notice_Employee {
         }
     }
 
+    // 사원 게시판 메뉴 화면
     private void noticeEmployeeMenu() throws IOException {
         while (true) {
             System.out.println();
@@ -48,6 +49,7 @@ public class Notice_Employee {
 
                 switch (no) {
                     case 1:
+                        // 게시글 작성
                     	System.out.println("\n[ 게시글 작성 ]");
                         String title = readRequiredOrCancel("제목");
                         if (title == null) {
@@ -58,6 +60,7 @@ public class Notice_Employee {
                             System.out.println("❌ 제목을 입력하세요.");
                             break;
                         }
+
                         String content = readRequiredOrCancel("내용");
                         if (content == null) {
                             System.out.println("↩ 게시글 작성이 취소되었습니다.");
@@ -68,19 +71,22 @@ public class Notice_Employee {
                             break;
                         }
 
-                        // 사원 작성글은 기본: 고정X, 투표X
+                        // 사원 작성글은 고정글/투표글 없이 일반 게시글로 등록
                         dao.insertNotice(title, content, userId, "N", "N", null, loginLogId);
                         break;
 
                     case 2:
+                        // 전체 게시글 조회
                         dao.selectNoticeList();
                         break;
 
                     case 3:
+                        // 내가 작성한 게시글 조회
                         dao.selectMyNoticeList(userId);
                         break;
 
                     case 4:
+                        // 게시글 상세 조회
                     	dao.selectNoticeList();
                         Integer noticeId = readIntOrCancel("조회할 공지번호");
                         if (noticeId == null) {
@@ -91,6 +97,7 @@ public class Notice_Employee {
                         break;
 
                     case 5:
+                        // 게시글 투표 참여
                     	dao.selectNoticeList();
                         Integer voteNoticeId = readIntOrCancel("투표할 공지번호");
                         if (voteNoticeId == null) {
@@ -106,6 +113,7 @@ public class Notice_Employee {
                         break;
 
                     case 6:
+                        // 내 게시글 수정
                     	System.out.println("\n[ 내 게시글 수정 ]");
                         dao.selectMyNoticeList(userId);
 
@@ -136,6 +144,7 @@ public class Notice_Employee {
                         break;
 
                     case 7:
+                        // 내 게시글 삭제
                     	System.out.println("\n[ 내 게시글 삭제 ]");
                         dao.selectMyNoticeList(userId);
 
@@ -144,6 +153,7 @@ public class Notice_Employee {
                             System.out.println("↩ 게시글 삭제가 취소되었습니다.");
                             break;
                         }
+
                         String yn = readYNOrCancel("정말 삭제하시겠습니까?");
                         if (yn == null) {
                             System.out.println("↩ 게시글 삭제가 취소되었습니다.");
@@ -157,6 +167,7 @@ public class Notice_Employee {
                         break;
 
                     case 0:
+                        // 이전 화면으로 이동
                         return;
 
                     default:
@@ -164,22 +175,24 @@ public class Notice_Employee {
                 }
 
             } catch (NumberFormatException e) {
+                // 숫자가 아닌 값 입력 시 예외 처리
                 System.out.println("숫자만 입력하세요.");
             }
         }
     }
- //(취소: 0)
-   
+
+    // 필수 입력값을 받되, 0 입력 시 취소
     private String readRequiredOrCancel(String label) throws IOException {
         System.out.print(label + " (뒤로가기: 0) : ");
         String input = br.readLine();
         if (input == null) return null;
 
         input = input.trim();
-        if ("0".equals(input)) return null; // 취소
-        return input; // 엔터면 ""
+        if ("0".equals(input)) return null;
+        return input;
     }
 
+    // 숫자 입력값을 받되, 0 입력 시 취소
     private Integer readIntOrCancel(String label) throws IOException {
         while (true) {
             System.out.print(label + " (뒤로가기: 0) : ");
@@ -197,6 +210,7 @@ public class Notice_Employee {
         }
     }
 
+    // Y/N 값을 받되, 0 입력 시 취소
     private String readYNOrCancel(String label) throws IOException {
         while (true) {
             System.out.print(label + " (Y/N, 취소: 0) : ");
@@ -212,6 +226,7 @@ public class Notice_Employee {
         }
     }
 
+    // 투표 선택값(Y/N)을 받되, 0 입력 시 취소
     private String readVoteChoiceOrCancel() throws IOException {
         while (true) {
             System.out.print("찬성(Y) / 반대(N) 입력 (뒤로가기: 0) : ");
