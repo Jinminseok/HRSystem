@@ -3,12 +3,12 @@ package kr.hrsystem.main;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import kr.attendance.UserAttendanceMenu;
-import kr.employee.MyInfoUpdateMenu;
+import kr.employee.MyInfoUpdate_employee;
+import kr.employee.Notice_Employee;
 import kr.hrsystem.dao.LogDAO;
 import kr.hrsystem.dao.MyInfoDAO;
-import kr.notice.NoticeEmployee;
-import kr.employee.OrgChartMenu;
+import kr.employee.OrgChart_Employee;
+import kr.employee.Attendance_Employee;
 
 
 public class EmployeeScreen {
@@ -18,7 +18,7 @@ public class EmployeeScreen {
     private int loginLogId;
     private LogDAO logDao;
     private MyInfoDAO myInfoDao;
-    private static final String LINE = "───────────────────────────────────────────";
+    
     
     public EmployeeScreen(BufferedReader br, int userId, int loginLogId) {
         this.br = br;
@@ -60,18 +60,18 @@ public class EmployeeScreen {
                         break;
                         
                     case 2:
-                    	new MyInfoUpdateMenu(br, userId, loginLogId);
+                    	new MyInfoUpdate_employee(br, userId, loginLogId);
                         break;
                     case 3:
-                        new UserAttendanceMenu(br, userId, loginLogId);
+                        new Attendance_Employee(br, userId, loginLogId);
                         break;
 
                     case 4:
-                    	 new OrgChartMenu(br);
+                    	 new OrgChart_Employee(br);
                     	 break;
 
                     case 5:
-                        new NoticeEmployee(br, userId, loginLogId);
+                        new Notice_Employee(br, userId, loginLogId);
                         break;
 
                     case 0:

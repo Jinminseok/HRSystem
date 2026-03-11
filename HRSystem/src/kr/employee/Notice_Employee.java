@@ -1,4 +1,4 @@
-package kr.notice;
+package kr.employee;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,19 +6,19 @@ import java.io.IOException;
 import kr.hrsystem.dao.NoticeDAO;
 
 
-public class NoticeEmployee {
+public class Notice_Employee {
 
     private BufferedReader br;
     private NoticeDAO dao;
     private int userId;
     private Integer loginLogId; // ✅ null 허용
 
-    public NoticeEmployee(BufferedReader br, int userId, Integer loginLogId) {
+    public Notice_Employee(BufferedReader br, int userId, Integer loginLogId) {
         this.br = br;
         this.userId = userId;
         this.loginLogId = loginLogId;
         this.dao = new NoticeDAO();
-
+ 
         try {
             noticeEmployeeMenu();
         } catch (Exception e) {

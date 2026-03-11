@@ -5,12 +5,12 @@ import java.io.IOException;
 
 import kr.hrsystem.dao.OrgChartDAO;
 
-public class OrgChartMenu {
+public class OrgChart_Employee {
 
     private BufferedReader br;
     private OrgChartDAO dao;
 
-    public OrgChartMenu(BufferedReader br) {
+    public OrgChart_Employee(BufferedReader br) {
         this.br = br;
         this.dao = new OrgChartDAO();
 
@@ -19,7 +19,7 @@ public class OrgChartMenu {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    } 
 
     private void menu() throws IOException {
         while (true) {

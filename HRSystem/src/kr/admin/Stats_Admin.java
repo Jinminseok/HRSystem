@@ -1,4 +1,4 @@
-package kr.hrsystem.main;
+package kr.admin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,18 +7,18 @@ import kr.hrsystem.dao.PositionDAO;
 import kr.hrsystem.dao.StatsDAO;
 import kr.hrsystem.dao.salary_DAO;
 
-public class StatsMain {
+public class Stats_Admin {
 
     private StatsDAO sDao = new StatsDAO();
     private salary_DAO salDao = new salary_DAO();
     private PositionDAO positionDao = new PositionDAO();
     private BufferedReader br;
 
-    public StatsMain(BufferedReader br, int userId, int loginLogId) {
+    public Stats_Admin(BufferedReader br, int userId, int loginLogId) {
         this.br = br;
         runStatsMenu();
     }
-
+ 
     public void runStatsMenu() {
         while (true) {
             try {

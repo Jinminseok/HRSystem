@@ -5,15 +5,15 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
-import kr.appointment.HrAppointmentHistoryDAO;
 import kr.hrsystem.dao.LogDAO;
 import kr.hrsystem.dao.LoginDAO;
 import kr.hrsystem.dao.DeptDAO;
+import kr.hrsystem.dao.HrAppointmentHistoryDAO;
 import kr.hrsystem.dao.PositionDAO;
 import kr.hrsystem.dao.SearchDAO;
 import kr.hrsystem.dao.OrgChartDAO;
 
-public class UserManageAdminMenu {
+public class UserManage_Admin {
 
     private BufferedReader br;
     private int adminUserId;
@@ -23,8 +23,8 @@ public class UserManageAdminMenu {
     private HrAppointmentHistoryDAO historyDao;
     private DeptDAO deptDao;
     private PositionDAO positionDao;
-
-    public UserManageAdminMenu(BufferedReader br, int adminUserId, int loginLogId) {
+ 
+    public UserManage_Admin(BufferedReader br, int adminUserId, int loginLogId) {
         this.br = br;
         this.adminUserId = adminUserId;
         this.loginLogId = loginLogId;

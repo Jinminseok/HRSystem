@@ -1,4 +1,4 @@
-package kr.attendance;
+package kr.employee;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,7 +6,7 @@ import java.io.IOException;
 import kr.hrsystem.dao.AttendanceDAO;
 
 
-public class UserAttendanceMenu {
+public class Attendance_Employee {
 
     private int userId;
     private int loginLogId;
@@ -14,12 +14,12 @@ public class UserAttendanceMenu {
     private BufferedReader br;
 
     // ✅ Shared BufferedReader 사용 (Stream closed 방지)
-    public UserAttendanceMenu(BufferedReader br, int userId, int loginLogId) {
+    public Attendance_Employee(BufferedReader br, int userId, int loginLogId) {
         this.br = br;
         this.userId = userId;
         this.loginLogId = loginLogId;
         this.dao = new AttendanceDAO();
-
+ 
         try {
             menu();
         } catch (Exception e) {

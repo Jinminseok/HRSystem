@@ -7,19 +7,19 @@ import java.util.List;
 
 import kr.hrsystem.dao.SearchDAO;
 
-public class SearchAdminMenu {
+public class Search_Admin {
 
 	private BufferedReader br;
 	private int userId;
 	private int loginLogId;
 	private SearchDAO dao;
 
-	public SearchAdminMenu(BufferedReader br, int userId, int loginLogId) {
+	public Search_Admin(BufferedReader br, int userId, int loginLogId) {
 		this.br = br;
 		this.userId = userId;
 		this.loginLogId = loginLogId;
 		this.dao = new SearchDAO();
-
+ 
 		try {
 			callMenu();
 		} catch (Exception e) {

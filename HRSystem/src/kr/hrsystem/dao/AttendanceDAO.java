@@ -26,7 +26,7 @@ public class AttendanceDAO {
     // 1. 출근하기 (로그 포함)
     // ==========================
     public void checkIn(int userId, int loginLogId) {
-
+ 
         if (!existsUser(userId)) {
             System.out.println("❌ 존재하지 않는 USER_ID 입니다.");
             System.out.println("다시 입력해주세요.");

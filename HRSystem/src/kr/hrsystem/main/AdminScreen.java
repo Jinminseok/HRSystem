@@ -4,25 +4,26 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import kr.admin.SearchAdminMenu;
-import kr.admin.UserManageAdminMenu;
-import kr.admin.DepartmentManageAdminMenu;
-import kr.admin.PositionManageAdminMenu;
-import kr.appointment.HrAppointmentHistoryAdminMenu;
-import kr.attendance.AdminAttendanceMenu;
+import kr.admin.Search_Admin;
+import kr.admin.Stats_Admin;
+import kr.admin.UserManage_Admin;
+import kr.admin.Attendance_Admin;
+import kr.admin.Dept_Admin;
+import kr.admin.HrAppointmentHistory_Admin;
+import kr.admin.LogAdminMenu;
+import kr.admin.NoticeAdmin;
+import kr.admin.Position_Admin;
+import kr.admin.Salary_Admin;
 import kr.hrsystem.dao.LogDAO;
-import kr.log.LogAdminMenu;
-import kr.notice.NoticeAdmin;
-import kr.hrsystem.main.salary_MAIN;
 
-
+ 
 public class AdminScreen {
 
     private BufferedReader br;
     private int userId;
     private int loginLogId;
     private LogDAO logDao;
-    private static final String LINE = "───────────────────────────────────────────";
+   
 
     public AdminScreen(BufferedReader br, int userId, Integer loginLogId) {
         this.br = br;
@@ -63,29 +64,29 @@ public class AdminScreen {
 
                 switch (no) {
                     case 1:
-                        new UserManageAdminMenu(br, userId, loginLogId);
+                        new UserManage_Admin(br, userId, loginLogId);
                         break;
 
                     case 2:
                         // ✅ 부서관리 메뉴 클래스 연결 (아직 없으면 아래 안내처럼 먼저 생성)
-                    	new DepartmentManageAdminMenu(br, userId, loginLogId);
+                    	new Dept_Admin(br, userId, loginLogId);
                         break;
 
                     case 3:
                         // ✅ 직급관리 메뉴는 여기
-                    	new PositionManageAdminMenu(br, userId, loginLogId);
+                    	new Position_Admin(br, userId, loginLogId);
                         break;
 
                     case 4:
-                    	new salary_MAIN(br, userId, loginLogId);
+                    	new Salary_Admin(br, userId, loginLogId);
                         break;
 
                     case 5:
-                    	new HrAppointmentHistoryAdminMenu(br, userId, loginLogId);
+                    	new HrAppointmentHistory_Admin(br, userId, loginLogId);
                         break;
 
                     case 6:
-                       new AdminAttendanceMenu(br, userId, loginLogId);
+                       new Attendance_Admin(br, userId, loginLogId);
                         break;
 
                     case 7:
@@ -93,11 +94,11 @@ public class AdminScreen {
                         break;
 
                     case 8:
-                        new SearchAdminMenu(br, userId, loginLogId);
+                        new Search_Admin(br, userId, loginLogId);
                         break;
 
                     case 9:
-                        new StatsMain(br, userId, loginLogId);
+                        new Stats_Admin(br, userId, loginLogId);
                         break;
 
                     case 10:

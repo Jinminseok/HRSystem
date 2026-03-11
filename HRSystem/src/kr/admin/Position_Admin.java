@@ -6,7 +6,7 @@ import java.io.IOException;
 import kr.hrsystem.dao.LogDAO;
 import kr.hrsystem.dao.PositionDAO;
 
-public class PositionManageAdminMenu {
+public class Position_Admin {
 
     private BufferedReader br;
     private PositionDAO dao;
@@ -14,9 +14,9 @@ public class PositionManageAdminMenu {
 
     private int adminUserId;
     private int loginLogId;
-
+ 
     // ✅ AdminScreen에서 공유 br, 관리자정보 전달받기
-    public PositionManageAdminMenu(BufferedReader br, int adminUserId, int loginLogId) {
+    public Position_Admin(BufferedReader br, int adminUserId, int loginLogId) {
         this.br = br;
         this.dao = new PositionDAO();
         this.logDao = new LogDAO();
@@ -257,7 +257,7 @@ public class PositionManageAdminMenu {
             java.io.BufferedReader br =
                 new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
 
-            new PositionManageAdminMenu(br, 1, -1);
+            new Position_Admin(br, 1, -1);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,18 +1,18 @@
-package kr.attendance;
+package kr.admin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 
 import kr.hrsystem.dao.AttendanceDAO;
 
-public class AdminAttendanceMenu {
+public class Attendance_Admin {
 
     private AttendanceDAO dao;
     private BufferedReader br;
     private int adminUserId;
     private int loginLogId;
 
-    public AdminAttendanceMenu(BufferedReader br, int adminUserId, int loginLogId) {
+    public Attendance_Admin(BufferedReader br, int adminUserId, int loginLogId) {
         this.br = br;
         this.adminUserId = adminUserId;
         this.loginLogId = loginLogId;

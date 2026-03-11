@@ -1,20 +1,20 @@
-package kr.hrsystem.main;
+package kr.admin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import kr.hrsystem.dao.salary_DAO;
 import kr.hrsystem.dao.payment_DAO;
 
-public class payment_MAIN {
+public class Payment_Admin {
     private payment_DAO pDao = new payment_DAO();
     private salary_DAO sDao = new salary_DAO();
     private BufferedReader br;
 
-    public payment_MAIN(BufferedReader br, int adminUserId, int loginLogId) {
+    public Payment_Admin(BufferedReader br, int adminUserId, int loginLogId) {
         this.br = br;
         runPaymentMenu();
     }
-
+ 
     public void runPaymentMenu() {
         while (true) {
             System.out.println("+──────────────────────────────────────────────+");

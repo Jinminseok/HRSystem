@@ -1,4 +1,4 @@
-package kr.appointment;
+package kr.admin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,9 +6,10 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
+import kr.hrsystem.dao.HrAppointmentHistoryDAO;
 import kr.hrsystem.dao.LogDAO;
 
-public class HrAppointmentHistoryAdminMenu {
+public class HrAppointmentHistory_Admin {
 
     private BufferedReader br;
     private int adminUserId;
@@ -17,7 +18,7 @@ public class HrAppointmentHistoryAdminMenu {
     private HrAppointmentHistoryDAO historyDao;
     private LogDAO logDao;
 
-    public HrAppointmentHistoryAdminMenu(BufferedReader br, int adminUserId, int loginLogId) {
+    public HrAppointmentHistory_Admin(BufferedReader br, int adminUserId, int loginLogId) {
         this.br = br;
         this.adminUserId = adminUserId;
         this.loginLogId = loginLogId;

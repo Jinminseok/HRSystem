@@ -1,4 +1,4 @@
-package kr.hrsystem.main;
+package kr.admin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,19 +6,19 @@ import java.util.List;
 import java.util.Map;
 import kr.hrsystem.dao.salary_DAO;
 
-public class salary_MAIN {
+public class Salary_Admin {
     private salary_DAO dao = new salary_DAO();
     private BufferedReader br;
     private int adminUserId;
     private int loginLogId;
 
-    public salary_MAIN(BufferedReader br, int adminUserId, int loginLogId) {
+    public Salary_Admin(BufferedReader br, int adminUserId, int loginLogId) {
         this.br = br;
         this.adminUserId = adminUserId;
         this.loginLogId = loginLogId;
         runSalaryMenu();
     }
-
+ 
     public String align(String text, int length) {
         if (text == null) text = "-";
         int currentLength = 0;
@@ -58,7 +58,7 @@ public class salary_MAIN {
                     case 1: showUnpaidMenu(); break;
                     case 2: showSummaryMenu(); break;
                     case 3: manageSalaryMenu(); break;
-                    case 4: new payment_MAIN(br, adminUserId, loginLogId); break;
+                    case 4: new Payment_Admin(br, adminUserId, loginLogId); break;
                     default: System.out.println("  ❌ 존재하지 않는 번호입니다.");
                 }
             } catch (Exception e) { 

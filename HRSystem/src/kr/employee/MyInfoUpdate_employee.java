@@ -5,19 +5,19 @@ import java.io.IOException;
 
 import kr.hrsystem.dao.MyInfoDAO;
 
-public class MyInfoUpdateMenu {
+public class MyInfoUpdate_employee {
 
 	private BufferedReader br;
 	private int userId;
 	private int loginLogId; // 지금은 안 써도 나중 로그용으로 받아둠
 	private MyInfoDAO myInfoDao;
 
-	public MyInfoUpdateMenu(BufferedReader br, int userId, int loginLogId) {
+	public MyInfoUpdate_employee(BufferedReader br, int userId, int loginLogId) {
 		this.br = br;
 		this.userId = userId;
 		this.loginLogId = loginLogId;
 		this.myInfoDao = new MyInfoDAO();
-
+ 
 		try {
 			menu();
 		} catch (Exception e) {

@@ -5,14 +5,14 @@ import java.io.IOException;
 
 import kr.hrsystem.dao.DeptDAO;
 
-public class DepartmentManageAdminMenu {
+public class Dept_Admin {
 
     private BufferedReader br;
     private DeptDAO dao;
     private int adminUserId;
     private int loginLogId;
 
-    public DepartmentManageAdminMenu(BufferedReader br, int adminUserId, int loginLogId) {
+    public Dept_Admin(BufferedReader br, int adminUserId, int loginLogId) {
         this.br = br;
         this.adminUserId = adminUserId;
         this.loginLogId = loginLogId;
@@ -139,7 +139,7 @@ public class DepartmentManageAdminMenu {
     public static void main(String[] args) {
         try {
             BufferedReader br = new BufferedReader(new java.io.InputStreamReader(System.in));
-            new DepartmentManageAdminMenu(br, 1, -1);
+            new Dept_Admin(br, 1, -1);
         } catch (Exception e) {
             e.printStackTrace();
         }

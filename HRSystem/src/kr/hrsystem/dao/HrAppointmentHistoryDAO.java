@@ -1,4 +1,4 @@
-package kr.appointment;
+package kr.hrsystem.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -30,7 +30,7 @@ public class HrAppointmentHistoryDAO {
             int changedBy,
             String sourceMenu,
             Integer loginLogId
-    ) {
+    ) { 
         String sql =
             "INSERT INTO HR_APPOINTMENT_HISTORY ( " +
             "    HISTORY_ID, TARGET_USER_ID, CHANGE_TYPE, BEFORE_VALUE, AFTER_VALUE, " +

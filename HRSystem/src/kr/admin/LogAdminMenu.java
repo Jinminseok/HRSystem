@@ -1,4 +1,4 @@
-package kr.log;
+package kr.admin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,7 +19,7 @@ public class LogAdminMenu {
         this.dao = new LogDAO();
 
         try {
-            menu();
+            menu(); 
         } catch (Exception e) {
             System.out.println("❌ 로그 메뉴 실행 중 오류가 발생했습니다.");
         }

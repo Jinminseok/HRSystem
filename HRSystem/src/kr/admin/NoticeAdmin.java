@@ -1,4 +1,4 @@
-package kr.notice;
+package kr.admin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,7 +17,7 @@ public class NoticeAdmin {
         this.adminUserId = adminUserId;
         this.loginLogId = loginLogId;
         this.dao = new NoticeDAO();
-
+ 
         try {
             noticeAdminMenu();
         } catch (Exception e) {
