@@ -88,7 +88,7 @@ public class UserManage_Admin {
                             break; // case 2 종료 → 사원관리 메뉴로 복귀
                         }
 
-                        // ✅ 부서 목록(예쁜 UI) 출력
+                        // ✅ 부서 목록 출력
                         OrgChartDAO orgDao = new OrgChartDAO();
                         orgDao.printDeptGuide();
 
@@ -101,7 +101,7 @@ public class UserManage_Admin {
                             break;
                         }
 
-                        // ✅ 직급 목록(예쁜 UI) 출력
+                        // ✅ 직급 목록 출력
                         PositionDAO posDao = new PositionDAO();
                         posDao.printPositionGuide();
 
@@ -205,7 +205,7 @@ public class UserManage_Admin {
                             break;
                         }
 
-                        // ✅ 변경 전 현재값 조회 (이력 저장용)
+                        // 변경 전 현재값 조회 (이력 저장용)
                         Map<String, Object> beforeUser = userDao.getUserInfoMapById(targetUserId);
                         if (beforeUser == null) {
                             System.out.println("❌ 해당 USER_ID가 존재하지 않습니다.");
@@ -216,7 +216,7 @@ public class UserManage_Admin {
                         PositionDAO positionDao = new PositionDAO();
 
                         // =========================
-                        // ✅ 새 부서명 입력 (뒤로가기: 0)
+                        // 새 부서명 입력 (뒤로가기: 0)
                         // =========================
                         deptDao.printDeptListUI();
                         System.out.print("새 부서명 입력(뒤로가기: 0) : ");
@@ -234,7 +234,7 @@ public class UserManage_Admin {
                         }
 
                         // =========================
-                        // ✅ 새 직급명 입력 (뒤로가기: 0)
+                        // 새 직급명 입력 (뒤로가기: 0)
                         // =========================
                         positionDao.printPositionListUI();
                         System.out.print("새 직급명 입력(뒤로가기: 0) : ");
@@ -252,7 +252,7 @@ public class UserManage_Admin {
                         }
 
                         // =========================
-                        // ✅ 재직상태 입력 (뒤로가기: 0)
+                        // 재직상태 입력 (뒤로가기: 0)
                         // =========================
                         System.out.print("재직상태(재직/휴직/퇴직 또는 WORK/LEAVE/RESIGNED) (뒤로가기: 0) : ");
                         String empStatusInput = br.readLine().trim();
@@ -334,7 +334,7 @@ public class UserManage_Admin {
 
                 switch (no) {
                     case 1: {
-                        // ✅ 부서 번호표 먼저 보여주기
+                        // 부서 번호표 먼저 보여주기
                         System.out.println("\n[부서 목록]");
                         deptDao.selectDepartment();
 
@@ -343,7 +343,7 @@ public class UserManage_Admin {
 
                         if (deptNum == 0) break;
 
-                        // ✅ 존재 체크 (잘못 입력 방지)
+                        // 존재 체크 (잘못 입력 방지)
                         if (!userDao.existsDeptNum(deptNum)) {
                             System.out.println("❌ 해당 부서번호는 존재하지 않습니다.");
                             break;
@@ -354,7 +354,7 @@ public class UserManage_Admin {
                     }
 
                     case 2: {
-                        // ✅ 직급 번호표 먼저 보여주기
+                        // 직급 번호표 먼저 보여주기
                         System.out.println("\n[직급 목록]");
                         positionDao.selectPosition();
 
@@ -363,7 +363,7 @@ public class UserManage_Admin {
 
                         if (posNum == 0) break;
 
-                        // ✅ 존재 체크
+                        // 존재 체크
                         if (!userDao.existsPositionNum(posNum)) {
                             System.out.println("❌ 해당 직급번호는 존재하지 않습니다.");
                             break;
@@ -390,7 +390,7 @@ public class UserManage_Admin {
         }
     }
 
-    // ✅ 재직상태 입력값(한글/영문) -> DB 코드값 변환
+    // 재직상태 입력값(한글/영문) -> DB 코드값 변환
     private String empStatusToCode(String input) {
         if (input == null) return null;
 
@@ -410,7 +410,7 @@ public class UserManage_Admin {
         return null;
     }
 
-    // ✅ 코드값 -> 한글 (로그/출력용)
+    // 코드값 -> 한글 (로그/출력용)
     private String empStatusToKor(String code) {
         if (code == null) return "-";
 
@@ -441,7 +441,7 @@ public class UserManage_Admin {
         Integer beforePositionNum = (Integer) beforeUser.get("POSITION_NUM");
         String beforeEmpStatus = (String) beforeUser.get("EMP_STATUS");
 
-        // 1) 부서 변경
+        // 1. 부서 변경
         if (!Objects.equals(beforeDeptNum, newDeptNum)) {
             String beforeValue = (beforeDeptNum == null) ? null : String.valueOf(beforeDeptNum);
             String afterValue = String.valueOf(newDeptNum);
@@ -463,7 +463,7 @@ public class UserManage_Admin {
             );
         }
 
-        // 2) 직급 변경
+        // 2.직급 변경
         if (!Objects.equals(beforePositionNum, newPositionNum)) {
             String beforeValue = (beforePositionNum == null) ? null : String.valueOf(beforePositionNum);
             String afterValue = String.valueOf(newPositionNum);
@@ -485,7 +485,7 @@ public class UserManage_Admin {
             );
         }
 
-        // 3) 재직상태 변경
+        // 3.재직상태 변경
         if (beforeEmpStatus == null || !beforeEmpStatus.equalsIgnoreCase(newEmpStatus)) {
             historyDao.insertHistory(
                 targetUserId,
