@@ -22,7 +22,7 @@ public class HrAppointmentHistoryDAO {
             String changeType,      
             String beforeValue,
             String afterValue,
-            String beforeLabel,
+            String beforeLabel, 
             String afterLabel,
             String changeReason,
             int changedBy,

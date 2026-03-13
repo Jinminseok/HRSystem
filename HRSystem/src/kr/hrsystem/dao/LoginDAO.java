@@ -85,7 +85,7 @@ public class LoginDAO {
         return false;
     }
 
-    // 로그인용: 계정 정보 조회 (승인상태/권한 포함)
+    // 로그인용: 계정 정보 조회 (승인상태/권한/재직상태 포함)
     public Map<String, Object> loginAsMap(String loginId, String password) {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -94,7 +94,7 @@ public class LoginDAO {
         try {
             conn = DBUtil.getConnection();
 
-            String sql = "SELECT USER_ID, LOGIN_ID, USER_NAME, APPROVAL_STATUS, USER_ROLE "
+            String sql = "SELECT USER_ID, LOGIN_ID, USER_NAME, APPROVAL_STATUS, USER_ROLE, EMP_STATUS "
                        + "FROM USERTEST "
                        + "WHERE LOGIN_ID = ? AND PASSWORD = ?";
 
@@ -111,6 +111,7 @@ public class LoginDAO {
                 m.put("USER_NAME", rs.getString("USER_NAME"));
                 m.put("APPROVAL_STATUS", rs.getString("APPROVAL_STATUS"));
                 m.put("USER_ROLE", rs.getString("USER_ROLE"));
+                m.put("EMP_STATUS", rs.getString("EMP_STATUS"));
                 return m;
             }
 

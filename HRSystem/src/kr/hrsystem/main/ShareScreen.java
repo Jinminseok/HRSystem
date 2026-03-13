@@ -89,11 +89,19 @@ public class ShareScreen {
 		String userName = (String) u.get("USER_NAME");
 		String approvalStatus = (String) u.get("APPROVAL_STATUS");
 		String userRole = (String) u.get("USER_ROLE");
+		String empStatus = (String) u.get("EMP_STATUS");
 
 		// 승인되지 않은 계정은 로그인 불가
 		if (!"APPROVED".equalsIgnoreCase(approvalStatus)) {
 			logDao.insertLoginHistory(userId, id, "F", "승인대기 또는 승인거절 상태");
 			System.out.println("⛔ 관리자 승인 후 로그인 가능합니다. (현재 상태: " + approvalStatus + ")");
+			return;
+		}
+
+		// 퇴직 상태 계정은 로그인 불가
+		if ("RESIGNED".equalsIgnoreCase(empStatus)) {
+			logDao.insertLoginHistory(userId, id, "F", "퇴직 상태 계정 로그인 시도");
+			System.out.println("⛔ 퇴직 처리된 계정은 로그인할 수 없습니다.");
 			return;
 		}
 
