@@ -1,1 +1,14 @@
 /bin/
+/.settings/
+/.classpath
+/.project
+
+*.class
+*.log
+
+# Eclipse metadata
+.metadata/
+
+# OS
+.DS_Store
+Thumbs.db
