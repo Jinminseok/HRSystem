@@ -122,7 +122,7 @@ public class ShareScreen {
 	}
 
 	// 회원가입 처리
-	private void signScreen() throws IOException {
+	private void signScreen() throws IOException {	
 
 		System.out.print("아이디 : ");
 		String id = br.readLine().trim();

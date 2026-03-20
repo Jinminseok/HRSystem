@@ -32,7 +32,6 @@ public class AttendanceDAO {
             System.out.println("다시 입력해주세요.");
             return;
         }
-
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -48,7 +47,6 @@ public class AttendanceDAO {
         String selectTimeSql =
             "SELECT CHECK_IN FROM attendance " +
             "WHERE USER_ID = ? AND ATT_DATE = TRUNC(SYSDATE)";
-
         try {
             conn = DBUtil.getConnection();
 
@@ -62,9 +60,7 @@ public class AttendanceDAO {
                 System.out.println();
                 return;
             }
-
             DBUtil.executeClose(rs, pstmt, null);
-
             Timestamp now = new Timestamp(System.currentTimeMillis());
             int inStatus = calculateInStatus(now);
 
@@ -72,9 +68,7 @@ public class AttendanceDAO {
             pstmt = conn.prepareStatement(insertSql);
             pstmt.setInt(1, userId);
             pstmt.setInt(2, inStatus);
-
             int count = pstmt.executeUpdate();
-
             DBUtil.executeClose(null, pstmt, null);
 
             if (count > 0) {
@@ -89,7 +83,6 @@ public class AttendanceDAO {
                 } else {
                     System.out.println("✅ 출근 처리 완료!");
                 }
-
                 // 출근 처리 로그 저장
                 logDao.insertActionLog(
                     userId,
@@ -101,7 +94,6 @@ public class AttendanceDAO {
                     loginLogId
                 );
             }
-
         } catch (Exception e) {
             System.out.println("❌ 출근 처리 중 오류가 발생했습니다.");
             System.out.println("다시 시도해주세요.");
