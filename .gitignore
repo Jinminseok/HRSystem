@@ -12,3 +12,5 @@
 # OS
 .DS_Store
 Thumbs.db
+
+libs/ojdbc8.jar
